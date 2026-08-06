@@ -51,9 +51,57 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      bi_atividade_diaria: {
+        Args: { p_dias?: number }
+        Returns: {
+          ativos: number
+          data: string
+        }[]
+      }
+      bi_eventos_por_tipo: {
+        Args: { p_dias?: number }
+        Returns: {
+          eventos: number
+          tipo: string
+        }[]
+      }
+      bi_heatmap_navegacao: {
+        Args: { p_dias?: number }
+        Returns: {
+          dia_semana: number
+          hora: number
+          pageviews: number
+        }[]
+      }
+      bi_top_telas: {
+        Args: { p_dias?: number; p_limite?: number }
+        Returns: {
+          path: string
+          usuarios: number
+          views: number
+        }[]
+      }
+      bi_ultima_sincronizacao: { Args: never; Returns: string }
+      bi_visao_geral_kpis: {
+        Args: { p_dias?: number }
+        Returns: {
+          ativos: number
+          ativos_ant: number
+          aulas: number
+          aulas_ant: number
+          novos: number
+          novos_ant: number
+          pageviews: number
+          pageviews_ant: number
+        }[]
+      }
     }
     Enums: {
+      consultor_planejamento_status:
+        | "gathering"
+        | "generating"
+        | "ready"
+        | "error"
       user_role: "admin" | "member"
     }
     CompositeTypes: {
@@ -182,6 +230,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      consultor_planejamento_status: [
+        "gathering",
+        "generating",
+        "ready",
+        "error",
+      ],
       user_role: ["admin", "member"],
     },
   },

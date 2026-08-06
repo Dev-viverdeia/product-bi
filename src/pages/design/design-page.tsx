@@ -4,6 +4,7 @@ import {
   CategoryBarChart,
   ChartCard,
   DonutChart,
+  HeatmapChart,
   KpiCard,
   KpiGrid,
   TimeSeriesChart,
@@ -175,6 +176,26 @@ export function DesignPage() {
           <div />
         </ChartCard>
       </div>
+
+      <ChartCard
+        title="Heatmap dia × hora"
+        description="Sequencial de 1 hue por alfa — funciona igual nos 2 temas"
+      >
+        <HeatmapChart
+          label="eventos"
+          data={Array.from({ length: 7 }, (_, dia) =>
+            Array.from({ length: 24 }, (_, hora) => ({
+              dia,
+              hora,
+              // padrão determinístico: pico em dias úteis, 10h–16h
+              valor:
+                dia === 0 || dia === 6
+                  ? Math.max(0, 12 - Math.abs(hora - 14) * 2)
+                  : Math.max(0, 80 - Math.abs(hora - 11) * 9 - (dia === 5 ? 18 : 0)),
+            })),
+          ).flat()}
+        />
+      </ChartCard>
 
       <Card>
         <CardHeader>

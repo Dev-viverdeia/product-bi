@@ -11,6 +11,6 @@ export type NavItem = {
 
 /** Ponto único para registrar novas seções do produto. */
 export const navItems: NavItem[] = [
-  { title: 'Dashboard', to: '/', icon: LayoutDashboardIcon },
+  { title: 'Visão geral', to: '/', icon: LayoutDashboardIcon },
   { title: 'Design system', to: '/design', icon: PaletteIcon },
 ]

@@ -11,3 +11,4 @@ export {
   type CategoryDatum,
 } from '@/components/charts/category-bar-chart'
 export { DonutChart, type DonutDatum } from '@/components/charts/donut-chart'
+export { HeatmapChart, type HeatmapDatum } from '@/components/charts/heatmap-chart'

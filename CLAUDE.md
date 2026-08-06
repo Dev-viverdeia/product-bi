@@ -52,6 +52,7 @@ Páginas usam SEMPRE o kit — nunca montar Recharts cru em página de produto:
 - `TimeSeriesChart` — linha/área; máximo de 2 séries **garantido por tipo**; 2ª série tracejada + legenda com chave de linha; tooltip com crosshair e valores formatados.
 - `CategoryBarChart` — colunas ou barras horizontais; ≤24px, ponta 4px, base no zero, valor na ponta; eixos `width="auto"` (largura fixa corta rótulo).
 - `DonutChart` — composição; ordena desc e agrega excedente em "Outros" (máx. 5 fatias); total no centro.
+- `HeatmapChart` — dia×hora em grid CSS (não Recharts); sequencial = UM hue por alfa de `--data-1` (funciona nos 2 temas por construção); tooltip por célula; semana seg→dom.
 - Formatadores pt-BR em `src/lib/format.ts` — não criar Intl.NumberFormat solto em página.
 
 **Animação (aprendido na prática):** `isAnimationActive={false}` em TODO elemento Recharts — o controlador de animação dele congela sob rAF-throttling (aba oculta) e o draw-in corrompe `strokeDasharray` customizado. Entrada de gráfico é via `ChartReveal` (motion, time-based, respeita `prefers-reduced-motion`): `left` p/ séries/barras horizontais, `up` p/ colunas, `scale` p/ donut.
@@ -72,6 +73,16 @@ Vite 8 · React 19 · TypeScript strict · Tailwind v4 · shadcn/ui (new-york) �
 - Após qualquer DDL: rodar advisors (security e performance) e zerar warnings; regenerar types com `npm run db:types` (ou via MCP → `src/types/database.types.ts`).
 - Funções auxiliares de policy vivem no schema `private` (fora da API REST). Usar `private.is_admin()` nas policies de novas tabelas.
 - RLS ligada em toda tabela nova, sem exceção.
+
+### Pipeline de dados (BI ← plataforma)
+
+- Fonte única: banco da plataforma `product_viverdeia_platform` (ref `zotzvtepvpnkcoobdubt`), via **postgres_fdw** — servidor `plataforma_srv`, host = **session pooler** `aws-0-sa-east-1.pooler.supabase.com:5432` (a rota direta IPv6 não fecha entre os projetos; não "corrigir").
+- Credencial: user mapping do role `postgres` criado **manualmente** no SQL editor pelo Mateus — a senha nunca entra em migration/repo/chat. Conexão como `postgres` remoto é intencional (dono das tabelas → leitura íntegra sob RLS).
+- Schemas: `plataforma` (58 foreign tables, somente leitura) · `marts` (dim/fact consumidos pelo app) · `etl` (watermarks `sync_state` + log `sync_runs`). Nenhum exposto na API REST; RLS deny-all neles é intencional (advisors INFO esperados).
+- Sync: funções `etl.sync_*` incrementais por watermark (fatias de ≤45 dias por chamada) + `etl.executar_sync()` no pg_cron `bi_sync_plataforma` a cada 30 min. Agregações pesadas SEMPRE nos marts locais, nunca na produção.
+- Regras herdadas da plataforma em toda métrica: exclusões de `bi_cohort_base` (campo `e_cliente` na dim) e timezone `America/Sao_Paulo` (colunas `*_brt` pré-computadas).
+- Enums remotos precisam de tipo local homônimo antes de `import foreign schema` (hoje só `consultor_planejamento_status`).
+- Discovery completo do banco da plataforma: `docs/discovery-banco-plataforma.md`.
 
 ## Estrutura
 
