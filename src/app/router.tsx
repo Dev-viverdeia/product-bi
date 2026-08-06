@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/features/auth/protected-route'
 import { PublicOnlyRoute } from '@/features/auth/public-only-route'
 import { DesignPage } from '@/pages/design/design-page'
 import { VisaoGeralPage } from '@/features/visao-geral/visao-geral-page'
+import { ClientesPage } from '@/features/clientes/clientes-page'
 import { NotFoundPage } from '@/pages/not-found-page'
 
 export function AppRouter() {
@@ -19,6 +20,7 @@ export function AppRouter() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route index element={<VisaoGeralPage />} />
+            <Route path="/clientes" element={<ClientesPage />} />
             <Route path="/design" element={<DesignPage />} />
           </Route>
         </Route>

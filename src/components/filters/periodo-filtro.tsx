@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
-import type { Periodo } from '@/features/visao-geral/queries'
+
+export type Periodo = 7 | 30 | 90
 
 const OPCOES: { valor: Periodo; rotulo: string }[] = [
   { valor: 7, rotulo: '7 dias' },

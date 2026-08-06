@@ -10,7 +10,7 @@ import {
 } from '@/components/charts'
 import { formatCompact, formatDateShort, formatInt } from '@/lib/format'
 import { labelRota, labelTipoEvento } from '@/features/visao-geral/labels'
-import { PeriodoFiltro } from '@/features/visao-geral/periodo-filtro'
+import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
 import {
   calcularDelta,
   useAtividadeDiaria,
@@ -19,7 +19,6 @@ import {
   useKpis,
   useTopTelas,
   useUltimaSincronizacao,
-  type Periodo,
 } from '@/features/visao-geral/queries'
 
 export function VisaoGeralPage() {

@@ -25,7 +25,8 @@ coleção de gráficos.
 | --- | --- |
 | 0. Fundação (pipeline FDW, marts, kit de gráficos, DS) | ✅ Entregue |
 | 1. Visão Geral (ativos, picos, telas, ações) | ✅ Entregue |
-| 2. Clientes & Retenção (2a descritiva → 2b acionável) | 🔜 Próxima |
+| 2a. Clientes & Retenção — descritiva | ✅ Entregue (aguardando OK do Mateus no módulo) |
+| 2b. Clientes & Retenção — acionável (risco, aha, churn) | 🔜 Próxima |
 | 3. Entrada & Crescimento | ⬜ |
 | 4. Formações | ⬜ |
 | 5. Soluções | ⬜ |

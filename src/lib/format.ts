@@ -37,6 +37,13 @@ export function formatInt(value: number) {
   return integer.format(value)
 }
 
+const decimal = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 })
+
+/** 2.94 → "2,9" */
+export function formatDecimal(value: number) {
+  return decimal.format(value)
+}
+
 /** 4200 → "R$ 4.200" */
 export function formatCurrency(value: number) {
   return currency.format(value)
@@ -64,6 +71,15 @@ export function formatMonthShort(isoDate: string) {
   const date = new Date(`${isoDate.slice(0, 10)}T12:00:00`)
   return date
     .toLocaleDateString(locale, { month: 'short' })
+    .replace('.', '')
+}
+
+/** "2026-03-01" → "mar/26" */
+export function formatMesAno(isoDate: string) {
+  const date = new Date(`${isoDate.slice(0, 10)}T12:00:00`)
+  return date
+    .toLocaleDateString(locale, { month: 'short', year: '2-digit' })
+    .replace('. de ', '/')
     .replace('.', '')
 }
 

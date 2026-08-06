@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 
+import type { Periodo } from '@/components/filters/periodo-filtro'
 import { supabase } from '@/lib/supabase'
 
-export type Periodo = 7 | 30 | 90
+export type { Periodo }
 
 async function rpc<T>(promise: PromiseLike<{ data: T | null; error: { message: string } | null }>) {
   const { data, error } = await promise

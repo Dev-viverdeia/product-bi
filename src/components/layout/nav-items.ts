@@ -1,4 +1,4 @@
-import { LayoutDashboardIcon, PaletteIcon } from 'lucide-react'
+import { LayoutDashboardIcon, PaletteIcon, UsersIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export type NavItem = {
@@ -12,5 +12,6 @@ export type NavItem = {
 /** Ponto único para registrar novas seções do produto. */
 export const navItems: NavItem[] = [
   { title: 'Visão geral', to: '/', icon: LayoutDashboardIcon },
+  { title: 'Clientes', to: '/clientes', icon: UsersIcon },
   { title: 'Design system', to: '/design', icon: PaletteIcon },
 ]

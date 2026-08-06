@@ -51,11 +51,37 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bi_amplitude_modulos: {
+        Args: { p_dias?: number }
+        Returns: {
+          clientes: number
+          modulos: number
+        }[]
+      }
       bi_atividade_diaria: {
         Args: { p_dias?: number }
         Returns: {
           ativos: number
           data: string
+        }[]
+      }
+      bi_dias_ativos_distribuicao: {
+        Args: { p_dias?: number }
+        Returns: {
+          clientes: number
+          faixa: string
+          ordem: number
+        }[]
+      }
+      bi_engajamento_clientes: {
+        Args: { p_dias?: number }
+        Returns: {
+          dau_medio: number
+          dias_ativos_medio: number
+          mau: number
+          pct_habito_semanal: number
+          pct_multimodulo: number
+          stickiness: number
         }[]
       }
       bi_eventos_por_tipo: {
@@ -71,6 +97,37 @@ export type Database = {
           dia_semana: number
           hora: number
           pageviews: number
+        }[]
+      }
+      bi_power_users: {
+        Args: { p_dias?: number; p_limite?: number }
+        Returns: {
+          dias_ativos: number
+          email: string
+          eventos: number
+          modulos: number
+          nome: string
+          organizacao: string
+          plano: string
+        }[]
+      }
+      bi_retencao_cohort: {
+        Args: never
+        Returns: {
+          clientes: number
+          cohort_mes: string
+          ret_180d: number | null
+          ret_30d: number | null
+          ret_7d: number | null
+          ret_90d: number | null
+        }[]
+      }
+      bi_retencao_por_amplitude: {
+        Args: never
+        Returns: {
+          clientes: number
+          modulos: number
+          pct_retidos: number
         }[]
       }
       bi_top_telas: {
