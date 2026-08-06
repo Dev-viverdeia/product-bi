@@ -1,0 +1,383 @@
+/* =============================================================
+   PRODUCT BI · Design tokens
+   Portado do Viver de IA Design System (viver-de-ia-ds).
+   Light-first: branco/off-white é o padrão; navy é cor de marca
+   (texto, ação, detalhe) — nunca o fundo da página.
+   Fonte: Outfit (UI/display) + JetBrains Mono (números/código).
+   ============================================================= */
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/outfit';
+@import '@fontsource-variable/jetbrains-mono';
+
+@custom-variant dark (&:is(.dark *));
+
+/* =============================================================
+   CAMADA 1 · PRIMITIVOS — a paleta canônica da marca
+   Branco · off-white · cinzas · azul-escuro · navy · preto.
+   Sem gold/amarelo/roxo/cyan em nenhum nível.
+   ============================================================= */
+:root {
+  /* Navy — a cor da marca */
+  --via-navy: #0a1f3b;
+  --via-navy-deep: #02162a;
+  --via-navy-darker: #010b1a;
+  --via-blue: #1e3a5f;
+  --via-blue-soft: #2a4a6e;
+
+  /* Cinzas — paleta secundária */
+  --via-gray-50: #f7f8fa;
+  --via-gray-100: #f0f2f5;
+  --via-gray-200: #e4e7ec;
+  --via-gray-300: #d0d5dd;
+  --via-gray-400: #98a2b3;
+  --via-gray-500: #667085;
+  --via-gray-600: #475467;
+  --via-gray-700: #344054;
+  --via-gray-800: #1d2939;
+  --via-gray-900: #101828;
+
+  /* Status — dessaturados, vizinhos do navy */
+  --via-success: #1f8a5b;
+  --via-danger: #b83a3a;
+  --via-coral: #b85c5c;
+
+  /* Sombras — navy-tinted no claro (a marca nunca usa sombra preta no light) */
+  --via-shadow-xs: 0 1px 2px rgba(10, 31, 59, 0.04);
+  --via-shadow-sm: 0 2px 6px rgba(10, 31, 59, 0.05), 0 1px 2px rgba(10, 31, 59, 0.03);
+  --via-shadow-md: 0 6px 18px rgba(10, 31, 59, 0.07), 0 1px 3px rgba(10, 31, 59, 0.04);
+  --via-shadow-lg: 0 16px 40px rgba(10, 31, 59, 0.1), 0 2px 8px rgba(10, 31, 59, 0.05);
+  --via-shadow-xl: 0 32px 80px rgba(10, 31, 59, 0.14), 0 4px 16px rgba(10, 31, 59, 0.06);
+
+  /* Motion */
+  --via-ease: cubic-bezier(0.32, 0.08, 0.24, 1);
+  --via-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --via-ease-snap: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --via-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dark {
+  /* No escuro a sombra precisa ser preta e mais densa pra existir */
+  --via-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --via-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.34), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --via-shadow-md: 0 6px 18px rgba(0, 0, 0, 0.42), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --via-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.52), 0 2px 8px rgba(0, 0, 0, 0.34);
+  --via-shadow-xl: 0 32px 80px rgba(0, 0, 0, 0.62), 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* =============================================================
+   CAMADA 2 · SEMÂNTICOS — tokens shadcn/ui + dataviz
+   Tema claro é o padrão da marca; .dark é modo do usuário.
+   ============================================================= */
+:root {
+  --radius: 14px; /* md do DS — botão, input, card pequeno */
+
+  --background: #ffffff;
+  --foreground: var(--via-navy);
+  --card: #ffffff;
+  --card-foreground: var(--via-navy);
+  --popover: #ffffff;
+  --popover-foreground: var(--via-navy);
+  --primary: var(--via-navy);
+  --primary-foreground: #ffffff;
+  --secondary: var(--via-gray-100);
+  --secondary-foreground: var(--via-navy);
+  --muted: var(--via-gray-100);
+  --muted-foreground: #4f596b;
+  --accent: var(--via-gray-100);
+  --accent-foreground: var(--via-navy);
+  --destructive: var(--via-danger);
+  --destructive-foreground: #ffffff;
+  --success: var(--via-success);
+  --success-foreground: #ffffff;
+  --border: var(--via-gray-200); /* hairline */
+  --input: rgba(10, 31, 59, 0.16); /* borda de controle, navy-tint */
+  --ring: rgba(10, 31, 59, 0.35);
+
+  /* Dataviz · rampa monocromática (5 passos com separação real de valor).
+     Para segmentos/stacked/categorias dentro da família navy. */
+  --chart-1: #0a1f3b;
+  --chart-2: #335379;
+  --chart-3: #5e7b9e;
+  --chart-4: #93a8c2;
+  --chart-5: #c4cfdd;
+
+  /* Dataviz · par de séries VALIDADO (CVD/contraste). A paleta navy-only
+     não sustenta 3+ séries por cor — 1 série usa data-1; 2 séries usam
+     data-1 + data-2 com segundo canal (tracejado/marcador); 3+ séries
+     viram small multiples ou "Outros". */
+  --data-1: #2e6fc4;
+  --data-2: #7fb0ee;
+  --data-grid: rgba(10, 31, 59, 0.08); /* grade recessiva */
+  --data-axis: rgba(10, 31, 59, 0.2); /* linha de eixo */
+  --data-ink: #4f596b; /* rótulo de eixo — token de texto, nunca cor de série */
+
+  /* Sidebar — off-white, navy como texto */
+  --sidebar: var(--via-gray-50);
+  --sidebar-foreground: var(--via-gray-700);
+  --sidebar-primary: var(--via-navy);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(10, 31, 59, 0.06);
+  --sidebar-accent-foreground: var(--via-navy);
+  --sidebar-border: var(--via-gray-200);
+  --sidebar-ring: rgba(10, 31, 59, 0.35);
+}
+
+.dark {
+  --background: #0b1220; /* canvas warm dark */
+  --foreground: #f4f6fa;
+  --card: #131c30;
+  --card-foreground: #f4f6fa;
+  --popover: #1b273f; /* elevado — modal/popover */
+  --popover-foreground: #f4f6fa;
+  --primary: #f4f6fa;
+  --primary-foreground: var(--via-navy);
+  --secondary: #1b273f;
+  --secondary-foreground: #f4f6fa;
+  --muted: #17213a;
+  --muted-foreground: #aeb8c6;
+  --accent: rgba(255, 255, 255, 0.06);
+  --accent-foreground: #f4f6fa;
+  --destructive: #e58a8a;
+  --destructive-foreground: #2a0f0f;
+  --success: #6fcfa5;
+  --success-foreground: #06251a;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.18);
+  --ring: rgba(255, 255, 255, 0.45);
+
+  /* Dataviz dark · rampa clara, visível sobre navy escuro */
+  --chart-1: #6e8cb4;
+  --chart-2: #8ba3c4;
+  --chart-3: #a8bad4;
+  --chart-4: #c5d1e2;
+  --chart-5: #e0e7f1;
+
+  /* Séries no dark têm passos PRÓPRIOS — nunca inverter o par do light.
+     Par re-degrauado sobre o original do DS (#5C9BEA/#2E6FC4), que reprovava
+     no piso de visão normal (ΔE 13.8 < 15) do validador da skill dataviz.
+     Este par passa TODOS os checks sobre a superfície de card #131C30:
+     banda L, chroma, CVD, piso normal (ΔE 15.0) e contraste ≥ 3:1. */
+  --data-1: #4e96f0;
+  --data-2: #3168b4;
+  --data-grid: rgba(255, 255, 255, 0.09);
+  --data-axis: rgba(255, 255, 255, 0.22);
+  --data-ink: #aeb8c6;
+
+  --sidebar: #0f1729;
+  --sidebar-foreground: #d0d5dd;
+  --sidebar-primary: #f4f6fa;
+  --sidebar-primary-foreground: var(--via-navy);
+  --sidebar-accent: rgba(255, 255, 255, 0.06);
+  --sidebar-accent-foreground: #f4f6fa;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: rgba(255, 255, 255, 0.45);
+}
+
+/* =============================================================
+   CAMADA 3 · MAPEAMENTO TAILWIND
+   ============================================================= */
+@theme inline {
+  /* Tipografia — Outfit p/ UI e display; JetBrains Mono p/ números e código */
+  --font-sans: 'Outfit Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
+
+  /* Raios — escala canônica do DS: cada degrau perceptivelmente diferente.
+     xs chip/tag · sm badge/input pequeno · md botão/input · lg CARD PADRÃO ·
+     xl card grande/modal/drawer · 2xl painel hero */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-2xl: 40px;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-data-1: var(--data-1);
+  --color-data-2: var(--data-2);
+  --color-data-grid: var(--data-grid);
+  --color-data-axis: var(--data-axis);
+  --color-data-ink: var(--data-ink);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Sombras — navy-tinted no claro, pretas no escuro (via CAMADA 1) */
+  --shadow-xs: var(--via-shadow-xs);
+  --shadow-sm: var(--via-shadow-sm);
+  --shadow: var(--via-shadow-sm);
+  --shadow-md: var(--via-shadow-md);
+  --shadow-lg: var(--via-shadow-lg);
+  --shadow-xl: var(--via-shadow-xl);
+
+  /* Motion */
+  --ease-via: var(--via-ease);
+  --ease-via-out: var(--via-ease-out);
+  --ease-snap: var(--via-ease-snap);
+  --ease-spring: var(--via-ease-spring);
+}
+
+/* =============================================================
+   BASE
+   ============================================================= */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    /* Tracking editorial levemente negativo (padrão do DS pra corpo) */
+    letter-spacing: -0.011em;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Mono nunca herda o tracking negativo do corpo */
+  code,
+  kbd,
+  samp,
+  pre {
+    @apply font-mono;
+    letter-spacing: 0;
+  }
+
+  /* Headings: peso médio, tracking mais apertado — nunca bold massivo */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-medium;
+    letter-spacing: -0.022em;
+  }
+}
+
+/* =============================================================
+   UTILITIES DO DS
+   ============================================================= */
+@utility num {
+  /* Números de dado: mono + tabular, alinhados à direita em tabela */
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* =============================================================
+   SUPERFÍCIES DO DS — atmosfera de página + glass card
+   Receitas canônicas do Viver de IA DS ("glass on light surfaces").
+   ============================================================= */
+@layer components {
+  /* A página precisa de atmosfera — sem ela o vidro não tem o que refletir */
+  .page-atmosphere {
+    background:
+      radial-gradient(ellipse 80% 50% at 15% 0%, rgba(10, 31, 59, 0.05), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 100% 100%, rgba(10, 31, 59, 0.035), transparent 65%),
+      var(--color-background);
+  }
+
+  .dark .page-atmosphere {
+    background:
+      radial-gradient(ellipse 80% 50% at 15% 0%, rgba(255, 255, 255, 0.04), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 100% 100%, rgba(255, 255, 255, 0.025), transparent 65%),
+      var(--color-background);
+  }
+
+  /* Glass card sutil — 5 camadas: gradiente 3-stop, hairline quase invisível,
+     linha de luz no topo, sombra navy difusa e atmosfera própria (::before).
+     Sem hover por padrão: card-container não é controle interativo. */
+  .glass-card {
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.96) 0%,
+      rgba(255, 255, 255, 0.84) 10%,
+      rgba(247, 248, 250, 0.58) 100%
+    );
+    border-color: rgba(10, 31, 59, 0.05);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      0 10px 24px -16px rgba(10, 31, 59, 0.12);
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(540px 240px at 0% 0%, rgba(10, 31, 59, 0.04), transparent 60%);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .dark .glass-card {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 10%,
+      rgba(255, 255, 255, 0.022) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 16px 40px rgba(0, 0, 0, 0.3),
+      0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .dark .glass-card::before {
+    background: radial-gradient(540px 240px at 0% 0%, rgba(255, 255, 255, 0.04), transparent 60%);
+  }
+
+  /* Acessibilidade de material (regra do DS): translúcido vira sólido
+     quando o usuário pede menos transparência ou mais contraste */
+  @media (prefers-reduced-transparency: reduce) {
+    .glass-card,
+    .dark .glass-card {
+      background: var(--color-card);
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .glass-card,
+    .dark .glass-card {
+      background: var(--color-card);
+      border-color: var(--color-border);
+    }
+  }
+}
