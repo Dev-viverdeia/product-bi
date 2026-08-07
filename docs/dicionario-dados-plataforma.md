@@ -14,6 +14,29 @@ Mapeamento completo em 2026-08-06 (complementa `discovery-banco-plataforma.md`, 
 - **808 funções** no public (inclui internals de pgvector/pg_trgm). RPCs de negócio relevantes p/ entender semântica: `complete_lesson_v2`, `use_invite_enhanced`, `apply_invite_to_user`, `complete_onboarding_v2`, `check_ai_solution_limit_v2`, `use_mentorship_credit_v2`, `get_nps_analytics_data`, `refresh_master_user_snapshots`.
 - **Cron da plataforma** (rotinas que mantêm dados): `refresh_master_user_snapshots` (15min), `sync-video-durations-daily`, reconciliações diárias de org/plan, `process-email-queue` (1min).
 
+## 1.1 ⚠️ Janelas de rastreamento por tipo de evento (medido em 2026-08-06)
+
+Os triggers `track_*` foram criados em momentos diferentes — TODA análise
+longitudinal precisa respeitar estas janelas:
+
+| Tipo de evento | Início | Fim | Nota |
+| --- | --- | --- | --- |
+| `lesson_completed` | mai/2025 | ativo | régua mais estável |
+| `connection_sent` | jul/2025 | **jul/2026?** | conferir se parou |
+| `certificate_generated` | ago/2025 | ativo | |
+| `community_post_created` | ago/2025 | jun/2026? | volume baixo |
+| `builder_solution_created` | out/2025 | ativo | ≈ lançamento do Builder |
+| `mentorship_booked` | nov/2025 | ativo | volume baixo |
+| `solution_viewed/completed` | **abr/2026** | ativo | tracking novo |
+| `solution_started` | abr/2026 | **⚠️ PAROU em 22/jun/2026** | provável trigger quebrado — reportar ao time da plataforma |
+| `connection_accepted` | nov/2025 | **⚠️ parou em mai/2026** | idem |
+| `consultor_ia_message` | mai/2026 | ativo | = lançamento do Consultor |
+
+Consequências já aplicadas no BI: (a) curvas de retenção entre cohorts distantes
+carregam efeito de instrumentação (régua ganhou tipos novos — nota na UI);
+(b) "usou Soluções" vem do espelho de `progress` (jul/2025+), não dos eventos;
+(c) análise de aha moment só considera ações com cobertura no período.
+
 ## 2. ⚠️ Retenção e pipelines pré-existentes (não tocar, só saber)
 
 - **`cleanup_old_analytics(365)` + cron semanal `cleanup-analytics-views`**: pageviews têm retenção ~365 dias (com backup em `analytics_backups`). **Nosso mart de pageviews é o que preserva histórico além disso.**

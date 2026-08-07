@@ -9,7 +9,7 @@ import {
   TimeSeriesChart,
 } from '@/components/charts'
 import { formatCompact, formatDateShort, formatInt } from '@/lib/format'
-import { labelRota, labelTipoEvento } from '@/features/visao-geral/labels'
+import { labelRota, labelTipoEvento } from '@/lib/labels-plataforma'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
 import {
   calcularDelta,

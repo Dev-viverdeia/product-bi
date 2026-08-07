@@ -51,6 +51,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bi_aha_moment: {
+        Args: never
+        Returns: {
+          acao: string
+          fizeram: number
+          lift: number | null
+          nao_fizeram: number
+          ret_fizeram: number | null
+          ret_nao_fizeram: number | null
+        }[]
+      }
       bi_amplitude_modulos: {
         Args: { p_dias?: number }
         Returns: {
@@ -63,6 +74,45 @@ export type Database = {
         Returns: {
           ativos: number
           data: string
+        }[]
+      }
+      bi_churn_modulos: {
+        Args: never
+        Returns: {
+          gap_pp: number | null
+          medido_desde: string
+          modulo: string
+          pct_ativos_nunca_usou: number | null
+          pct_churned_nunca_usou: number | null
+        }[]
+      }
+      bi_churn_resumo: {
+        Args: never
+        Returns: {
+          ativos: number
+          churned: number
+          pct_churn: number | null
+          vida_media_dias: number | null
+        }[]
+      }
+      bi_churn_ultimo_modulo: {
+        Args: never
+        Returns: {
+          clientes: number
+          modulo: string
+        }[]
+      }
+      bi_clientes_em_risco: {
+        Args: { p_limite?: number }
+        Returns: {
+          dias_ate_vencer: number | null
+          dias_inativo: number | null
+          email: string
+          motivo: string
+          nome: string
+          organizacao: string | null
+          plano: string | null
+          ultima_atividade: string | null
         }[]
       }
       bi_dias_ativos_distribuicao: {

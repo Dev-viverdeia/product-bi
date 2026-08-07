@@ -57,3 +57,42 @@ export function usePowerUsers(dias: Periodo) {
       (await rpc(supabase.rpc('bi_power_users', { p_dias: dias, p_limite: 15 }))) ?? [],
   })
 }
+
+export function useClientesEmRisco() {
+  return useQuery({
+    queryKey: ['clientes', 'em-risco'],
+    queryFn: async () =>
+      (await rpc(supabase.rpc('bi_clientes_em_risco', { p_limite: 30 }))) ?? [],
+  })
+}
+
+export function useAhaMoment() {
+  return useQuery({
+    queryKey: ['clientes', 'aha-moment'],
+    queryFn: async () => (await rpc(supabase.rpc('bi_aha_moment'))) ?? [],
+  })
+}
+
+export function useChurnResumo() {
+  return useQuery({
+    queryKey: ['clientes', 'churn-resumo'],
+    queryFn: async () => {
+      const rows = await rpc(supabase.rpc('bi_churn_resumo'))
+      return rows?.[0] ?? null
+    },
+  })
+}
+
+export function useChurnModulos() {
+  return useQuery({
+    queryKey: ['clientes', 'churn-modulos'],
+    queryFn: async () => (await rpc(supabase.rpc('bi_churn_modulos'))) ?? [],
+  })
+}
+
+export function useChurnUltimoModulo() {
+  return useQuery({
+    queryKey: ['clientes', 'churn-ultimo-modulo'],
+    queryFn: async () => (await rpc(supabase.rpc('bi_churn_ultimo_modulo'))) ?? [],
+  })
+}
