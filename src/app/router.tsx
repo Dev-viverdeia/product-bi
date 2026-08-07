@@ -7,6 +7,7 @@ import { PublicOnlyRoute } from '@/features/auth/public-only-route'
 import { DesignPage } from '@/pages/design/design-page'
 import { VisaoGeralPage } from '@/features/visao-geral/visao-geral-page'
 import { ClientesPage } from '@/features/clientes/clientes-page'
+import { EntradaPage } from '@/features/entrada/entrada-page'
 import { NotFoundPage } from '@/pages/not-found-page'
 
 export function AppRouter() {
@@ -21,6 +22,7 @@ export function AppRouter() {
           <Route element={<AppLayout />}>
             <Route index element={<VisaoGeralPage />} />
             <Route path="/clientes" element={<ClientesPage />} />
+            <Route path="/entrada" element={<EntradaPage />} />
             <Route path="/design" element={<DesignPage />} />
           </Route>
         </Route>

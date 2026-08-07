@@ -32,6 +32,12 @@ longitudinal precisa respeitar estas janelas:
 | `connection_accepted` | nov/2025 | **⚠️ parou em mai/2026** | idem |
 | `consultor_ia_message` | mai/2026 | ativo | = lançamento do Consultor |
 
+**Rastreamentos de convite também mortos (medido em 2026-08-07):**
+`invite_deliveries.opened_at`/`clicked_at` NUNCA foram preenchidos (colunas mortas)
+e `invite_delivery_events` é 100% `sent`; o próprio registro de envio **parou em
+19/abr/2026**. Funil honesto atual: criado → cadastro (used_at) → onboarding →
+1ª ação. Reportar ao time da plataforma junto com os triggers de evento.
+
 Consequências já aplicadas no BI: (a) curvas de retenção entre cohorts distantes
 carregam efeito de instrumentação (régua ganhou tipos novos — nota na UI);
 (b) "usou Soluções" vem do espelho de `progress` (jul/2025+), não dos eventos;

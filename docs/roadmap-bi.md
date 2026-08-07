@@ -27,8 +27,8 @@ coleção de gráficos.
 | 1. Visão Geral (ativos, picos, telas, ações) | ✅ Entregue |
 | 2a. Clientes & Retenção — descritiva | ✅ Entregue |
 | 2b. Clientes & Retenção — acionável (risco, aha, churn) | ✅ Entregue |
-| 3. Entrada & Crescimento | 🔜 Próxima |
-| 4. Formações | ⬜ |
+| 3. Entrada & Crescimento | ✅ Entregue |
+| 4. Formações | 🔜 Próxima |
 | 5. Soluções | ⬜ |
 | 6. Consultor & Builder | ⬜ |
 | 7. Organizações (B2B) | ⬜ |

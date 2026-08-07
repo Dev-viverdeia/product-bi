@@ -134,11 +134,43 @@ export type Database = {
           stickiness: number
         }[]
       }
+      bi_entrada_kpis: {
+        Args: { p_dias?: number }
+        Returns: {
+          conversao: number | null
+          convites: number
+          erros_login: number
+          onboarding_pct: number | null
+        }[]
+      }
+      bi_erros_login: {
+        Args: { p_dias?: number }
+        Returns: {
+          categoria: string
+          ocorrencias: number
+        }[]
+      }
+      bi_erros_por_tela: {
+        Args: { p_dias?: number; p_limite?: number }
+        Returns: {
+          ocorrencias: number
+          tela: string
+        }[]
+      }
       bi_eventos_por_tipo: {
         Args: { p_dias?: number }
         Returns: {
           eventos: number
           tipo: string
+        }[]
+      }
+      bi_funil_entrada: {
+        Args: { p_dias?: number }
+        Returns: {
+          etapa: string
+          ordem: number
+          pct_do_inicio: number | null
+          quantidade: number
         }[]
       }
       bi_heatmap_navegacao: {
@@ -147,6 +179,33 @@ export type Database = {
           dia_semana: number
           hora: number
           pageviews: number
+        }[]
+      }
+      bi_masters_convites_resumo: {
+        Args: never
+        Returns: {
+          conversao_convites: number | null
+          masters_convidaram: number
+          masters_total: number
+          pct_convidam: number | null
+        }[]
+      }
+      bi_masters_top_convidadores: {
+        Args: { p_limite?: number }
+        Returns: {
+          conversao: number | null
+          convites: number
+          email: string
+          nome: string
+          organizacao: string | null
+          usados: number
+        }[]
+      }
+      bi_onboarding_abandono: {
+        Args: never
+        Returns: {
+          clientes: number
+          step_atual: number
         }[]
       }
       bi_power_users: {
@@ -178,6 +237,14 @@ export type Database = {
           clientes: number
           modulos: number
           pct_retidos: number
+        }[]
+      }
+      bi_tempo_primeiro_valor: {
+        Args: never
+        Returns: {
+          clientes: number
+          faixa: string
+          ordem: number
         }[]
       }
       bi_top_telas: {
