@@ -13,6 +13,7 @@ import { SolucoesPage } from '@/features/solucoes/solucoes-page'
 import { IaPage } from '@/features/ia/ia-page'
 import { OrganizacoesPage } from '@/features/organizacoes/organizacoes-page'
 import { JornadaPage } from '@/features/jornada/jornada-page'
+import { ReceitaPage } from '@/features/receita/receita-page'
 import { NotFoundPage } from '@/pages/not-found-page'
 
 export function AppRouter() {
@@ -33,6 +34,7 @@ export function AppRouter() {
             <Route path="/ia" element={<IaPage />} />
             <Route path="/organizacoes" element={<OrganizacoesPage />} />
             <Route path="/jornada" element={<JornadaPage />} />
+            <Route path="/receita" element={<ReceitaPage />} />
             <Route path="/design" element={<DesignPage />} />
           </Route>
         </Route>

@@ -32,6 +32,13 @@ longitudinal precisa respeitar estas janelas:
 | `connection_accepted` | nov/2025 | **⚠️ parou em mai/2026** | idem |
 | `consultor_ia_message` | mai/2026 | ativo | = lançamento do Consultor |
 
+**Receita: fonte parada E view quebrada (medido em 2026-08-07):**
+`hubla_webhooks` **parou em 19/abr/2026**. Pior: a view `bi_receita_hubla` da
+plataforma lê `payload->'invoice'->'amount'->>'totalCents'`, caminho que **não
+existe** — a estrutura real é `payload->'event'->'invoice'->...`. Resultado: a
+view retorna vazio e qualquer análise de receita/LTV feita com ela é nula.
+O BI usa o caminho correto (`marts.fact_fatura`). Reportar ao time.
+
 **Rastreamentos de convite também mortos (medido em 2026-08-07):**
 `invite_deliveries.opened_at`/`clicked_at` NUNCA foram preenchidos (colunas mortas)
 e `invite_delivery_events` é 100% `sent`; o próprio registro de envio **parou em

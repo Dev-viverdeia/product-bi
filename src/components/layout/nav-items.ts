@@ -5,6 +5,7 @@ import {
   Building2Icon,
   MapIcon,
   PaletteIcon,
+  ReceiptIcon,
   PuzzleIcon,
   UserPlusIcon,
   UsersIcon,
@@ -29,5 +30,6 @@ export const navItems: NavItem[] = [
   { title: 'Consultor & Builder', to: '/ia', icon: CompassIcon },
   { title: 'Organizações', to: '/organizacoes', icon: Building2Icon },
   { title: 'Jornada & Telas', to: '/jornada', icon: MapIcon },
+  { title: 'Receita', to: '/receita', icon: ReceiptIcon },
   { title: 'Design system', to: '/design', icon: PaletteIcon },
 ]

@@ -302,6 +302,16 @@ export type Database = {
           telas_por_sessao: number | null
         }[]
       }
+      bi_ltv_cohort: {
+        Args: never
+        Returns: {
+          clientes: number
+          cohort_mes: string
+          compradores: number
+          receita_brl: number | null
+          receita_por_cliente: number | null
+        }[]
+      }
       bi_masters_convites_resumo: {
         Args: never
         Returns: {
@@ -424,6 +434,35 @@ export type Database = {
           usuarios: number
         }[]
       }
+      bi_receita_kpis: {
+        Args: never
+        Returns: {
+          compradores: number
+          dados_ate: string | null
+          faturas: number
+          receita_brl: number | null
+          reembolsado_brl: number | null
+          ticket_mediano: number | null
+        }[]
+      }
+      bi_receita_mensal: {
+        Args: never
+        Returns: {
+          compradores: number
+          faturas: number
+          mes: string
+          receita_brl: number | null
+        }[]
+      }
+      bi_receita_saude_cobranca: {
+        Args: never
+        Returns: {
+          evento: string
+          faturas: number
+          pct_do_pago: number | null
+          valor_brl: number | null
+        }[]
+      }
       bi_retencao_cohort: {
         Args: never
         Returns: {
@@ -533,6 +572,17 @@ export type Database = {
           item: string
           pct_uso: number | null
           usado: number
+        }[]
+      }
+      bi_uso_vs_receita: {
+        Args: never
+        Returns: {
+          clientes: number
+          dias_ativos_medio: number | null
+          faixa: string
+          ordem: number
+          pct_ativos_30d: number | null
+          receita_media: number | null
         }[]
       }
       bi_visao_geral_kpis: {

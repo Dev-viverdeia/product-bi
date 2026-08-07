@@ -33,7 +33,7 @@ coleção de gráficos.
 | 6. Consultor & Builder | ✅ Entregue |
 | 7. Organizações (B2B) | ✅ Entregue |
 | 8. Jornada & Telas (profundidade) | ✅ Entregue |
-| 9. Receita & Renovação | 🔜 Próxima |
+| 9. Receita & Renovação | ✅ Entregue |
 | 10. Saúde da plataforma (backend/banco/cyber) | ⏸️ Adiada por decisão do Mateus — só depois do BI |
 
 ## Entrega 2 — Clientes & Retenção ⭐ espinha dorsal
