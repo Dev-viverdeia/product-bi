@@ -28,8 +28,8 @@ coleção de gráficos.
 | 2a. Clientes & Retenção — descritiva | ✅ Entregue |
 | 2b. Clientes & Retenção — acionável (risco, aha, churn) | ✅ Entregue |
 | 3. Entrada & Crescimento | ✅ Entregue |
-| 4. Formações | 🔜 Próxima |
-| 5. Soluções | ⬜ |
+| 4. Formações | ✅ Entregue |
+| 5. Soluções | 🔜 Próxima |
 | 6. Consultor & Builder | ⬜ |
 | 7. Organizações (B2B) | ⬜ |
 | 8. Jornada & Telas (profundidade) | ⬜ |

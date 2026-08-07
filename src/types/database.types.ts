@@ -69,6 +69,14 @@ export type Database = {
           modulos: number
         }[]
       }
+      bi_assuntos: {
+        Args: { p_dias?: number }
+        Returns: {
+          alunos: number
+          aulas_concluidas: number
+          categoria: string
+        }[]
+      }
       bi_atividade_diaria: {
         Args: { p_dias?: number }
         Returns: {
@@ -157,11 +165,48 @@ export type Database = {
           tela: string
         }[]
       }
+      bi_dropoff_posicao: {
+        Args: never
+        Returns: {
+          decil: number
+          taxa_media: number | null
+        }[]
+      }
+      bi_duracao_ideal: {
+        Args: never
+        Returns: {
+          aulas: number
+          faixa: string
+          ordem: number
+          taxa_media: number | null
+        }[]
+      }
       bi_eventos_por_tipo: {
         Args: { p_dias?: number }
         Returns: {
           eventos: number
           tipo: string
+        }[]
+      }
+      bi_formacoes_kpis: {
+        Args: { p_dias?: number }
+        Returns: {
+          alunos_ativos: number
+          aulas_concluidas: number
+          certificados: number
+          nps_medio: number | null
+        }[]
+      }
+      bi_formacoes_uso: {
+        Args: { p_dias?: number }
+        Returns: {
+          alunos: number
+          alunos_historico: number
+          aulas_concluidas: number
+          categoria: string | null
+          certificados_historico: number
+          conclusao_historica: number | null
+          curso: string
         }[]
       }
       bi_funil_entrada: {
@@ -179,6 +224,14 @@ export type Database = {
           dia_semana: number
           hora: number
           pageviews: number
+        }[]
+      }
+      bi_jornada_cursos: {
+        Args: { p_min_certificados?: number }
+        Returns: {
+          certificados: number
+          curso: string
+          mediana_dias: number | null
         }[]
       }
       bi_masters_convites_resumo: {
@@ -199,6 +252,16 @@ export type Database = {
           nome: string
           organizacao: string | null
           usados: number
+        }[]
+      }
+      bi_nps_cursos: {
+        Args: { p_min_respostas?: number }
+        Returns: {
+          curso: string
+          media: number | null
+          pct_detratores: number | null
+          pct_promotores: number | null
+          respostas: number
         }[]
       }
       bi_onboarding_abandono: {
