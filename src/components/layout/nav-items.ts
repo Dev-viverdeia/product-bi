@@ -3,6 +3,7 @@ import {
   GraduationCapIcon,
   LayoutDashboardIcon,
   Building2Icon,
+  MapIcon,
   PaletteIcon,
   PuzzleIcon,
   UserPlusIcon,
@@ -27,5 +28,6 @@ export const navItems: NavItem[] = [
   { title: 'Soluções', to: '/solucoes', icon: PuzzleIcon },
   { title: 'Consultor & Builder', to: '/ia', icon: CompassIcon },
   { title: 'Organizações', to: '/organizacoes', icon: Building2Icon },
+  { title: 'Jornada & Telas', to: '/jornada', icon: MapIcon },
   { title: 'Design system', to: '/design', icon: PaletteIcon },
 ]

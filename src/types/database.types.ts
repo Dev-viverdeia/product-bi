@@ -213,6 +213,14 @@ export type Database = {
           tipo: string
         }[]
       }
+      bi_fluxo_da_tela: {
+        Args: { p_dias?: number; p_tela: string }
+        Returns: {
+          destino: string
+          pct: number | null
+          transicoes: number
+        }[]
+      }
       bi_formacoes_kpis: {
         Args: { p_dias?: number }
         Returns: {
@@ -283,6 +291,15 @@ export type Database = {
           certificados: number
           curso: string
           mediana_dias: number | null
+        }[]
+      }
+      bi_jornada_kpis: {
+        Args: { p_dias?: number }
+        Returns: {
+          minutos_medianos: number | null
+          pct_uma_tela: number | null
+          sessoes: number
+          telas_por_sessao: number | null
         }[]
       }
       bi_masters_convites_resumo: {
@@ -360,6 +377,22 @@ export type Database = {
           plano: string | null
         }[]
       }
+      bi_pontos_saida: {
+        Args: { p_dias?: number; p_limite?: number }
+        Returns: {
+          pct_da_tela: number | null
+          saidas: number
+          tela: string
+        }[]
+      }
+      bi_portas_entrada: {
+        Args: { p_dias?: number; p_limite?: number }
+        Returns: {
+          pct: number | null
+          sessoes: number
+          tela: string
+        }[]
+      }
       bi_power_users: {
         Args: { p_dias?: number; p_limite?: number }
         Returns: {
@@ -370,6 +403,25 @@ export type Database = {
           nome: string
           organizacao: string
           plano: string
+        }[]
+      }
+      bi_profundidade_sessao: {
+        Args: { p_dias?: number }
+        Returns: {
+          faixa: string
+          ordem: number
+          sessoes: number
+        }[]
+      }
+      bi_raio_x_telas: {
+        Args: { p_dias?: number; p_limite?: number }
+        Returns: {
+          pageviews: number
+          pct_entrada: number | null
+          pct_saida: number | null
+          posicao_media: number | null
+          tela: string
+          usuarios: number
         }[]
       }
       bi_retencao_cohort: {
