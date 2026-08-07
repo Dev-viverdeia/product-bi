@@ -31,8 +31,8 @@ coleção de gráficos.
 | 4. Formações | ✅ Entregue |
 | 5. Soluções | ✅ Entregue |
 | 6. Consultor & Builder | ✅ Entregue |
-| 7. Organizações (B2B) | 🔜 Próxima |
-| 8. Jornada & Telas (profundidade) | ⬜ |
+| 7. Organizações (B2B) | ✅ Entregue |
+| 8. Jornada & Telas (profundidade) | 🔜 Próxima |
 | 9. Receita & Renovação | ⬜ |
 | 10. Saúde da plataforma (backend/banco/cyber) | ⏸️ Adiada por decisão do Mateus — só depois do BI |
 

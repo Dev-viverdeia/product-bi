@@ -322,6 +322,44 @@ export type Database = {
           step_atual: number
         }[]
       }
+      bi_orgs_efeito_master: {
+        Args: never
+        Returns: {
+          grupo: string
+          membros: number
+          orgs: number
+          pct_time_ativo: number | null
+        }[]
+      }
+      bi_orgs_kpis: {
+        Args: never
+        Returns: {
+          membros_total: number
+          orgs_ativas: number
+          orgs_master_ativo: number | null
+          pct_time_ativo_medio: number | null
+        }[]
+      }
+      bi_orgs_ocupacao: {
+        Args: never
+        Returns: {
+          faixa: string
+          ordem: number
+          orgs: number
+        }[]
+      }
+      bi_orgs_risco: {
+        Args: { p_limite?: number }
+        Returns: {
+          assentos_ociosos: number
+          ativos_30d: number
+          master_ativo: boolean
+          membros: number
+          organizacao: string
+          pct_time_ativo: number | null
+          plano: string | null
+        }[]
+      }
       bi_power_users: {
         Args: { p_dias?: number; p_limite?: number }
         Returns: {
@@ -435,6 +473,16 @@ export type Database = {
         }[]
       }
       bi_ultima_sincronizacao: { Args: never; Returns: string }
+      bi_valor_nao_consumido: {
+        Args: never
+        Returns: {
+          beneficiarios: number
+          disponivel: number
+          item: string
+          pct_uso: number | null
+          usado: number
+        }[]
+      }
       bi_visao_geral_kpis: {
         Args: { p_dias?: number }
         Returns: {
