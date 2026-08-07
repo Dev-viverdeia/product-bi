@@ -32,6 +32,11 @@ longitudinal precisa respeitar estas janelas:
 | `connection_accepted` | nov/2025 | **⚠️ parou em mai/2026** | idem |
 | `consultor_ia_message` | mai/2026 | ativo | = lançamento do Consultor |
 
+> 📄 **Reporte consolidado para o time da plataforma:** `reporte-rastreamentos-quebrados.md`
+> — inclui o achado de que `hubla_webhooks`, `webhook_logs` e `invite_deliveries`
+> pararam **no mesmo dia (19/abr/2026)**, sugerindo causa raiz única no subsistema
+> de webhooks.
+
 **Receita: fonte parada E view quebrada (medido em 2026-08-07):**
 `hubla_webhooks` **parou em 19/abr/2026**. Pior: a view `bi_receita_hubla` da
 plataforma lê `payload->'invoice'->'amount'->>'totalCents'`, caminho que **não
