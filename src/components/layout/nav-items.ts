@@ -1,4 +1,11 @@
-import { GraduationCapIcon, LayoutDashboardIcon, PaletteIcon, UserPlusIcon, UsersIcon } from 'lucide-react'
+import {
+  GraduationCapIcon,
+  LayoutDashboardIcon,
+  PaletteIcon,
+  PuzzleIcon,
+  UserPlusIcon,
+  UsersIcon,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export type NavItem = {
@@ -15,5 +22,6 @@ export const navItems: NavItem[] = [
   { title: 'Clientes', to: '/clientes', icon: UsersIcon },
   { title: 'Entrada', to: '/entrada', icon: UserPlusIcon },
   { title: 'Formações', to: '/formacoes', icon: GraduationCapIcon },
+  { title: 'Soluções', to: '/solucoes', icon: PuzzleIcon },
   { title: 'Design system', to: '/design', icon: PaletteIcon },
 ]

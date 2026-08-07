@@ -302,6 +302,71 @@ export type Database = {
           pct_retidos: number
         }[]
       }
+      bi_solucoes_candidatas_remocao: {
+        Args: never
+        Returns: {
+          categoria: string | null
+          concluidas: number
+          favoritos: number
+          iniciadas: number
+          motivo: string
+          nota: number | null
+          pageviews: number
+          solucao: string
+        }[]
+      }
+      bi_solucoes_conversao_tela: {
+        Args: { p_dias?: number }
+        Returns: {
+          etapa: string
+          ordem: number
+          pct: number | null
+          usuarios: number
+        }[]
+      }
+      bi_solucoes_funil_abas: {
+        Args: never
+        Returns: {
+          aba: string
+          ordem: number
+          pct_do_topo: number | null
+          usuarios: number
+        }[]
+      }
+      bi_solucoes_kpis: {
+        Args: { p_dias?: number }
+        Returns: {
+          concluidas_periodo: number
+          iniciadas_periodo: number
+          publicadas: number
+          taxa_conclusao_historica: number | null
+        }[]
+      }
+      bi_solucoes_por_categoria: {
+        Args: never
+        Returns: {
+          categoria: string
+          concluidas: number
+          iniciadas: number
+          solucoes: number
+          taxa: number | null
+        }[]
+      }
+      bi_solucoes_ranking: {
+        Args: { p_limite?: number }
+        Returns: {
+          avaliacoes: number
+          categoria: string | null
+          concluidas: number
+          favoritos: number
+          iniciadas: number
+          nota: number | null
+          pageviews: number
+          publicada: boolean
+          solucao: string
+          taxa_conclusao: number | null
+        }[]
+      }
       bi_tempo_primeiro_valor: {
         Args: never
         Returns: {
