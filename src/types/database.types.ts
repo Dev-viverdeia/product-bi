@@ -110,6 +110,15 @@ export type Database = {
           modulo: string
         }[]
       }
+      bi_builder_steps: {
+        Args: { p_dias?: number }
+        Returns: {
+          geracoes: number
+          pct_erro: number | null
+          segundos_medio: number | null
+          step: string
+        }[]
+      }
       bi_clientes_em_risco: {
         Args: { p_limite?: number }
         Returns: {
@@ -121,6 +130,22 @@ export type Database = {
           organizacao: string | null
           plano: string | null
           ultima_atividade: string | null
+        }[]
+      }
+      bi_consultor_modos: {
+        Args: never
+        Returns: {
+          modo: string
+          threads: number
+          usuarios: number
+        }[]
+      }
+      bi_consultor_recorrencia: {
+        Args: { p_dias?: number }
+        Returns: {
+          faixa: string
+          ordem: number
+          usuarios: number
         }[]
       }
       bi_dias_ativos_distribuicao: {
@@ -224,6 +249,32 @@ export type Database = {
           dia_semana: number
           hora: number
           pageviews: number
+        }[]
+      }
+      bi_ia_adocao: {
+        Args: { p_dias?: number }
+        Returns: {
+          ferramenta: string
+          pct_dos_ativos: number | null
+          usuarios: number
+        }[]
+      }
+      bi_ia_impacto_retencao: {
+        Args: never
+        Returns: {
+          clientes: number
+          grupo: string
+          pct_retencao: number | null
+          retidos: number
+        }[]
+      }
+      bi_ia_kpis: {
+        Args: { p_dias?: number }
+        Returns: {
+          mensagens_consultor: number
+          solucoes_builder: number
+          usuarios_builder: number
+          usuarios_consultor: number
         }[]
       }
       bi_jornada_cursos: {

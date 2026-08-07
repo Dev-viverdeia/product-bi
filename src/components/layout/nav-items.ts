@@ -1,4 +1,5 @@
 import {
+  CompassIcon,
   GraduationCapIcon,
   LayoutDashboardIcon,
   PaletteIcon,
@@ -23,5 +24,6 @@ export const navItems: NavItem[] = [
   { title: 'Entrada', to: '/entrada', icon: UserPlusIcon },
   { title: 'Formações', to: '/formacoes', icon: GraduationCapIcon },
   { title: 'Soluções', to: '/solucoes', icon: PuzzleIcon },
+  { title: 'Consultor & Builder', to: '/ia', icon: CompassIcon },
   { title: 'Design system', to: '/design', icon: PaletteIcon },
 ]

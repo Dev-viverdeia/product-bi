@@ -10,6 +10,7 @@ import { ClientesPage } from '@/features/clientes/clientes-page'
 import { EntradaPage } from '@/features/entrada/entrada-page'
 import { FormacoesPage } from '@/features/formacoes/formacoes-page'
 import { SolucoesPage } from '@/features/solucoes/solucoes-page'
+import { IaPage } from '@/features/ia/ia-page'
 import { NotFoundPage } from '@/pages/not-found-page'
 
 export function AppRouter() {
@@ -27,6 +28,7 @@ export function AppRouter() {
             <Route path="/entrada" element={<EntradaPage />} />
             <Route path="/formacoes" element={<FormacoesPage />} />
             <Route path="/solucoes" element={<SolucoesPage />} />
+            <Route path="/ia" element={<IaPage />} />
             <Route path="/design" element={<DesignPage />} />
           </Route>
         </Route>
