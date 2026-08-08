@@ -169,6 +169,23 @@ experiência com IA de ~15k clientes — dado subutilizado. A partir da Entrega 
   é pergunta permanente, não análise avulsa;
 - recorte por setor/objetivo entra onde fizer sentido analítico.
 
+## Pendências abertas pela auditoria de 08/ago/2026
+
+Relatório completo: `docs/auditoria-dados-2026-08.md`. As telas 1–9 estão
+entregues; estes são os pontos que a auditoria abriu e ainda não fecharam.
+
+| # | Pendência | Entrega | Bloqueio |
+| --- | --- | --- | --- |
+| 1 | Pageviews por solução via `slug` (a origem não preenche `analytics.solution_id`) — reintroduz a coluna e o critério "sem acesso" | 5 | FDW |
+| 2 | Espelhar `implementation_requests` (114) — "pedidos de implementação paga" ficou sem cobertura | 5 | FDW |
+| 3 | Engajamento pré-renovação — sem RPC; depende de inventariar `renewal_logs` | 9 | FDW |
+| 4 | `dim_usuario` não remove quem foi deletado na plataforma | — | FDW |
+| 5 | "Onde a implementação trava" não é monotônico — lido como funil, confunde | 5 | passada visual |
+
+⚠️ **O FDW está fora**: o projeto da plataforma passou a ter restrição de rede
+que rejeita a conexão do BI. Enquanto não for liberada, o pipeline não
+sincroniza e as pendências 1–4 ficam paradas.
+
 ## Notas de régua (valem para tudo)
 
 - "Cliente" = regra `e_cliente` herdada do `bi_cohort_base` da plataforma.

@@ -9,6 +9,7 @@ import {
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { PageTitle } from '@/components/layout/page-title'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
+import { AlertaPipeline } from '@/components/layout/alerta-pipeline'
 
 export function AppLayout() {
   return (
@@ -23,7 +24,8 @@ export function AppLayout() {
             <ThemeToggle />
           </div>
         </header>
-        <main className="page-atmosphere flex-1 overflow-x-hidden p-4 md:p-6">
+        <main className="page-atmosphere flex-1 space-y-4 overflow-x-hidden p-4 md:p-6">
+          <AlertaPipeline />
           <Outlet />
         </main>
       </SidebarInset>

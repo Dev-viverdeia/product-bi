@@ -1,5 +1,3 @@
-// Gerado a partir do schema do Supabase.
-// Regenerar após qualquer migration com: npm run db:types
 export type Json =
   | string
   | number
@@ -56,10 +54,10 @@ export type Database = {
         Returns: {
           acao: string
           fizeram: number
-          lift: number | null
+          lift: number
           nao_fizeram: number
-          ret_fizeram: number | null
-          ret_nao_fizeram: number | null
+          ret_fizeram: number
+          ret_nao_fizeram: number
         }[]
       }
       bi_amplitude_modulos: {
@@ -84,14 +82,23 @@ export type Database = {
           data: string
         }[]
       }
+      bi_builder_steps: {
+        Args: { p_dias?: number }
+        Returns: {
+          geracoes: number
+          pct_erro: number
+          segundos_medio: number
+          step: string
+        }[]
+      }
       bi_churn_modulos: {
         Args: never
         Returns: {
-          gap_pp: number | null
+          gap_pp: number
           medido_desde: string
           modulo: string
-          pct_ativos_nunca_usou: number | null
-          pct_churned_nunca_usou: number | null
+          pct_ativos_nunca_usou: number
+          pct_churned_nunca_usou: number
         }[]
       }
       bi_churn_resumo: {
@@ -99,8 +106,8 @@ export type Database = {
         Returns: {
           ativos: number
           churned: number
-          pct_churn: number | null
-          vida_media_dias: number | null
+          pct_churn: number
+          vida_media_dias: number
         }[]
       }
       bi_churn_ultimo_modulo: {
@@ -110,26 +117,17 @@ export type Database = {
           modulo: string
         }[]
       }
-      bi_builder_steps: {
-        Args: { p_dias?: number }
-        Returns: {
-          geracoes: number
-          pct_erro: number | null
-          segundos_medio: number | null
-          step: string
-        }[]
-      }
       bi_clientes_em_risco: {
         Args: { p_limite?: number }
         Returns: {
-          dias_ate_vencer: number | null
-          dias_inativo: number | null
+          dias_ate_vencer: number
+          dias_inativo: number
           email: string
           motivo: string
           nome: string
-          organizacao: string | null
-          plano: string | null
-          ultima_atividade: string | null
+          organizacao: string
+          plano: string
+          ultima_atividade: string
         }[]
       }
       bi_consultor_modos: {
@@ -156,6 +154,22 @@ export type Database = {
           ordem: number
         }[]
       }
+      bi_dropoff_posicao: {
+        Args: never
+        Returns: {
+          decil: number
+          taxa_media: number
+        }[]
+      }
+      bi_duracao_ideal: {
+        Args: never
+        Returns: {
+          aulas: number
+          faixa: string
+          ordem: number
+          taxa_media: number
+        }[]
+      }
       bi_engajamento_clientes: {
         Args: { p_dias?: number }
         Returns: {
@@ -170,10 +184,10 @@ export type Database = {
       bi_entrada_kpis: {
         Args: { p_dias?: number }
         Returns: {
-          conversao: number | null
+          conversao: number
           convites: number
           erros_login: number
-          onboarding_pct: number | null
+          onboarding_pct: number
         }[]
       }
       bi_erros_login: {
@@ -190,22 +204,6 @@ export type Database = {
           tela: string
         }[]
       }
-      bi_dropoff_posicao: {
-        Args: never
-        Returns: {
-          decil: number
-          taxa_media: number | null
-        }[]
-      }
-      bi_duracao_ideal: {
-        Args: never
-        Returns: {
-          aulas: number
-          faixa: string
-          ordem: number
-          taxa_media: number | null
-        }[]
-      }
       bi_eventos_por_tipo: {
         Args: { p_dias?: number }
         Returns: {
@@ -217,7 +215,7 @@ export type Database = {
         Args: { p_dias?: number; p_tela: string }
         Returns: {
           destino: string
-          pct: number | null
+          pct: number
           transicoes: number
         }[]
       }
@@ -227,7 +225,7 @@ export type Database = {
           alunos_ativos: number
           aulas_concluidas: number
           certificados: number
-          nps_medio: number | null
+          nps_medio: number
         }[]
       }
       bi_formacoes_uso: {
@@ -236,9 +234,9 @@ export type Database = {
           alunos: number
           alunos_historico: number
           aulas_concluidas: number
-          categoria: string | null
+          categoria: string
           certificados_historico: number
-          conclusao_historica: number | null
+          conclusao_historica: number
           curso: string
         }[]
       }
@@ -247,7 +245,7 @@ export type Database = {
         Returns: {
           etapa: string
           ordem: number
-          pct_do_inicio: number | null
+          pct_do_inicio: number
           quantidade: number
         }[]
       }
@@ -263,7 +261,7 @@ export type Database = {
         Args: { p_dias?: number }
         Returns: {
           ferramenta: string
-          pct_dos_ativos: number | null
+          pct_dos_ativos: number
           usuarios: number
         }[]
       }
@@ -272,7 +270,7 @@ export type Database = {
         Returns: {
           clientes: number
           grupo: string
-          pct_retencao: number | null
+          pct_retencao: number
           retidos: number
         }[]
       }
@@ -290,16 +288,16 @@ export type Database = {
         Returns: {
           certificados: number
           curso: string
-          mediana_dias: number | null
+          mediana_dias: number
         }[]
       }
       bi_jornada_kpis: {
         Args: { p_dias?: number }
         Returns: {
-          minutos_medianos: number | null
-          pct_uma_tela: number | null
+          minutos_medianos: number
+          pct_uma_tela: number
           sessoes: number
-          telas_por_sessao: number | null
+          telas_por_sessao: number
         }[]
       }
       bi_ltv_cohort: {
@@ -308,27 +306,27 @@ export type Database = {
           clientes: number
           cohort_mes: string
           compradores: number
-          receita_brl: number | null
-          receita_por_cliente: number | null
+          receita_brl: number
+          receita_por_cliente: number
         }[]
       }
       bi_masters_convites_resumo: {
         Args: never
         Returns: {
-          conversao_convites: number | null
+          conversao_convites: number
           masters_convidaram: number
           masters_total: number
-          pct_convidam: number | null
+          pct_convidam: number
         }[]
       }
       bi_masters_top_convidadores: {
         Args: { p_limite?: number }
         Returns: {
-          conversao: number | null
+          conversao: number
           convites: number
           email: string
           nome: string
-          organizacao: string | null
+          organizacao: string
           usados: number
         }[]
       }
@@ -336,9 +334,9 @@ export type Database = {
         Args: { p_min_respostas?: number }
         Returns: {
           curso: string
-          media: number | null
-          pct_detratores: number | null
-          pct_promotores: number | null
+          media: number
+          pct_detratores: number
+          pct_promotores: number
           respostas: number
         }[]
       }
@@ -355,7 +353,7 @@ export type Database = {
           grupo: string
           membros: number
           orgs: number
-          pct_time_ativo: number | null
+          pct_time_ativo: number
         }[]
       }
       bi_orgs_kpis: {
@@ -363,8 +361,8 @@ export type Database = {
         Returns: {
           membros_total: number
           orgs_ativas: number
-          orgs_master_ativo: number | null
-          pct_time_ativo_medio: number | null
+          orgs_master_ativo: number
+          pct_time_ativo_medio: number
         }[]
       }
       bi_orgs_ocupacao: {
@@ -383,14 +381,14 @@ export type Database = {
           master_ativo: boolean
           membros: number
           organizacao: string
-          pct_time_ativo: number | null
-          plano: string | null
+          pct_time_ativo: number
+          plano: string
         }[]
       }
       bi_pontos_saida: {
         Args: { p_dias?: number; p_limite?: number }
         Returns: {
-          pct_da_tela: number | null
+          pct_da_tela: number
           saidas: number
           tela: string
         }[]
@@ -398,7 +396,7 @@ export type Database = {
       bi_portas_entrada: {
         Args: { p_dias?: number; p_limite?: number }
         Returns: {
-          pct: number | null
+          pct: number
           sessoes: number
           tela: string
         }[]
@@ -427,9 +425,9 @@ export type Database = {
         Args: { p_dias?: number; p_limite?: number }
         Returns: {
           pageviews: number
-          pct_entrada: number | null
-          pct_saida: number | null
-          posicao_media: number | null
+          pct_entrada: number
+          pct_saida: number
+          posicao_media: number
           tela: string
           usuarios: number
         }[]
@@ -438,11 +436,11 @@ export type Database = {
         Args: never
         Returns: {
           compradores: number
-          dados_ate: string | null
+          dados_ate: string
           faturas: number
-          receita_brl: number | null
-          reembolsado_brl: number | null
-          ticket_mediano: number | null
+          receita_brl: number
+          reembolsado_brl: number
+          ticket_mediano: number
         }[]
       }
       bi_receita_mensal: {
@@ -451,7 +449,7 @@ export type Database = {
           compradores: number
           faturas: number
           mes: string
-          receita_brl: number | null
+          receita_brl: number
         }[]
       }
       bi_receita_saude_cobranca: {
@@ -459,8 +457,8 @@ export type Database = {
         Returns: {
           evento: string
           faturas: number
-          pct_do_pago: number | null
-          valor_brl: number | null
+          pct_do_pago: number
+          valor_brl: number
         }[]
       }
       bi_retencao_cohort: {
@@ -468,10 +466,10 @@ export type Database = {
         Returns: {
           clientes: number
           cohort_mes: string
-          ret_180d: number | null
-          ret_30d: number | null
-          ret_7d: number | null
-          ret_90d: number | null
+          ret_180d: number
+          ret_30d: number
+          ret_7d: number
+          ret_90d: number
         }[]
       }
       bi_retencao_por_amplitude: {
@@ -482,16 +480,26 @@ export type Database = {
           pct_retidos: number
         }[]
       }
+      bi_saude_pipeline: {
+        Args: never
+        Returns: {
+          esta_defasado: boolean
+          falhas_recentes: number
+          horas_desde_sync: number
+          tabelas_ok: number
+          ultima_sync: string
+          ultimo_erro: string
+        }[]
+      }
       bi_solucoes_candidatas_remocao: {
         Args: never
         Returns: {
-          categoria: string | null
+          categoria: string
           concluidas: number
           favoritos: number
           iniciadas: number
           motivo: string
-          nota: number | null
-          pageviews: number
+          nota: number
           solucao: string
         }[]
       }
@@ -500,7 +508,7 @@ export type Database = {
         Returns: {
           etapa: string
           ordem: number
-          pct: number | null
+          pct: number
           usuarios: number
         }[]
       }
@@ -509,7 +517,7 @@ export type Database = {
         Returns: {
           aba: string
           ordem: number
-          pct_do_topo: number | null
+          pct_do_topo: number
           usuarios: number
         }[]
       }
@@ -519,7 +527,7 @@ export type Database = {
           concluidas_periodo: number
           iniciadas_periodo: number
           publicadas: number
-          taxa_conclusao_historica: number | null
+          taxa_conclusao_historica: number
         }[]
       }
       bi_solucoes_por_categoria: {
@@ -529,22 +537,21 @@ export type Database = {
           concluidas: number
           iniciadas: number
           solucoes: number
-          taxa: number | null
+          taxa_conclusao: number
         }[]
       }
       bi_solucoes_ranking: {
         Args: { p_limite?: number }
         Returns: {
           avaliacoes: number
-          categoria: string | null
+          categoria: string
           concluidas: number
           favoritos: number
           iniciadas: number
-          nota: number | null
-          pageviews: number
+          nota: number
           publicada: boolean
           solucao: string
-          taxa_conclusao: number | null
+          taxa_conclusao: number
         }[]
       }
       bi_tempo_primeiro_valor: {
@@ -564,25 +571,25 @@ export type Database = {
         }[]
       }
       bi_ultima_sincronizacao: { Args: never; Returns: string }
+      bi_uso_vs_receita: {
+        Args: never
+        Returns: {
+          clientes: number
+          dias_ativos_medio: number
+          faixa: string
+          ordem: number
+          pct_ativos_30d: number
+          receita_media: number
+        }[]
+      }
       bi_valor_nao_consumido: {
         Args: never
         Returns: {
           beneficiarios: number
           disponivel: number
           item: string
-          pct_uso: number | null
+          pct_uso: number
           usado: number
-        }[]
-      }
-      bi_uso_vs_receita: {
-        Args: never
-        Returns: {
-          clientes: number
-          dias_ativos_medio: number | null
-          faixa: string
-          ordem: number
-          pct_ativos_30d: number | null
-          receita_media: number | null
         }[]
       }
       bi_visao_geral_kpis: {

@@ -31,3 +31,6 @@ dist-ssr
 # Claude Code local
 .claude/settings.local.json
 .claude/worktrees/
+
+# Supabase CLI
+supabase/.temp/
