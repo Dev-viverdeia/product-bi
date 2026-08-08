@@ -112,7 +112,27 @@ a UI omite o delta em vez de mostrar 0%).
 Depois: ativos 3.451 (+0,1% real) · série de 90 dias sem degrau (341 → 332) ·
 Pageviews sem delta falso.
 
-### 2.4 Falha do pipeline era silenciosa (corrigido antes da auditoria)
+### 2.4 Funil de Soluções passava de 100% em 90 dias ⚠️ grave
+
+Mesma causa raiz da 2.3, em outra tela. As etapas 1 e 2 do funil ("Abriu o
+catálogo", "Abriu alguma solução") vêm de `fact_pageview`; as etapas 3 e 4
+("Iniciou", "Concluiu") vêm de `fact_progresso_solucao`. Com o filtro de 90
+dias, o pageview cobria só 36 dias reais e o progresso cobria os 90 — o funil
+ficava **impossível**:
+
+| Etapa | Antes (90d) | Depois (90d) |
+| --- | --- | --- |
+| Abriu o catálogo | 3.607 · 100% | 3.607 · 100% |
+| Abriu alguma solução | 2.457 · 68,1% | 2.457 · 68,1% |
+| **Iniciou uma solução** | **4.061 · 112,6%** ❌ | 2.274 · 63,0% |
+| Concluiu uma solução | 469 · 13,0% | 113 · 3,1% |
+
+**Corrigido**: a janela é recortada no início do rastreio, de forma que as 4
+etapas cubram sempre o mesmo período; a RPC devolve `desde` e a tela informa a
+data real ("desde 3 de jul, quando a navegação passou a ser rastreada") em vez
+de prometer 90 dias que não existem.
+
+### 2.5 Falha do pipeline era silenciosa (corrigido antes da auditoria)
 
 `etl.executar_sync()` gravava o log de erro dentro do bloco `exception` do
 PL/pgSQL — subtransação já revertida, log descartado junto. O pipeline ficou

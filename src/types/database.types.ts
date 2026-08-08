@@ -506,6 +506,7 @@ export type Database = {
       bi_solucoes_conversao_tela: {
         Args: { p_dias?: number }
         Returns: {
+          desde: string
           etapa: string
           ordem: number
           pct: number

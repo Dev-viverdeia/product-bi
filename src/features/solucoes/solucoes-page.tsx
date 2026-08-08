@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
+import { formatDateShort, formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import {
   useCandidatasRemocao,
   useConversaoTela,
@@ -120,8 +120,13 @@ export function SolucoesPage() {
           <CardHeader>
             <CardTitle className="text-base">A tela de Soluções está boa?</CardTitle>
             <CardDescription>
-              Catálogo → detalhe → início → conclusão · usuários únicos nos últimos{' '}
-              {periodo} dias · pageviews rastreados desde jul/2026
+              Catálogo → detalhe → início → conclusão · usuários únicos
+              {/* a janela é recortada no início do rastreio de navegação: as 4
+                  etapas precisam cobrir o mesmo período, senão o funil passa
+                  de 100% (era o caso no filtro de 90 dias) */}
+              {conversao.data?.[0]?.desde
+                ? ` desde ${formatDateShort(conversao.data[0].desde)}, quando a navegação passou a ser rastreada`
+                : ` nos últimos ${periodo} dias`}
             </CardDescription>
           </CardHeader>
           <CardContent>
