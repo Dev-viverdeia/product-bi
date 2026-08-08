@@ -86,7 +86,33 @@ taxa de erro vai de 0,27% para 0,24%. O ganho é de **consistência**: dois
 números sobre o mesmo assunto na mesma tela não podem contar populações
 diferentes.
 
-### 2.3 Falha do pipeline era silenciosa (corrigido antes da auditoria)
+### 2.3 Degrau de instrumentação na tela principal ⚠️ grave
+
+`bi_visao_geral_kpis` e `bi_atividade_diaria` definiam "ativo" como **evento OU
+pageview**. Como o pageview só existe desde **03/07/2026**, isso produzia:
+
+- **Série de 90 dias com degrau de 341 → 735 ativos/dia (+116%)** em 03/07 — no
+  gráfico principal da tela principal, a base de usuários parecia dobrar. Era o
+  rastreamento nascendo, não crescimento.
+- **KPI "Usuários ativos +33,5%"** e **"Pageviews +313,3%"**: a janela atual
+  tinha 30 dias instrumentados, a de comparação tinha 6.
+- **Divergência entre telas**: 5.457 ativos na Visão Geral contra 3.451 em
+  Clientes/Retenção — mesmo conceito, dois números.
+
+O contrato do roadmap já dizia "Ativo (dia) = cliente com ≥1 evento de domínio
+no dia", e a régua já alertava que "deltas longos de navegação refletem
+instrumentação". A implementação não seguia nem um nem outro.
+
+**Corrigido**: "ativo" passa a ser `fact_evento` apenas (estável desde
+mai/2025), o que alinha a Visão Geral com Clientes/Retenção. Pageview segue
+como KPI próprio — é métrica de navegação legítima — mas **sem comparativo**
+quando a janela anterior antecede o início do rastreio (a RPC devolve `null` e
+a UI omite o delta em vez de mostrar 0%).
+
+Depois: ativos 3.451 (+0,1% real) · série de 90 dias sem degrau (341 → 332) ·
+Pageviews sem delta falso.
+
+### 2.4 Falha do pipeline era silenciosa (corrigido antes da auditoria)
 
 `etl.executar_sync()` gravava o log de erro dentro do bloco `exception` do
 PL/pgSQL — subtransação já revertida, log descartado junto. O pipeline ficou

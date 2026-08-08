@@ -188,7 +188,12 @@ sincroniza e as pendências 1–4 ficam paradas.
 
 ## Notas de régua (valem para tudo)
 
-- "Cliente" = regra `e_cliente` herdada do `bi_cohort_base` da plataforma.
+- "Cliente" = regra `e_cliente` herdada do `bi_cohort_base` da plataforma —
+  aplicada em **toda** métrica de uso, sem exceção (a auditoria de 08/ago
+  encontrou 7 pontos que não aplicavam).
 - Timezone: America/Sao_Paulo, colunas `*_brt`.
-- Pageviews rastreados desde jul/2026; deltas longos de navegação refletem instrumentação.
+- **Pageviews começam em 03/07/2026.** Nenhuma métrica que atravesse essa data
+  pode incluir pageview: "ativo" é sempre `fact_evento` (contrato), e todo
+  comparativo cujo período anterior anteceda 03/07 é suprimido (`null` na RPC,
+  delta omitido na UI) em vez de mostrar crescimento que é instrumentação.
 - Toda peça visual nova passa pelo showcase `/design` antes do módulo.

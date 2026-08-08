@@ -12,7 +12,7 @@ import { formatCompact, formatDateShort, formatInt } from '@/lib/format'
 import { labelRota, labelTipoEvento } from '@/lib/labels-plataforma'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
 import {
-  calcularDelta,
+  deltaOuNada,
   useAtividadeDiaria,
   useEventosPorTipo,
   useHeatmapNavegacao,
@@ -60,10 +60,7 @@ export function VisaoGeralPage() {
           format={formatInt}
           delta={
             kpis.data
-              ? {
-                  value: calcularDelta(kpis.data.ativos, kpis.data.ativos_ant) ?? 0,
-                  vs: vsPeriodo,
-                }
+              ? deltaOuNada(kpis.data.ativos, kpis.data.ativos_ant, vsPeriodo)
               : undefined
           }
           isLoading={kpis.isLoading}
@@ -74,10 +71,7 @@ export function VisaoGeralPage() {
           format={formatInt}
           delta={
             kpis.data
-              ? {
-                  value: calcularDelta(kpis.data.novos, kpis.data.novos_ant) ?? 0,
-                  vs: vsPeriodo,
-                }
+              ? deltaOuNada(kpis.data.novos, kpis.data.novos_ant, vsPeriodo)
               : undefined
           }
           isLoading={kpis.isLoading}
@@ -88,10 +82,7 @@ export function VisaoGeralPage() {
           format={formatInt}
           delta={
             kpis.data
-              ? {
-                  value: calcularDelta(kpis.data.aulas, kpis.data.aulas_ant) ?? 0,
-                  vs: vsPeriodo,
-                }
+              ? deltaOuNada(kpis.data.aulas, kpis.data.aulas_ant, vsPeriodo)
               : undefined
           }
           isLoading={kpis.isLoading}
@@ -102,11 +93,7 @@ export function VisaoGeralPage() {
           format={formatCompact}
           delta={
             kpis.data
-              ? {
-                  value:
-                    calcularDelta(kpis.data.pageviews, kpis.data.pageviews_ant) ?? 0,
-                  vs: vsPeriodo,
-                }
+              ? deltaOuNada(kpis.data.pageviews, kpis.data.pageviews_ant, vsPeriodo)
               : undefined
           }
           isLoading={kpis.isLoading}
@@ -115,7 +102,7 @@ export function VisaoGeralPage() {
 
       <ChartCard
         title="Usuários ativos por dia"
-        description={`Clientes com qualquer atividade · últimos ${periodo} dias`}
+        description={`Clientes com ao menos uma ação de produto no dia · últimos ${periodo} dias`}
         isLoading={atividade.isLoading}
         isError={atividade.isError}
         onRetry={() => void atividade.refetch()}
