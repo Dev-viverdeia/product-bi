@@ -174,17 +174,19 @@ experiência com IA de ~15k clientes — dado subutilizado. A partir da Entrega 
 Relatório completo: `docs/auditoria-dados-2026-08.md`. As telas 1–9 estão
 entregues; estes são os pontos que a auditoria abriu e ainda não fecharam.
 
-| # | Pendência | Entrega | Bloqueio |
+| # | Pendência | Entrega | Estado |
 | --- | --- | --- | --- |
-| 1 | Pageviews por solução via `slug` (a origem não preenche `analytics.solution_id`) — reintroduz a coluna e o critério "sem acesso" | 5 | FDW |
-| 2 | Espelhar `implementation_requests` (114) — "pedidos de implementação paga" ficou sem cobertura | 5 | FDW |
-| 3 | Engajamento pré-renovação — sem RPC; depende de inventariar `renewal_logs` | 9 | FDW |
-| 4 | `dim_usuario` não remove quem foi deletado na plataforma | — | FDW |
+| 1 | Pageviews por solução via `slug` (a origem não preenche `analytics.solution_id`) | 5 | ✅ resolvida |
+| 2 | `dim_usuario` não removia quem foi deletado na plataforma | — | ✅ resolvida |
+| 3 | Espelhar `implementation_requests` (114) — "pedidos de implementação paga" ficou sem cobertura | 5 | aberta |
+| 4 | Engajamento pré-renovação — sem RPC; depende de inventariar `renewal_logs` | 9 | aberta |
 | 5 | "Onde a implementação trava" não é monotônico — lido como funil, confunde | 5 | passada visual |
 
-⚠️ **O FDW está fora**: o projeto da plataforma passou a ter restrição de rede
-que rejeita a conexão do BI. Enquanto não for liberada, o pipeline não
-sincroniza e as pendências 1–4 ficam paradas.
+**Nota de infraestrutura**: o pipeline ficou 19h parado porque a restrição de
+rede do projeto da plataforma liberava só `72.60.154.220/32`, e o BI sai por
+`54.232.250.105`. Resolvido. O IP de saída do BI não é dedicado e pode mudar em
+manutenção do Supabase — se isso acontecer, o sintoma é o mesmo
+(`EADDRNOTALLOWED`) e o alerta no topo do app avisa em até 30 min.
 
 ## Notas de régua (valem para tudo)
 

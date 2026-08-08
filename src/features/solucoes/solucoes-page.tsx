@@ -199,7 +199,8 @@ export function SolucoesPage() {
           <CardDescription>
             Soluções publicadas no quartil inferior de uso ou sem nenhuma conclusão ·
             revisar antes de remover: nota alta com pouco uso pode ser problema de
-            descoberta, não de qualidade
+            descoberta, não de qualidade · pageviews só desde jul/2026, então
+            podem ficar abaixo das iniciadas (histórico completo)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -210,6 +211,7 @@ export function SolucoesPage() {
                   <TableHead>Solução</TableHead>
                   <TableHead>Categoria</TableHead>
                   <TableHead>Motivo</TableHead>
+                  <TableHead className="text-right">Pageviews</TableHead>
                   <TableHead className="text-right">Iniciadas</TableHead>
                   <TableHead className="text-right">Concluídas</TableHead>
                   <TableHead className="text-right">Nota</TableHead>
@@ -224,6 +226,7 @@ export function SolucoesPage() {
                     <TableCell>
                       <Badge variant="secondary">{c.motivo}</Badge>
                     </TableCell>
+                    <TableCell className="num text-right">{formatInt(c.pageviews)}</TableCell>
                     <TableCell className="num text-right">{formatInt(c.iniciadas)}</TableCell>
                     <TableCell className="num text-right">{formatInt(c.concluidas)}</TableCell>
                     <TableCell className="num text-right">
@@ -263,7 +266,7 @@ export function SolucoesPage() {
           <CardTitle className="text-base">Ranking de soluções</CardTitle>
           <CardDescription>
             Ordenado por vezes iniciadas (histórico) · nota em escala 0–10 ·
-            somente clientes
+            somente clientes · pageviews da página da solução, desde jul/2026
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -273,6 +276,7 @@ export function SolucoesPage() {
                 <TableRow>
                   <TableHead>Solução</TableHead>
                   <TableHead>Categoria</TableHead>
+                  <TableHead className="text-right">Pageviews</TableHead>
                   <TableHead className="text-right">Iniciadas</TableHead>
                   <TableHead className="text-right">Concluídas</TableHead>
                   <TableHead className="text-right">Conclusão</TableHead>
@@ -285,6 +289,7 @@ export function SolucoesPage() {
                   <TableRow key={r.solucao}>
                     <TableCell className="max-w-64 truncate font-medium">{r.solucao}</TableCell>
                     <TableCell>{r.categoria ?? '—'}</TableCell>
+                    <TableCell className="num text-right">{formatInt(r.pageviews)}</TableCell>
                     <TableCell className="num text-right">{formatInt(r.iniciadas)}</TableCell>
                     <TableCell className="num text-right">{formatInt(r.concluidas)}</TableCell>
                     <TableCell className="num text-right">

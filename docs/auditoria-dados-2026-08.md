@@ -161,27 +161,53 @@ propôs a achar.
 
 ---
 
-## 4. Pendências
+## 4. A causa da parada do pipeline
 
-Bloqueadas pelo FDW (o projeto da plataforma passou a ter restrição de rede que
-rejeita a conexão do BI):
+Não era a senha do banco, como se suspeitou a princípio. O projeto da
+**plataforma** tinha restrição de rede liberando **um único IP**
+(`72.60.154.220/32`); o BI sai por `54.232.250.105` e era recusado na camada de
+rede, antes de qualquer autenticação — daí `EADDRNOTALLOWED` e não `28P01`.
 
-1. **Pageviews por solução** — adicionar `slug` em `dim_solucao` vindo de
-   `plataforma.solutions`, e contar por `path = '/solucoes/' || slug`.
-   Reintroduzir a coluna nas duas tabelas e o critério "sem acesso" em
-   *Candidatas a remoção*.
-2. **`implementation_requests` (114 linhas) não está espelhada** — é a fonte de
+Liberado o IP, o pipeline voltou: 20/20 passos com sucesso, defasagem zerada.
+
+⚠️ O IP de saída do BI não é dedicado — é da infraestrutura do Supabase em
+sa-east-1 e pode mudar em manutenção. Se mudar, o pipeline para do mesmo jeito;
+a diferença é que agora o alerta avisa em até 30 min, em vez de 18h.
+
+## 5. Integridade mart × origem (verificada com o FDW de volta)
+
+| Par | Mart | Origem |
+| --- | --- | --- |
+| `dim_usuario` ← `profiles` | 14.847 | 14.847 ✅ |
+| `dim_solucao` ← `solutions` | 167 | 167 ✅ |
+| `dim_organizacao` ← `organizations` | 2.101 | 2.101 ✅ |
+| `fact_certificado` ← `learning_certificates` | 10.025 | 10.025 ✅ |
+
+As demais tabelas diferem em unidades por serem produção viva (linhas nascendo
+entre o sync e a conferência).
+
+## 6. Pendências
+
+Resolvidas nesta rodada, depois que o FDW voltou:
+
+- ✅ **Pageviews por solução** — `slug` entrou na `dim_solucao` e a contagem
+  casa `path = '/solucoes/' || slug`. Determinístico, sem heurística. Cobertura
+  84,7%; o resto são soluções que não existem mais (excluídas corretamente) e
+  12 slugs de renomeação (2,7%, perda conhecida). Coluna de volta nas duas
+  tabelas e critério "Sem acesso e sem uso" ativo em *Candidatas a remoção*.
+- ✅ **`dim_usuario` agora espelha remoções** — 2 contas fantasmas (ambas
+  marcadas como cliente) saíram. O delete tem trava: aborta se a origem
+  devolver menos de 90% do tamanho do mart, para que uma leitura parcial nunca
+  esvazie a dimensão de que o BI inteiro depende.
+
+Em aberto:
+
+1. **`implementation_requests` (114 linhas) não está espelhada** — é a fonte de
    "pedidos de implementação paga", item de *Qualidade* na Entrega 5 que ficou
    sem cobertura.
-3. **Engajamento pré-renovação (Entrega 9)** — sem RPC. Depende de inventariar
+2. **Engajamento pré-renovação (Entrega 9)** — sem RPC. Depende de inventariar
    `renewal_logs`, que o discovery não chegou a contar.
-4. **`dim_usuario` nunca remove** quem foi deletado na plataforma (`insert on
-   conflict` não apaga). Hoje sem efeito prático — as métricas vêm dos fatos —
-   mas infla contagens sobre a dimensão com o tempo.
-
-Independente do FDW:
-
-5. **"Onde a implementação trava" não é monotônico**: Checklist (10,6%) aparece
+3. **"Onde a implementação trava" não é monotônico**: Checklist (10,6%) aparece
    entre Vídeo (50,7%) e Comentários (25,7%). A ordem é a sequência temporal
    real, mas apresentada como "% do topo" o leitor lê como funil e conclui que
    está errado. Rever na passada visual.

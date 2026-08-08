@@ -500,6 +500,7 @@ export type Database = {
           iniciadas: number
           motivo: string
           nota: number
+          pageviews: number
           solucao: string
         }[]
       }
@@ -550,6 +551,7 @@ export type Database = {
           favoritos: number
           iniciadas: number
           nota: number
+          pageviews: number
           publicada: boolean
           solucao: string
           taxa_conclusao: number
