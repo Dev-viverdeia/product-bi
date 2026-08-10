@@ -7,7 +7,8 @@ Plataforma de análise de dados (BI) central da Viver de IA. Projeto de alta vis
 ## Regras de trabalho
 
 - Organização acima de velocidade. Sem atalhos, sem TODO solto, sem código morto, sem gambiarra "temporária".
-- `npm run lint` e `npm run build` limpos antes de dar qualquer entrega por concluída.
+- `npm run lint`, `npm test` e `npm run build` limpos antes de dar qualquer entrega por concluída. O CI (`.github/workflows/ci.yml`) roda os três em push e PR.
+- **Commitar cedo.** Em 10/ago um `git reset` destruiu ~8h de trabalho não commitado; o que estava no banco sobreviveu, o disco não.
 - Mudança visual só está pronta depois de verificada no navegador (desktop 1280px e mobile 375px).
 - Texto de UI sempre em pt-BR.
 - Trabalho evolui em fases confirmadas com o Mateus — não avançar de fase sem o OK dele.
@@ -18,7 +19,9 @@ Referência oficial: **Viver de IA DS** — https://github.com/rafaelmilagre7/vi
 
 Regras inegociáveis herdadas do DS:
 
-- **LIGHT-FIRST (regra zero)**: a marca é clara. Branco/off-white é o padrão de tudo; navy `#0A1F3B` é cor de texto/ação/detalhe, nunca fundo de página. Dark mode existe e é completo, mas é escolha do usuário (toggle no header) — `defaultTheme="light"`.
+- **LIGHT-FIRST (regra zero)**: a marca é clara. Dark mode existe e é completo, mas é escolha do usuário (toggle no header) — `defaultTheme="light"`.
+  - **Canvas é cinza quase branco, card é branco**: `--via-canvas: #f4f5f7` + `--via-card-borda`. Enquanto os dois eram `#ffffff`, o card só existia por uma borda de 5% e a tela lia como uma folha só. A separação vem de **borda fina e sombra**, não de contraste de fundo. O cinza é neutro de propósito — a escala do DS é fria por construção e, numa página inteira, lê como lavanda.
+  - **Navy é componente, nunca fundo de página**: vale para o canvas. A barra (`--nav-surface`) e o `.brand-card` são navy por serem componentes.
 - **Paleta restrita**: branco · off-white · cinzas · azul-escuro `#1E3A5F` · navy · preto. Coral `#B85C5C`/danger só destrutivo real; verde `#1F8A5B` só status. **BANIDO**: gold/amarelo/roxo/cyan/magenta/neon, gradientes quentes.
 - **Fonte: Outfit** (decisão do Mateus, no lugar da Geist do DS) + **JetBrains Mono** para números/código/tabelas (fallback oficial do DS). Self-hosted via `@fontsource-variable/*`. Pesos: body 400–500, headings 500–600 — nunca bold massivo. Tracking negativo leve já aplicado no base.
 - Nunca hardcodar cor/raio/sombra — sempre token. Raios canônicos: xs 6 · sm 10 · md 14 (botão/input) · lg 20 (**card padrão**) · xl 28 (modal/card grande) · 2xl 40. Sombras navy-tinted no light, pretas no dark (`--shadow-*` já mapeadas).
@@ -27,7 +30,9 @@ Regras inegociáveis herdadas do DS:
 - Sem emoji decorativo em UI; sem clichês de IA em copy.
 - Todo controle tem os 3 estados (`:hover`, `:active`, `:focus-visible`); disabled muta por cor, não por opacity. Contraste AA nos 2 temas, sempre.
 - **Ajuste deliberado em `src/components/ui/card.tsx`**: `rounded-xl` → `rounded-lg` (card padrão do DS = 20px). Se regenerar o card via shadcn CLI, reaplicar.
-- **Superfícies da marca em `src/index.css`**: `.page-atmosphere` (radiais navy sutis — vai no `<main>` e em páginas públicas; sem ela o vidro não tem o que refletir) e `.glass-card` (receita canônica de 5 camadas, adapta no dark, solidifica com `prefers-reduced-transparency`/`prefers-contrast`). KpiCard, ChartCard e o card do login já usam; card de tabela densa fica plano (regra do DS). Sem hover/lift em card que não é clicável.
+- ⚠️ O gradiente do `.glass-card` é **de opacidade alta e faixa curta**. A receita antiga ia de 96% a 58% e fazia o card **mudar de cor conforme a altura** — dois brancos diferentes na mesma tela. Não restaurar o gradiente longo.
+- ⚠️ `.brand-card` **redeclara tokens semânticos** em vez de sobrescrever `color`: utilitário do Tailwind vence CSS da camada de componentes, e `color: #fff` deixa o título navy sobre navy. A rampa de dataviz dentro dele é a do tema escuro, já validada. Uso: **um por tela**.
+- **Superfícies da marca em `src/index.css`**: `.page-atmosphere` (radiais sutis, vai no shell e em páginas públicas), `.glass-card` (card padrão: branco, hairline e sombra; solidifica com `prefers-reduced-transparency`/`prefers-contrast`) e `.brand-card` (destaque navy). Sem hover/lift em card que não é clicável.
 
 ## Gráficos
 
@@ -47,7 +52,7 @@ Gráficos são o coração do produto — capricho máximo aqui. Regras do DS (v
 
 Páginas usam SEMPRE o kit — nunca montar Recharts cru em página de produto:
 
-- `ChartCard` — moldura obrigatória: título + estados loading/erro/vazio/refetch (refetch mantém o frame com opacidade reduzida).
+- `ChartCard` — moldura obrigatória: estados loading/erro/vazio/refetch. **Gramática do cabeçalho: identidade à esquerda, afordância à direita** — `icon` + título curto numa linha, `headline` com o número que responde o card, e a `description` vira o conteúdo do botão circular de informação. A definição da métrica não sai da tela, sai do caminho. `tone="brand"` para o bloco de destaque.
 - `KpiCard`/`KpiGrid` — stat tile com count-up, delta assinado (`upIsGood` decide a cor), sparkline; grid com entrada escalonada.
 - `TimeSeriesChart` — linha/área; máximo de 2 séries **garantido por tipo**; 2ª série tracejada + legenda com chave de linha; tooltip com crosshair e valores formatados.
 - `CategoryBarChart` — colunas ou barras horizontais; ≤24px, ponta 4px, base no zero, valor na ponta; eixos `width="auto"` (largura fixa corta rótulo).
@@ -90,7 +95,11 @@ Vite 8 · React 19 · TypeScript strict · Tailwind v4 · shadcn/ui (new-york) �
 src/
   app/          providers + router
   components/
-    layout/     shell autenticado (sidebar, header, nav-items.ts)
+    charts/     kit de gráficos
+    layout/     shell autenticado: app-header (barra navy), app-layout,
+                bento.tsx, modulo-tabs.tsx, nav-items.ts, alerta-pipeline
+    tabela/     tabela-longa.tsx (lista nominal com busca e paginação)
+    ui-marca/   peças da marca fora do shadcn (status-pill)
     ui/         shadcn — gerado por CLI, fora do lint, não editar à mão
   features/<x>/ módulos com estado/lógica própria
   lib/          env.ts (validado com Zod), supabase.ts, utils.ts
@@ -98,7 +107,16 @@ src/
   types/        types gerados do banco
 ```
 
-Módulo novo: página em `pages/` ou `features/` → rota em `src/app/router.tsx` (dentro de ProtectedRoute → AppLayout) → item em `src/components/layout/nav-items.ts` → migration + `db:types` se tocar banco.
+Módulo novo: página em `pages/` ou `features/` → rota em `src/app/router.tsx` (dentro de ProtectedRoute → AppLayout, via `lazy()`) → item em `src/components/layout/nav-items.ts` (com `shortTitle`, e `abas` se tiver) → migration + `db:types` se tocar banco.
+
+### Layout de módulo
+
+- **Navegação no topo**, não lateral: barra navy flutuante (`AppHeader`). A sidebar foi removida — não reintroduzir.
+- **Mosaico, não empilhamento**: a página é um `BentoGrid` de 12 colunas com **um único gap**. `BentoItem` aceita `span` e `rows`. Card preenche a altura via `[&>*]:h-full` na primitiva; não repetir nas páginas.
+- **Abas por contexto** (`ModuloTabs`) quando a tela responde 3+ perguntas distintas. Visão Geral e Organizações ficam sem, de propósito. A aba vive na URL (`?aba=`) e é declarada uma vez em `nav-items.ts` — a barra do topo consome a mesma lista.
+  - Fora das abas: cabeçalho, filtro de período, KPIs **e avisos de limitação do dado**.
+- **Lista nominal usa `TabelaLonga`** (busca + paginação). Se a RPC corta em N linhas, a tela **declara o corte**.
+- **Estado usa `StatusPill`**, sempre com ícone e rótulo — nunca só cor.
 
 ## Comandos
 
@@ -108,4 +126,5 @@ Módulo novo: página em `pages/` ou `features/` → rota em `src/app/router.tsx
 | `npm run build` | type-check + build |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | só type-check |
+| `npm test` | Vitest — contratos de métrica e formatação pt-BR |
 | `npm run db:types` | regenera types do banco |

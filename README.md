@@ -32,6 +32,8 @@ As variáveis são validadas com Zod em [src/lib/env.ts](src/lib/env.ts) — se 
 | `npm run build` | type-check + build de produção |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | apenas type-check |
+| `npm test` | testes dos contratos de métrica e formatação (Vitest) |
+| `npm run test:watch` | os mesmos testes em modo watch |
 | `npm run db:types` | regenera `src/types/database.types.ts` (requer Supabase CLI logada) |
 
 ## Supabase
