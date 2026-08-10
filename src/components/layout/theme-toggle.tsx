@@ -2,8 +2,13 @@ import { MoonIcon, SunIcon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
-export function ThemeToggle() {
+/**
+ * `className` existe porque o botão vive na barra escura: o ghost padrão herda
+ * `foreground` (navy no claro) e o ícone sumiria sobre a superfície navy.
+ */
+export function ThemeToggle({ className }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
 
@@ -11,6 +16,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
+      className={cn(className)}
       aria-label={isDark ? 'Ativar tema claro' : 'Ativar tema escuro'}
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
     >

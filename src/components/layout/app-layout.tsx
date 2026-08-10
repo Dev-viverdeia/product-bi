@@ -1,34 +1,30 @@
+import { Suspense } from 'react'
 import { Outlet } from 'react-router'
 
-import { Separator } from '@/components/ui/separator'
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from '@/components/ui/sidebar'
-import { AppSidebar } from '@/components/layout/app-sidebar'
-import { PageTitle } from '@/components/layout/page-title'
-import { ThemeToggle } from '@/components/layout/theme-toggle'
-import { AlertaPipeline } from '@/components/layout/alerta-pipeline'
+import { AppHeader } from '@/components/layout/app-header'
+import { PageFallback } from '@/components/layout/page-fallback'
 
+/**
+ * Shell autenticado: barra flutuante escura no topo, mosaico claro embaixo.
+ *
+ * O aviso de sync vive na barra, não aqui: como faixa acima do conteúdo ele
+ * empurrava o mosaico para baixo em toda tela.
+ *
+ * O padding lateral é o mesmo do header (px-4 / md:px-6) para a barra e os
+ * blocos alinharem na mesma calha — desalinhamento de 2px entre a barra e a
+ * primeira coluna do mosaico é o tipo de coisa que faz a tela parecer torta
+ * sem que se saiba por quê.
+ */
 export function AppLayout() {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 !h-4" />
-          <PageTitle />
-          <div className="ml-auto">
-            <ThemeToggle />
-          </div>
-        </header>
-        <main className="page-atmosphere flex-1 space-y-4 overflow-x-hidden p-4 md:p-6">
-          <AlertaPipeline />
+    <div className="page-atmosphere min-h-svh">
+      <AppHeader />
+      <main className="space-y-4 overflow-x-hidden px-4 py-4 md:px-6 md:py-6">
+        {/* Módulos entram por import dinâmico — a barra não espera o chunk. */}
+        <Suspense fallback={<PageFallback />}>
           <Outlet />
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+        </Suspense>
+      </main>
+    </div>
   )
 }
