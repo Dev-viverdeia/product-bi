@@ -35,10 +35,10 @@ export function useCandidatasRemocao() {
   })
 }
 
-export function useFunilAbas() {
+export function useConclusaoPorAba() {
   return useQuery({
-    queryKey: ['solucoes', 'funil-abas'],
-    queryFn: async () => (await rpc(supabase.rpc('bi_solucoes_funil_abas'))) ?? [],
+    queryKey: ['solucoes', 'conclusao-por-aba'],
+    queryFn: async () => (await rpc(supabase.rpc('bi_solucoes_conclusao_por_aba'))) ?? [],
   })
 }
 

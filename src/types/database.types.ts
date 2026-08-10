@@ -504,6 +504,15 @@ export type Database = {
           solucao: string
         }[]
       }
+      bi_solucoes_conclusao_por_aba: {
+        Args: never
+        Returns: {
+          aba: string
+          ordem: number
+          pct_da_maior_aba: number
+          usuarios: number
+        }[]
+      }
       bi_solucoes_conversao_tela: {
         Args: { p_dias?: number }
         Returns: {
@@ -511,15 +520,6 @@ export type Database = {
           etapa: string
           ordem: number
           pct: number
-          usuarios: number
-        }[]
-      }
-      bi_solucoes_funil_abas: {
-        Args: never
-        Returns: {
-          aba: string
-          ordem: number
-          pct_do_topo: number
           usuarios: number
         }[]
       }

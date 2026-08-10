@@ -22,8 +22,8 @@ import {
 import { formatDateShort, formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import {
   useCandidatasRemocao,
+  useConclusaoPorAba,
   useConversaoTela,
-  useFunilAbas,
   useSolucoesKpis,
   useSolucoesPorCategoria,
   useSolucoesRanking,
@@ -71,7 +71,7 @@ export function SolucoesPage() {
 
   const kpis = useSolucoesKpis(periodo)
   const conversao = useConversaoTela(periodo)
-  const funil = useFunilAbas()
+  const abas = useConclusaoPorAba()
   const candidatas = useCandidatasRemocao()
   const ranking = useSolucoesRanking()
   const categorias = useSolucoesPorCategoria()
@@ -82,7 +82,7 @@ export function SolucoesPage() {
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">Soluções</h2>
           <p className="text-muted-foreground text-sm">
-            Catálogo, funil de implementação e candidatas a remoção
+            Catálogo, conclusão das abas de implementação e candidatas a remoção
           </p>
         </div>
         <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
@@ -157,30 +157,31 @@ export function SolucoesPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Onde a implementação trava</CardTitle>
+            <CardTitle className="text-base">Conclusão por aba da implementação</CardTitle>
             <CardDescription>
-              Usuários únicos por aba concluída · ordem validada pela sequência temporal
-              real de uso · a plataforma não registra progresso parcial, então o funil
-              vem das abas
+              Usuários únicos que concluíram cada aba, na ordem temporal típica de uso.
+              As abas são independentes — dá para concluir uma sem passar pela anterior —,
+              então não é funil: valor baixo é aba pulada, não abandono. Base de
+              comparação é a aba mais concluída.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <EstadoTabela isLoading={funil.isLoading} isError={funil.isError}>
+            <EstadoTabela isLoading={abas.isLoading} isError={abas.isError}>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Aba</TableHead>
                     <TableHead className="text-right">Usuários</TableHead>
-                    <TableHead className="text-right">% do topo</TableHead>
+                    <TableHead className="text-right">% da maior aba</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {(funil.data ?? []).map((f) => (
+                  {(abas.data ?? []).map((f) => (
                     <TableRow key={f.aba}>
                       <TableCell className="font-medium">{f.aba}</TableCell>
                       <TableCell className="num text-right">{formatInt(f.usuarios)}</TableCell>
-                      <TableCell className="num text-right" style={fundoFunil(f.pct_do_topo)}>
-                        {f.pct_do_topo != null ? formatPercent(f.pct_do_topo) : '—'}
+                      <TableCell className="num text-right" style={fundoFunil(f.pct_da_maior_aba)}>
+                        {f.pct_da_maior_aba != null ? formatPercent(f.pct_da_maior_aba) : '—'}
                       </TableCell>
                     </TableRow>
                   ))}
