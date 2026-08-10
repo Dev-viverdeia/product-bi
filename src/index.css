@@ -38,6 +38,19 @@
   --via-gray-800: #1d2939;
   --via-gray-900: #101828;
 
+  /* Canvas da aplicação — cinza quase branco.
+     Não é decoração: é o que faz o card branco existir como objeto elevado em
+     vez de se dissolver no fundo. O card se destaca por BORDA FINA E SOMBRA,
+     não por contraste de fundo — por isso o canvas é claro e não cinza médio.
+     Neutro de propósito: a escala de cinzas do DS é fria por construção (no
+     gray-300 o azul fica 13 pontos acima do vermelho) e, no tamanho de uma
+     página inteira, isso lê como lavanda. Aqui os canais ficam a 3. */
+  --via-canvas: #f4f5f7;
+
+  /* Hairline do card sobre o canvas claro: com o fundo quase branco, é a borda
+     que separa o card, não a diferença de luminância. */
+  --via-card-borda: #e7e9ee;
+
   /* Status — dessaturados, vizinhos do navy */
   --via-success: #1f8a5b;
   --via-danger: #b83a3a;
@@ -73,7 +86,9 @@
 :root {
   --radius: 14px; /* md do DS — botão, input, card pequeno */
 
-  --background: #ffffff;
+  /* Canvas quase branco, card branco: a separação vem da BORDA e da sombra.
+     Ver --via-canvas na camada 1. */
+  --background: var(--via-canvas);
   --foreground: var(--via-navy);
   --card: #ffffff;
   --card-foreground: var(--via-navy);
@@ -94,6 +109,14 @@
   --border: var(--via-gray-200); /* hairline */
   --input: rgba(10, 31, 59, 0.16); /* borda de controle, navy-tint */
   --ring: rgba(10, 31, 59, 0.35);
+
+  /* Barra de navegação — par próprio, não reaproveita --primary.
+     --primary inverte no dark (vira quase-branco), o que daria uma barra clara
+     justamente no tema escuro. A barra é escura nos DOIS temas: é a âncora de
+     marca no topo da página clara, e no escuro vira superfície elevada sobre o
+     canvas para não sumir. Navy aqui é componente, não fundo de página. */
+  --nav-surface: var(--via-navy);
+  --nav-foreground: #ffffff;
 
   /* Dataviz · rampa monocromática (5 passos com separação real de valor).
      Para segmentos/stacked/categorias dentro da família navy. */
@@ -146,6 +169,11 @@
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.18);
   --ring: rgba(255, 255, 255, 0.45);
+
+  /* No escuro a barra não pode ser navy: o canvas já é #0b1220 e ela sumiria.
+     Vira superfície elevada — mesmo degrau do popover. */
+  --nav-surface: #1b273f;
+  --nav-foreground: #f4f6fa;
 
   /* Dataviz dark · rampa clara, visível sobre navy escuro */
   --chart-1: #6e8cb4;
@@ -214,6 +242,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-nav-surface: var(--nav-surface);
+  --color-nav-foreground: var(--nav-foreground);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -320,19 +350,49 @@
   /* Glass card sutil — 5 camadas: gradiente 3-stop, hairline quase invisível,
      linha de luz no topo, sombra navy difusa e atmosfera própria (::before).
      Sem hover por padrão: card-container não é controle interativo. */
+  /* Card branco sólido com hairline e sombra suave.
+     ⚠️ A receita antiga era um gradiente de 96% → 58% de opacidade, e ele fazia
+     o card MUDAR DE COR conforme a altura: num tile de 104px o trecho
+     translúcido dominava e o canvas atravessava; num card de 434px o topo opaco
+     dominava. Dois brancos diferentes na mesma tela. Não restaurar o gradiente
+     longo — a separação agora vem da borda e da sombra. */
   .glass-card {
     position: relative;
     isolation: isolate;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.96) 0%,
-      rgba(255, 255, 255, 0.84) 10%,
-      rgba(247, 248, 250, 0.58) 100%
-    );
-    border-color: rgba(10, 31, 59, 0.05);
+    background: #ffffff;
+    border-color: var(--via-card-borda);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.95),
-      0 10px 24px -16px rgba(10, 31, 59, 0.12);
+      0 1px 2px rgba(10, 31, 59, 0.04),
+      0 8px 20px -14px rgba(10, 31, 59, 0.14);
+  }
+
+  /* Card de destaque, preenchido em navy — o ritmo do mosaico.
+     REDECLARA tokens semânticos em vez de sobrescrever `color`: o Card carrega
+     `text-card-foreground`, e utilitário do Tailwind vence CSS da camada de
+     componentes — tentar `color: #fff` deixa o título navy sobre navy.
+     Uso parcimonioso: um por tela, no bloco que carrega a resposta principal. */
+  .brand-card {
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(160deg, var(--via-navy) 0%, var(--via-navy-deep) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 1px 2px rgba(10, 31, 59, 0.18),
+      0 16px 36px -20px rgba(10, 31, 59, 0.55);
+
+    --card-foreground: #ffffff;
+    --foreground: #ffffff;
+    --muted-foreground: rgba(255, 255, 255, 0.72);
+    --border: rgba(255, 255, 255, 0.12);
+
+    /* Dataviz: sem isto o gráfico some — --data-1 (#2e6fc4) sobre navy é
+       praticamente o mesmo valor. Reaproveita a rampa do tema escuro, já
+       validada em contraste e visão de cor. Não é cor nova. */
+    --data-1: #4e96f0;
+    --data-2: #3168b4;
+    --data-grid: rgba(255, 255, 255, 0.09);
+    --data-axis: rgba(255, 255, 255, 0.22);
+    --data-ink: #aeb8c6;
   }
 
   .glass-card::before {

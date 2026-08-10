@@ -83,10 +83,57 @@ export function formatMesAno(isoDate: string) {
     .replace('.', '')
 }
 
-/** "2026-03-08" → "8 mar" */
+/**
+ * "2026-03-08" → "8 de mar"
+ *
+ * Mantém o "de" do pt-BR: além do eixo de tempo, alimenta prosa como
+ * "desde 3 de jul, quando a navegação passou a ser rastreada" — sem o "de" o
+ * texto fica telegráfico.
+ */
 export function formatDateShort(isoDate: string) {
   const date = new Date(`${isoDate.slice(0, 10)}T12:00:00`)
   return date
     .toLocaleDateString(locale, { day: 'numeric', month: 'short' })
     .replace('.', '')
+}
+
+/**
+ * Timestamp completo → "8 de ago, 15:30" em horário de Brasília.
+ *
+ * O fuso é fixado de propósito. Todo o resto do BI usa colunas `*_brt`
+ * pré-computadas no banco; se este formatador usasse o fuso do navegador, quem
+ * abrisse de outro fuso veria uma hora que contradiz o resto da tela.
+ */
+const dataHora = new Intl.DateTimeFormat(locale, {
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'America/Sao_Paulo',
+})
+
+export function formatDataHora(iso: string) {
+  return dataHora.format(new Date(iso)).replace('.', '')
+}
+
+/**
+ * Horas decimais → duração que se lê sem fazer conta: 0,5 → "30 minutos" ·
+ * 8,2 → "8 horas" · 46,9 → "2 dias".
+ *
+ * "46,9h" obriga o leitor a dividir por 24 para entender se o dado é de ontem
+ * ou da semana passada — que é justamente a pergunta que ele está fazendo.
+ */
+export function formatDuracao(horas: number) {
+  const h = Math.max(horas, 0)
+
+  if (h < 1) {
+    const minutos = Math.max(Math.round(h * 60), 1)
+    return `${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}`
+  }
+  if (h < 24) {
+    const arredondado = Math.round(h)
+    return `${arredondado} ${arredondado === 1 ? 'hora' : 'horas'}`
+  }
+  const dias = Math.round(h / 24)
+  return `${dias} ${dias === 1 ? 'dia' : 'dias'}`
 }
