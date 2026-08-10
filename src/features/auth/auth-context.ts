@@ -8,8 +8,6 @@ export type Profile = Pick<
   'id' | 'email' | 'full_name' | 'avatar_url' | 'role'
 >
 
-export type UserRole = Profile['role']
-
 export type AuthContextValue = {
   session: Session | null
   user: User | null

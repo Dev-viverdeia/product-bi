@@ -1,12 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
+import { rpc } from '@/lib/rpc'
 import { supabase } from '@/lib/supabase'
-
-async function rpc<T>(promise: PromiseLike<{ data: T | null; error: { message: string } | null }>) {
-  const { data, error } = await promise
-  if (error) throw new Error(error.message)
-  return data
-}
 
 export function useOrgsKpis() {
   return useQuery({

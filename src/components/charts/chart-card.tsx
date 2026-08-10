@@ -1,20 +1,27 @@
 import type { ReactNode } from 'react'
-import { AlertCircleIcon, ChartColumnIcon } from 'lucide-react'
+import { AlertCircleIcon, ChartColumnIcon, InfoIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 type ChartCardProps = {
   title: string
   description?: string
+  /** ícone do assunto, em quadrado tintado à esquerda do título */
+  icon?: LucideIcon
+  /** número que responde o card antes do gráfico — o olho pousa aqui primeiro */
+  headline?: string
+  /** unidade/recorte do headline, em texto pequeno ao lado dele */
+  headlineLabel?: string
   /** slot à direita do header (filtro local, menu de exportação…) */
   action?: ReactNode
   isLoading?: boolean
@@ -24,6 +31,8 @@ type ChartCardProps = {
   emptyMessage?: string
   /** refetch mantém o frame: gráfico anterior fica visível com opacidade reduzida */
   isRefreshing?: boolean
+  /** 'brand' preenche em navy — bloco de destaque do mosaico, um por tela */
+  tone?: 'glass' | 'brand'
   className?: string
   contentClassName?: string
   children: ReactNode
@@ -36,6 +45,9 @@ type ChartCardProps = {
 export function ChartCard({
   title,
   description,
+  icon: Icon,
+  headline,
+  headlineLabel,
   action,
   isLoading = false,
   isError = false,
@@ -43,22 +55,69 @@ export function ChartCard({
   isEmpty = false,
   emptyMessage = 'Sem dados para o período selecionado.',
   isRefreshing = false,
+  tone = 'glass',
   className,
   contentClassName,
   children,
 }: ChartCardProps) {
   return (
-    <Card className={cn('glass-card gap-4', className)}>
-      {/* Empilha no mobile: ação ao lado do título espreme a descrição em 375px */}
-      <CardHeader className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
-        <div className="space-y-1">
-          <CardTitle className="text-base">{title}</CardTitle>
-          {description ? <CardDescription>{description}</CardDescription> : null}
+    <Card className={cn(tone === 'brand' ? 'brand-card' : 'glass-card', 'gap-4', className)}>
+      {/*
+        Gramática do cabeçalho: identidade à esquerda, afordância à direita.
+
+        A versão anterior abria com título em text-base mais uma frase inteira de
+        descrição — o topo do card era um parágrafo e o dado só aparecia depois.
+        Agora o assunto cabe numa linha (ícone + rótulo) e o headline responde.
+
+        A definição da métrica NÃO foi deletada: ela é parte do dado neste
+        projeto, e virou o conteúdo do botão de informação. Cabeçalho limpo, e a
+        régua continua a um clique de quem precisa conferir de onde vem o número.
+      */}
+      <CardHeader className="flex flex-row items-start justify-between gap-3">
+        <div className="min-w-0 space-y-1.5">
+          <div className="flex items-center gap-2">
+            {Icon ? (
+              <span className="bg-foreground/6 text-muted-foreground flex size-7 shrink-0 items-center justify-center rounded-md">
+                <Icon className="size-4" />
+              </span>
+            ) : null}
+            <CardTitle className="truncate text-sm font-medium">{title}</CardTitle>
+          </div>
+
+          {headline ? (
+            <p className="flex items-baseline gap-1.5 pt-0.5">
+              <span className="num text-3xl leading-none font-semibold tracking-tight">
+                {headline}
+              </span>
+              {headlineLabel ? (
+                <span className="text-muted-foreground text-xs">{headlineLabel}</span>
+              ) : null}
+            </p>
+          ) : null}
         </div>
-        {action ? <div className="shrink-0">{action}</div> : null}
+
+        <div className="shrink-0">
+          {action ??
+            (description ? (
+              <Tooltip>
+                <TooltipTrigger
+                  aria-label={`Como este número é calculado: ${title}`}
+                  className="border-foreground/8 text-muted-foreground hover:bg-foreground/6 hover:text-foreground focus-visible:ring-ring flex size-8 items-center justify-center rounded-full border transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  <InfoIcon className="size-4" />
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-72 text-xs leading-relaxed">
+                  {description}
+                </TooltipContent>
+              </Tooltip>
+            ) : null)}
+        </div>
       </CardHeader>
 
-      <CardContent className={cn('min-h-[220px]', contentClassName)}>
+      {/* min-w-0: em flex/grid o filho tem min-width auto, e o ResponsiveContainer
+          do Recharts mede o pai antes de encolher — sem isto ele renderiza alguns
+          px além da caixa e o gráfico era cortado no mobile pelo overflow-hidden. */}
+      <CardContent className={cn('min-h-[220px] min-w-0', contentClassName)}>
         {isLoading ? (
           <div className="flex h-full min-h-[220px] flex-col gap-3">
             <Skeleton className="h-full min-h-[180px] w-full rounded-md" />
