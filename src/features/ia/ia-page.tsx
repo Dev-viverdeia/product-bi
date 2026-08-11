@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BentoGrid, BentoItem } from '@/components/layout/bento'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
+import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/charts'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
@@ -207,30 +208,33 @@ export function IaPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={steps.isLoading} isError={steps.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={steps.data ?? []}
+                        chave={(s) => s.step}
+                        buscarEm={(s) => [s.step]}
+                        rotuloBusca="Buscar etapa"
+                        vazio="Nenhuma geração registrada nos últimos 90 dias."
+                        cabecalho={
                           <TableRow>
                             <TableHead>Etapa</TableHead>
                             <TableHead className="text-right">Gerações</TableHead>
                             <TableHead className="text-right">Erro</TableHead>
                             <TableHead className="text-right">Tempo médio</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(steps.data ?? []).map((s) => (
-                            <TableRow key={s.step}>
-                              <TableCell className="font-mono text-xs">{s.step}</TableCell>
-                              <TableCell className="num text-right">{formatInt(s.geracoes)}</TableCell>
-                              <TableCell className="num text-right">
-                                {s.pct_erro != null ? `${formatDecimal(s.pct_erro)}%` : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right">
-                                {s.segundos_medio != null ? `${formatDecimal(s.segundos_medio)}s` : '—'}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(s) => (
+                          <TableRow>
+                            <TableCell className="font-mono text-xs">{s.step}</TableCell>
+                            <TableCell className="num text-right">{formatInt(s.geracoes)}</TableCell>
+                            <TableCell className="num text-right">
+                              {s.pct_erro != null ? `${formatDecimal(s.pct_erro)}%` : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {s.segundos_medio != null ? `${formatDecimal(s.segundos_medio)}s` : '—'}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>

@@ -37,35 +37,56 @@ function CelulaRetencao({ valor }: { valor: number | null }) {
   )
 }
 
+/* Teto de safras na tela. A RPC devolve da mais recente para a mais antiga e
+   ganha uma linha por mês; sem teto, em um ano a grade tem 28 linhas e a
+   comparação que importa — as safras recentes — some abaixo da dobra.
+   Aqui não entra TabelaLonga de propósito: a leitura é diagonal (safra contra
+   janela) e paginar cortaria a comparação no meio. */
+const SAFRAS_VISIVEIS = 12
+
 /**
  * Grade de retenção por cohort — tabela densa PLANA (regra do DS: sem vidro).
  * "—" = janela ainda não completa (não é queda).
  */
 export function CohortTable({ linhas }: { linhas: CohortLinha[] }) {
+  const visiveis = linhas.slice(0, SAFRAS_VISIVEIS)
+  const ocultas = linhas.length - visiveis.length
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Cohort</TableHead>
-          <TableHead className="text-right">Clientes</TableHead>
-          <TableHead className="text-right">7 dias</TableHead>
-          <TableHead className="text-right">30 dias</TableHead>
-          <TableHead className="text-right">90 dias</TableHead>
-          <TableHead className="text-right">180 dias</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {linhas.map((linha) => (
-          <TableRow key={linha.cohort_mes}>
-            <TableCell className="font-medium">{formatMesAno(linha.cohort_mes)}</TableCell>
-            <TableCell className="num text-right">{formatInt(linha.clientes)}</TableCell>
-            <CelulaRetencao valor={linha.ret_7d} />
-            <CelulaRetencao valor={linha.ret_30d} />
-            <CelulaRetencao valor={linha.ret_90d} />
-            <CelulaRetencao valor={linha.ret_180d} />
+    <div className="space-y-3">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Cohort</TableHead>
+            <TableHead className="text-right">Clientes</TableHead>
+            <TableHead className="text-right">7 dias</TableHead>
+            <TableHead className="text-right">30 dias</TableHead>
+            <TableHead className="text-right">90 dias</TableHead>
+            <TableHead className="text-right">180 dias</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {visiveis.map((linha) => (
+            <TableRow key={linha.cohort_mes}>
+              <TableCell className="font-medium">{formatMesAno(linha.cohort_mes)}</TableCell>
+              <TableCell className="num text-right">{formatInt(linha.clientes)}</TableCell>
+              <CelulaRetencao valor={linha.ret_7d} />
+              <CelulaRetencao valor={linha.ret_30d} />
+              <CelulaRetencao valor={linha.ret_90d} />
+              <CelulaRetencao valor={linha.ret_180d} />
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      {ocultas > 0 ? (
+        <p className="text-muted-foreground text-xs">
+          As {SAFRAS_VISIVEIS} safras mais recentes ·{' '}
+          {ocultas === 1
+            ? '1 safra mais antiga não aparece'
+            : `${formatInt(ocultas)} safras mais antigas não aparecem`}
+        </p>
+      ) : null}
+    </div>
   )
 }

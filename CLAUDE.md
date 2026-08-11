@@ -118,7 +118,9 @@ Módulo novo: página em `pages/` ou `features/` → rota em `src/app/router.tsx
 - **Mosaico, não empilhamento**: a página é um `BentoGrid` de 12 colunas com **um único gap**. `BentoItem` aceita `span` e `rows`. Card preenche a altura via `[&>*]:h-full` na primitiva; não repetir nas páginas.
 - **Abas por contexto** (`ModuloTabs`) quando a tela responde 3+ perguntas distintas. Visão Geral e Organizações ficam sem, de propósito. A aba vive na URL (`?aba=`) e é declarada uma vez em `nav-items.ts` — a barra do topo consome a mesma lista.
   - Fora das abas: cabeçalho, filtro de período, KPIs **e avisos de limitação do dado**.
-- **Lista nominal usa `TabelaLonga`** (busca + paginação). Se a RPC corta em N linhas, a tela **declara o corte**.
+- **Lista usa `TabelaLonga`** (busca + paginação, 12 por página). Vale para toda tabela cuja quantidade de linhas vem do dado — nomes, módulos, etapas, safras, destinos. Se a RPC corta em N linhas, a tela **declara o corte**.
+  - Fica em `<Table>` cru o que é **bloco, não lista**: funil de etapas fixas, comparação de 2–3 grupos nomeados, baldes de status. O leitor lê o conjunto inteiro; busca e paginação ali só atrapalhariam (e nem apareceriam — a `TabelaLonga` esconde os controles abaixo de uma página).
+  - **Matriz não pagina**: a grade de cohort corta nas 12 safras mais recentes e diz quantas ficaram de fora. Paginar cortaria a leitura diagonal no meio.
 - **Estado usa `StatusPill`**, sempre com ícone e rótulo — nunca só cor.
 
 ## Comandos

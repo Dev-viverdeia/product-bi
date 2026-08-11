@@ -14,14 +14,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { TableCell, TableHead, TableRow } from '@/components/ui/table'
 import {
   formatDateShort,
   formatDecimal,
@@ -305,42 +298,45 @@ export function ClientesPage() {
                       isLoading={churnModulos.isLoading}
                       isError={churnModulos.isError}
                     >
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={churnModulos.data ?? []}
+                        chave={(m) => m.modulo}
+                        buscarEm={(m) => [m.modulo]}
+                        rotuloBusca="Buscar módulo"
+                        vazio="Nenhum módulo com tracking cobrindo o período."
+                        cabecalho={
                           <TableRow>
                             <TableHead>Módulo</TableHead>
                             <TableHead className="text-right">Churned nunca usou</TableHead>
                             <TableHead className="text-right">Ativos nunca usou</TableHead>
                             <TableHead className="text-right">Gap (pp)</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(churnModulos.data ?? []).map((m) => (
-                            <TableRow key={m.modulo}>
-                              <TableCell>
-                                <div className="font-medium">{m.modulo}</div>
-                                <div className="text-muted-foreground text-xs">
-                                  medido desde {formatDateShort(m.medido_desde)}
-                                  {m.modulo === 'Consultor' ? ' (lançamento do produto)' : ''}
-                                </div>
-                              </TableCell>
-                              <TableCell className="num text-right">
-                                {m.pct_churned_nunca_usou != null
-                                  ? formatPercent(m.pct_churned_nunca_usou)
-                                  : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right">
-                                {m.pct_ativos_nunca_usou != null
-                                  ? formatPercent(m.pct_ativos_nunca_usou)
-                                  : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right font-medium">
-                                {m.gap_pp != null ? formatDecimal(m.gap_pp) : '—'}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(m) => (
+                          <TableRow>
+                            <TableCell>
+                              <div className="font-medium">{m.modulo}</div>
+                              <div className="text-muted-foreground text-xs">
+                                medido desde {formatDateShort(m.medido_desde)}
+                                {m.modulo === 'Consultor' ? ' (lançamento do produto)' : ''}
+                              </div>
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {m.pct_churned_nunca_usou != null
+                                ? formatPercent(m.pct_churned_nunca_usou)
+                                : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {m.pct_ativos_nunca_usou != null
+                                ? formatPercent(m.pct_ativos_nunca_usou)
+                                : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right font-medium">
+                              {m.gap_pp != null ? formatDecimal(m.gap_pp) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>
@@ -384,8 +380,13 @@ export function ClientesPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={aha.isLoading} isError={aha.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={aha.data ?? []}
+                        chave={(a) => a.acao}
+                        buscarEm={(a) => [labelTipoEvento(a.acao), a.acao]}
+                        rotuloBusca="Buscar ação"
+                        vazio="Nenhuma ação com tracking cobrindo todo o período."
+                        cabecalho={
                           <TableRow>
                             <TableHead>Ação na 1ª semana</TableHead>
                             <TableHead className="text-right">Fizeram</TableHead>
@@ -394,26 +395,24 @@ export function ClientesPage() {
                             <TableHead className="text-right">Retenção 90d</TableHead>
                             <TableHead className="text-right">Lift</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(aha.data ?? []).map((a) => (
-                            <TableRow key={a.acao}>
-                              <TableCell className="font-medium">{labelTipoEvento(a.acao)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(a.fizeram)}</TableCell>
-                              <TableCell className="num text-right">
-                                {a.ret_fizeram != null ? formatPercent(a.ret_fizeram) : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right">{formatInt(a.nao_fizeram)}</TableCell>
-                              <TableCell className="num text-right">
-                                {a.ret_nao_fizeram != null ? formatPercent(a.ret_nao_fizeram) : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right font-medium">
-                                {a.lift != null ? `${formatDecimal(a.lift)}×` : '—'}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(a) => (
+                          <TableRow>
+                            <TableCell className="font-medium">{labelTipoEvento(a.acao)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(a.fizeram)}</TableCell>
+                            <TableCell className="num text-right">
+                              {a.ret_fizeram != null ? formatPercent(a.ret_fizeram) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">{formatInt(a.nao_fizeram)}</TableCell>
+                            <TableCell className="num text-right">
+                              {a.ret_nao_fizeram != null ? formatPercent(a.ret_nao_fizeram) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right font-medium">
+                              {a.lift != null ? `${formatDecimal(a.lift)}×` : '—'}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>

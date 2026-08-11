@@ -20,14 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { TableCell, TableHead, TableRow } from '@/components/ui/table'
 import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import { LIMITE_LISTA } from '@/lib/rpc'
 import {
@@ -210,26 +203,29 @@ export function JornadaPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={fluxo.isLoading} isError={fluxo.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={fluxo.data ?? []}
+                        chave={(f) => f.destino}
+                        buscarEm={(f) => [f.destino]}
+                        rotuloBusca="Buscar destino"
+                        vazio="Nenhuma transição registrada a partir desta tela."
+                        cabecalho={
                           <TableRow>
                             <TableHead>Destino</TableHead>
                             <TableHead className="text-right">Transições</TableHead>
                             <TableHead className="text-right">% do total</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(fluxo.data ?? []).map((f) => (
-                            <TableRow key={f.destino}>
-                              <TableCell className="font-mono text-xs">{f.destino}</TableCell>
-                              <TableCell className="num text-right">{formatInt(f.transicoes)}</TableCell>
-                              <TableCell className="num text-right" style={tintaPct(f.pct)}>
-                                {f.pct != null ? formatPercent(f.pct) : '—'}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(f) => (
+                          <TableRow>
+                            <TableCell className="font-mono text-xs">{f.destino}</TableCell>
+                            <TableCell className="num text-right">{formatInt(f.transicoes)}</TableCell>
+                            <TableCell className="num text-right" style={tintaPct(f.pct)}>
+                              {f.pct != null ? formatPercent(f.pct) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>

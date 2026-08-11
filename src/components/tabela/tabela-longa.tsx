@@ -125,7 +125,7 @@ export function TabelaLonga<T>({
               <Button
                 variant="outline"
                 size="icon"
-                className="size-7"
+                className="size-8"
                 onClick={() => setPagina((p) => Math.max(p - 1, 0))}
                 disabled={paginaAtual === 0}
                 aria-label="Página anterior"
@@ -138,7 +138,7 @@ export function TabelaLonga<T>({
               <Button
                 variant="outline"
                 size="icon"
-                className="size-7"
+                className="size-8"
                 onClick={() => setPagina((p) => Math.min(p + 1, totalPaginas - 1))}
                 disabled={paginaAtual >= totalPaginas - 1}
                 aria-label="Próxima página"

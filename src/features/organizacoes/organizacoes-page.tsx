@@ -164,8 +164,13 @@ export function OrganizacoesPage() {
           </CardHeader>
           <CardContent>
             <EstadoTabela isLoading={valor.isLoading} isError={valor.isError}>
-              <Table>
-                <TableHeader>
+              <TabelaLonga
+                linhas={valor.data ?? []}
+                chave={(v) => v.item}
+                buscarEm={(v) => [v.item]}
+                rotuloBusca="Buscar benefício"
+                vazio="Nenhum benefício disponível no período."
+                cabecalho={
                   <TableRow>
                     <TableHead>Benefício</TableHead>
                     <TableHead className="text-right">Disponível</TableHead>
@@ -173,23 +178,21 @@ export function OrganizacoesPage() {
                     <TableHead className="text-right">% de uso</TableHead>
                     <TableHead className="text-right">Beneficiários</TableHead>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(valor.data ?? []).map((v) => (
-                    <TableRow key={v.item}>
-                      <TableCell className="font-medium">{v.item}</TableCell>
-                      <TableCell className="num text-right">{formatInt(v.disponivel)}</TableCell>
-                      <TableCell className="num text-right">{formatInt(v.usado)}</TableCell>
-                      <TableCell className="num text-right font-medium">
-                        {v.pct_uso != null ? formatPercent(v.pct_uso) : '—'}
-                      </TableCell>
-                      <TableCell className="num text-right">
-                        {formatInt(v.beneficiarios)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                }
+                renderLinha={(v) => (
+                  <TableRow>
+                    <TableCell className="font-medium">{v.item}</TableCell>
+                    <TableCell className="num text-right">{formatInt(v.disponivel)}</TableCell>
+                    <TableCell className="num text-right">{formatInt(v.usado)}</TableCell>
+                    <TableCell className="num text-right font-medium">
+                      {v.pct_uso != null ? formatPercent(v.pct_uso) : '—'}
+                    </TableCell>
+                    <TableCell className="num text-right">
+                      {formatInt(v.beneficiarios)}
+                    </TableCell>
+                  </TableRow>
+                )}
+              />
             </EstadoTabela>
           </CardContent>
         </Card>

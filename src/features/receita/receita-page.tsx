@@ -1,6 +1,7 @@
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid, TimeSeriesChart } from '@/components/charts'
 import { BentoGrid, BentoItem } from '@/components/layout/bento'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
+import { TabelaLonga } from '@/components/tabela/tabela-longa'
 import {
   Card,
   CardContent,
@@ -239,8 +240,13 @@ export function ReceitaPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={ltv.isLoading} isError={ltv.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={ltv.data ?? []}
+                        chave={(l) => l.cohort_mes}
+                        buscarEm={(l) => [formatMesAno(l.cohort_mes)]}
+                        rotuloBusca="Buscar safra"
+                        vazio="Nenhuma safra com receita registrada."
+                        cabecalho={
                           <TableRow>
                             <TableHead>Safra</TableHead>
                             <TableHead className="text-right">Clientes</TableHead>
@@ -248,25 +254,23 @@ export function ReceitaPage() {
                             <TableHead className="text-right">Receita</TableHead>
                             <TableHead className="text-right">Receita por cliente</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(ltv.data ?? []).map((l) => (
-                            <TableRow key={l.cohort_mes}>
-                              <TableCell className="font-medium">{formatMesAno(l.cohort_mes)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(l.clientes)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(l.compradores)}</TableCell>
-                              <TableCell className="num text-right">
-                                {l.receita_brl != null ? formatCurrency(l.receita_brl) : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right">
-                                {l.receita_por_cliente != null
-                                  ? formatCurrency(l.receita_por_cliente)
-                                  : '—'}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(l) => (
+                          <TableRow>
+                            <TableCell className="font-medium">{formatMesAno(l.cohort_mes)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(l.clientes)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(l.compradores)}</TableCell>
+                            <TableCell className="num text-right">
+                              {l.receita_brl != null ? formatCurrency(l.receita_brl) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {l.receita_por_cliente != null
+                                ? formatCurrency(l.receita_por_cliente)
+                                : '—'}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>
