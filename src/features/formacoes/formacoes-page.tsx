@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BentoGrid, BentoItem } from '@/components/layout/bento'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
+import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/charts'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
@@ -13,11 +14,8 @@ import {
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
-  Table,
-  TableBody,
   TableCell,
   TableHead,
-  TableHeader,
   TableRow,
 } from '@/components/ui/table'
 import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
@@ -131,8 +129,12 @@ export function FormacoesPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={uso.isLoading} isError={uso.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={uso.data ?? []}
+                        chave={(c) => String(c.curso)}
+                        buscarEm={(c) => [c.curso]}
+                        rotuloBusca="Buscar por formação"
+                        cabecalho={
                           <TableRow>
                             <TableHead>Formação</TableHead>
                             <TableHead>Categoria</TableHead>
@@ -142,23 +144,21 @@ export function FormacoesPage() {
                             <TableHead className="text-right">Certificados</TableHead>
                             <TableHead className="text-right">Conclusão</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(uso.data ?? []).map((c) => (
-                            <TableRow key={c.curso}>
-                              <TableCell className="max-w-64 truncate font-medium">{c.curso}</TableCell>
-                              <TableCell>{c.categoria ?? '—'}</TableCell>
-                              <TableCell className="num text-right">{formatInt(c.alunos)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(c.aulas_concluidas)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(c.alunos_historico)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(c.certificados_historico)}</TableCell>
-                              <TableCell className="num text-right">
-                                {c.conclusao_historica != null ? formatPercent(c.conclusao_historica) : '—'}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(c) => (
+                          <TableRow>
+                            <TableCell className="max-w-64 truncate font-medium">{c.curso}</TableCell>
+                            <TableCell>{c.categoria ?? '—'}</TableCell>
+                            <TableCell className="num text-right">{formatInt(c.alunos)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(c.aulas_concluidas)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(c.alunos_historico)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(c.certificados_historico)}</TableCell>
+                            <TableCell className="num text-right">
+                              {c.conclusao_historica != null ? formatPercent(c.conclusao_historica) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>
@@ -246,26 +246,28 @@ export function FormacoesPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={jornada.isLoading} isError={jornada.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={jornada.data ?? []}
+                        chave={(j) => String(j.curso)}
+                        buscarEm={(j) => [j.curso]}
+                        rotuloBusca="Buscar por formação"
+                        cabecalho={
                           <TableRow>
                             <TableHead>Formação</TableHead>
                             <TableHead className="text-right">Certificados</TableHead>
                             <TableHead className="text-right">Mediana (dias)</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(jornada.data ?? []).map((j) => (
-                            <TableRow key={j.curso}>
-                              <TableCell className="max-w-56 truncate font-medium">{j.curso}</TableCell>
-                              <TableCell className="num text-right">{formatInt(j.certificados)}</TableCell>
-                              <TableCell className="num text-right">
-                                {j.mediana_dias != null ? formatDecimal(j.mediana_dias) : '—'}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(j) => (
+                          <TableRow>
+                            <TableCell className="max-w-56 truncate font-medium">{j.curso}</TableCell>
+                            <TableCell className="num text-right">{formatInt(j.certificados)}</TableCell>
+                            <TableCell className="num text-right">
+                              {j.mediana_dias != null ? formatDecimal(j.mediana_dias) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>
@@ -283,30 +285,32 @@ export function FormacoesPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={nps.isLoading} isError={nps.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={nps.data ?? []}
+                        chave={(n) => String(n.curso)}
+                        buscarEm={(n) => [n.curso]}
+                        rotuloBusca="Buscar por formação"
+                        cabecalho={
                           <TableRow>
                             <TableHead>Formação</TableHead>
                             <TableHead className="text-right">Respostas</TableHead>
                             <TableHead className="text-right">Média</TableHead>
                             <TableHead className="text-right">Detratores</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(nps.data ?? []).map((n) => (
-                            <TableRow key={n.curso}>
-                              <TableCell className="max-w-56 truncate font-medium">{n.curso}</TableCell>
-                              <TableCell className="num text-right">{formatInt(n.respostas)}</TableCell>
-                              <TableCell className="num text-right">
-                                {n.media != null ? formatDecimal(n.media) : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right">
-                                {n.pct_detratores != null ? formatPercent(n.pct_detratores) : '—'}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(n) => (
+                          <TableRow>
+                            <TableCell className="max-w-56 truncate font-medium">{n.curso}</TableCell>
+                            <TableCell className="num text-right">{formatInt(n.respostas)}</TableCell>
+                            <TableCell className="num text-right">
+                              {n.media != null ? formatDecimal(n.media) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {n.pct_detratores != null ? formatPercent(n.pct_detratores) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BentoGrid, BentoItem } from '@/components/layout/bento'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
+import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/charts'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
@@ -131,8 +132,12 @@ export function SolucoesPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={ranking.isLoading} isError={ranking.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={ranking.data ?? []}
+                        chave={(r) => String(r.solucao)}
+                        buscarEm={(r) => [r.solucao, r.categoria]}
+                        rotuloBusca="Buscar por solução ou categoria"
+                        cabecalho={
                           <TableRow>
                             <TableHead>Solução</TableHead>
                             <TableHead>Categoria</TableHead>
@@ -143,26 +148,24 @@ export function SolucoesPage() {
                             <TableHead className="text-right">Nota</TableHead>
                             <TableHead className="text-right">Favoritos</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(ranking.data ?? []).map((r) => (
-                            <TableRow key={r.solucao}>
-                              <TableCell className="max-w-64 truncate font-medium">{r.solucao}</TableCell>
-                              <TableCell>{r.categoria ?? '—'}</TableCell>
-                              <TableCell className="num text-right">{formatInt(r.pageviews)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(r.iniciadas)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(r.concluidas)}</TableCell>
-                              <TableCell className="num text-right">
-                                {r.taxa_conclusao != null ? formatPercent(r.taxa_conclusao) : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right">
-                                {r.nota != null ? formatDecimal(r.nota) : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right">{formatInt(r.favoritos)}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(r) => (
+                          <TableRow>
+                            <TableCell className="max-w-64 truncate font-medium">{r.solucao}</TableCell>
+                            <TableCell>{r.categoria ?? '—'}</TableCell>
+                            <TableCell className="num text-right">{formatInt(r.pageviews)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(r.iniciadas)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(r.concluidas)}</TableCell>
+                            <TableCell className="num text-right">
+                              {r.taxa_conclusao != null ? formatPercent(r.taxa_conclusao) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {r.nota != null ? formatDecimal(r.nota) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">{formatInt(r.favoritos)}</TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>
@@ -291,8 +294,12 @@ export function SolucoesPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={candidatas.isLoading} isError={candidatas.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={candidatas.data ?? []}
+                        chave={(c) => String(c.solucao)}
+                        buscarEm={(c) => [c.solucao, c.categoria]}
+                        rotuloBusca="Buscar por solução ou categoria"
+                        cabecalho={
                           <TableRow>
                             <TableHead>Solução</TableHead>
                             <TableHead>Categoria</TableHead>
@@ -303,26 +310,24 @@ export function SolucoesPage() {
                             <TableHead className="text-right">Nota</TableHead>
                             <TableHead className="text-right">Favoritos</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(candidatas.data ?? []).map((c) => (
-                            <TableRow key={c.solucao}>
-                              <TableCell className="max-w-64 truncate font-medium">{c.solucao}</TableCell>
-                              <TableCell>{c.categoria ?? '—'}</TableCell>
-                              <TableCell>
-                                <Badge variant="secondary">{c.motivo}</Badge>
-                              </TableCell>
-                              <TableCell className="num text-right">{formatInt(c.pageviews)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(c.iniciadas)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(c.concluidas)}</TableCell>
-                              <TableCell className="num text-right">
-                                {c.nota != null ? formatDecimal(c.nota) : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right">{formatInt(c.favoritos)}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(c) => (
+                          <TableRow>
+                            <TableCell className="max-w-64 truncate font-medium">{c.solucao}</TableCell>
+                            <TableCell>{c.categoria ?? '—'}</TableCell>
+                            <TableCell>
+                              <Badge variant="secondary">{c.motivo}</Badge>
+                            </TableCell>
+                            <TableCell className="num text-right">{formatInt(c.pageviews)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(c.iniciadas)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(c.concluidas)}</TableCell>
+                            <TableCell className="num text-right">
+                              {c.nota != null ? formatDecimal(c.nota) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">{formatInt(c.favoritos)}</TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>

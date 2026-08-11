@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BentoGrid, BentoItem } from '@/components/layout/bento'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
+import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/charts'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
@@ -29,6 +30,7 @@ import {
 } from '@/lib/format'
 import { labelTipoEvento } from '@/lib/labels-plataforma'
 import { CohortTable } from '@/features/clientes/cohort-table'
+import { LIMITE_LISTA } from '@/lib/rpc'
 import {
   useAhaMoment,
   useAmplitudeModulos,
@@ -237,8 +239,13 @@ export function ClientesPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={risco.isLoading} isError={risco.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={risco.data ?? []}
+                        limiteDaFonte={LIMITE_LISTA}
+                        chave={(r) => String(r.email)}
+                        buscarEm={(r) => [r.nome, r.email, r.organizacao]}
+                        rotuloBusca="Buscar por nome, e-mail ou organização"
+                        cabecalho={
                           <TableRow>
                             <TableHead>Cliente</TableHead>
                             <TableHead>Organização</TableHead>
@@ -248,36 +255,34 @@ export function ClientesPage() {
                             <TableHead className="text-right">Dias inativo</TableHead>
                             <TableHead className="text-right">Vence em</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(risco.data ?? []).map((r) => (
-                            <TableRow key={r.email}>
-                              <TableCell>
-                                <div className="font-medium">{r.nome ?? '—'}</div>
-                                <div className="text-muted-foreground text-xs">{r.email}</div>
-                              </TableCell>
-                              <TableCell>{r.organizacao ?? '—'}</TableCell>
-                              <TableCell>{r.plano ?? '—'}</TableCell>
-                              <TableCell>
-                                {/* dois motivos com urgências diferentes saíam no mesmo cinza —
-                                    silêncio de 14 dias é o caso crítico, plano vencendo ainda dá tempo */}
-                                <StatusPill tom={r.motivo === 'plano_vencendo' ? 'atencao' : 'critico'}>
-                                  {r.motivo === 'plano_vencendo' ? 'Plano vencendo' : 'Inatividade'}
-                                </StatusPill>
-                              </TableCell>
-                              <TableCell className="num text-right">
-                                {r.ultima_atividade ? formatDateShort(r.ultima_atividade) : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right">
-                                {r.dias_inativo != null ? formatInt(r.dias_inativo) : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right">
-                                {r.dias_ate_vencer != null ? `${formatInt(r.dias_ate_vencer)}d` : '—'}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(r) => (
+                          <TableRow>
+                            <TableCell>
+                              <div className="font-medium">{r.nome ?? '—'}</div>
+                              <div className="text-muted-foreground text-xs">{r.email}</div>
+                            </TableCell>
+                            <TableCell>{r.organizacao ?? '—'}</TableCell>
+                            <TableCell>{r.plano ?? '—'}</TableCell>
+                            <TableCell>
+                              {/* dois motivos com urgências diferentes saíam no mesmo cinza —
+                                  silêncio de 14 dias é o caso crítico, plano vencendo ainda dá tempo */}
+                              <StatusPill tom={r.motivo === 'plano_vencendo' ? 'atencao' : 'critico'}>
+                                {r.motivo === 'plano_vencendo' ? 'Plano vencendo' : 'Inatividade'}
+                              </StatusPill>
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {r.ultima_atividade ? formatDateShort(r.ultima_atividade) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {r.dias_inativo != null ? formatInt(r.dias_inativo) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {r.dias_ate_vencer != null ? `${formatInt(r.dias_ate_vencer)}d` : '—'}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>
@@ -425,8 +430,13 @@ export function ClientesPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={powerUsers.isLoading} isError={powerUsers.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={powerUsers.data ?? []}
+                        limiteDaFonte={LIMITE_LISTA}
+                        chave={(u) => String(u.email)}
+                        buscarEm={(u) => [u.nome, u.email, u.organizacao]}
+                        rotuloBusca="Buscar por nome, e-mail ou organização"
+                        cabecalho={
                           <TableRow>
                             <TableHead>Cliente</TableHead>
                             <TableHead>Organização</TableHead>
@@ -435,23 +445,21 @@ export function ClientesPage() {
                             <TableHead className="text-right">Ações</TableHead>
                             <TableHead className="text-right">Módulos</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(powerUsers.data ?? []).map((u) => (
-                            <TableRow key={u.email}>
-                              <TableCell>
-                                <div className="font-medium">{u.nome ?? '—'}</div>
-                                <div className="text-muted-foreground text-xs">{u.email}</div>
-                              </TableCell>
-                              <TableCell>{u.organizacao ?? '—'}</TableCell>
-                              <TableCell>{u.plano ?? '—'}</TableCell>
-                              <TableCell className="num text-right">{formatInt(u.dias_ativos)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(u.eventos)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(u.modulos)}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(u) => (
+                          <TableRow>
+                            <TableCell>
+                              <div className="font-medium">{u.nome ?? '—'}</div>
+                              <div className="text-muted-foreground text-xs">{u.email}</div>
+                            </TableCell>
+                            <TableCell>{u.organizacao ?? '—'}</TableCell>
+                            <TableCell>{u.plano ?? '—'}</TableCell>
+                            <TableCell className="num text-right">{formatInt(u.dias_ativos)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(u.eventos)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(u.modulos)}</TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>

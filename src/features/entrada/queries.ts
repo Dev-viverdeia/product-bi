@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import type { Periodo } from '@/components/filters/periodo-filtro'
-import { rpc } from '@/lib/rpc'
+import { LIMITE_LISTA, rpc } from '@/lib/rpc'
 import { supabase } from '@/lib/supabase'
 
 export function useEntradaKpis(dias: Periodo) {
@@ -52,7 +52,7 @@ export function useMastersTopConvidadores() {
   return useQuery({
     queryKey: ['entrada', 'masters-top'],
     queryFn: async () =>
-      (await rpc(supabase.rpc('bi_masters_top_convidadores', { p_limite: 12 }))) ?? [],
+      (await rpc(supabase.rpc('bi_masters_top_convidadores', { p_limite: LIMITE_LISTA }))) ?? [],
   })
 }
 
@@ -68,6 +68,6 @@ export function useErrosPorTela(dias: Periodo) {
   return useQuery({
     queryKey: ['entrada', 'erros-tela', dias],
     queryFn: async () =>
-      (await rpc(supabase.rpc('bi_erros_por_tela', { p_dias: dias, p_limite: 12 }))) ?? [],
+      (await rpc(supabase.rpc('bi_erros_por_tela', { p_dias: dias, p_limite: LIMITE_LISTA }))) ?? [],
   })
 }

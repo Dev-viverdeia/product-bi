@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import type { Periodo } from '@/components/filters/periodo-filtro'
-import { rpc } from '@/lib/rpc'
+import { LIMITE_LISTA, rpc } from '@/lib/rpc'
 import { supabase } from '@/lib/supabase'
 
 export function useEngajamento(dias: Periodo) {
@@ -49,7 +49,7 @@ export function usePowerUsers(dias: Periodo) {
   return useQuery({
     queryKey: ['clientes', 'power-users', dias],
     queryFn: async () =>
-      (await rpc(supabase.rpc('bi_power_users', { p_dias: dias, p_limite: 15 }))) ?? [],
+      (await rpc(supabase.rpc('bi_power_users', { p_dias: dias, p_limite: LIMITE_LISTA }))) ?? [],
   })
 }
 
@@ -57,7 +57,7 @@ export function useClientesEmRisco() {
   return useQuery({
     queryKey: ['clientes', 'em-risco'],
     queryFn: async () =>
-      (await rpc(supabase.rpc('bi_clientes_em_risco', { p_limite: 30 }))) ?? [],
+      (await rpc(supabase.rpc('bi_clientes_em_risco', { p_limite: LIMITE_LISTA }))) ?? [],
   })
 }
 

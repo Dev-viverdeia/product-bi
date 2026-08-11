@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BentoGrid, BentoItem } from '@/components/layout/bento'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
+import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/charts'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
@@ -28,6 +29,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
+import { LIMITE_LISTA } from '@/lib/rpc'
 import {
   useFluxoDaTela,
   useJornadaKpis,
@@ -146,8 +148,13 @@ export function JornadaPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={raioX.isLoading} isError={raioX.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={raioX.data ?? []}
+                        limiteDaFonte={LIMITE_LISTA}
+                        chave={(t) => String(t.tela)}
+                        buscarEm={(t) => [t.tela]}
+                        rotuloBusca="Buscar por tela"
+                        cabecalho={
                           <TableRow>
                             <TableHead>Tela</TableHead>
                             <TableHead className="text-right">Pageviews</TableHead>
@@ -156,26 +163,24 @@ export function JornadaPage() {
                             <TableHead className="text-right">% saída</TableHead>
                             <TableHead className="text-right">Posição média</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(raioX.data ?? []).map((t) => (
-                            <TableRow key={t.tela}>
-                              <TableCell className="font-mono text-xs">{t.tela}</TableCell>
-                              <TableCell className="num text-right">{formatInt(t.pageviews)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(t.usuarios)}</TableCell>
-                              <TableCell className="num text-right" style={tintaPct(t.pct_entrada, 0.25)}>
-                                {t.pct_entrada != null ? formatPercent(t.pct_entrada) : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right" style={tintaPct(t.pct_saida, 0.3)}>
-                                {t.pct_saida != null ? formatPercent(t.pct_saida) : '—'}
-                              </TableCell>
-                              <TableCell className="num text-right">
-                                {t.posicao_media != null ? formatDecimal(t.posicao_media) : '—'}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(t) => (
+                          <TableRow>
+                            <TableCell className="font-mono text-xs">{t.tela}</TableCell>
+                            <TableCell className="num text-right">{formatInt(t.pageviews)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(t.usuarios)}</TableCell>
+                            <TableCell className="num text-right" style={tintaPct(t.pct_entrada, 0.25)}>
+                              {t.pct_entrada != null ? formatPercent(t.pct_entrada) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right" style={tintaPct(t.pct_saida, 0.3)}>
+                              {t.pct_saida != null ? formatPercent(t.pct_saida) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {t.posicao_media != null ? formatDecimal(t.posicao_media) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>

@@ -1,5 +1,6 @@
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/charts'
 import { BentoGrid, BentoItem } from '@/components/layout/bento'
+import { TabelaLonga } from '@/components/tabela/tabela-longa'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -229,8 +230,12 @@ export function OrganizacoesPage() {
           </CardHeader>
           <CardContent>
             <EstadoTabela isLoading={risco.isLoading} isError={risco.isError}>
-              <Table>
-                <TableHeader>
+              <TabelaLonga
+                linhas={risco.data ?? []}
+                chave={(r) => String(r.organizacao)}
+                buscarEm={(r) => [r.organizacao]}
+                rotuloBusca="Buscar por organização"
+                cabecalho={
                   <TableRow>
                     <TableHead>Organização</TableHead>
                     <TableHead>Plano</TableHead>
@@ -240,31 +245,29 @@ export function OrganizacoesPage() {
                     <TableHead>Master</TableHead>
                     <TableHead className="text-right">Assentos ociosos</TableHead>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(risco.data ?? []).map((r) => (
-                    <TableRow key={r.organizacao}>
-                      <TableCell className="max-w-64 truncate font-medium">
-                        {r.organizacao}
-                      </TableCell>
-                      <TableCell>{r.plano ?? '—'}</TableCell>
-                      <TableCell className="num text-right">{formatInt(r.membros)}</TableCell>
-                      <TableCell className="num text-right">{formatInt(r.ativos_30d)}</TableCell>
-                      <TableCell className="num text-right">
-                        {r.pct_time_ativo != null ? formatPercent(r.pct_time_ativo) : '—'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={r.master_ativo ? 'secondary' : 'outline'}>
-                          {r.master_ativo ? 'Ativo' : 'Parado'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="num text-right">
-                        {formatInt(r.assentos_ociosos)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                }
+                renderLinha={(r) => (
+                  <TableRow>
+                    <TableCell className="max-w-64 truncate font-medium">
+                      {r.organizacao}
+                    </TableCell>
+                    <TableCell>{r.plano ?? '—'}</TableCell>
+                    <TableCell className="num text-right">{formatInt(r.membros)}</TableCell>
+                    <TableCell className="num text-right">{formatInt(r.ativos_30d)}</TableCell>
+                    <TableCell className="num text-right">
+                      {r.pct_time_ativo != null ? formatPercent(r.pct_time_ativo) : '—'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={r.master_ativo ? 'secondary' : 'outline'}>
+                        {r.master_ativo ? 'Ativo' : 'Parado'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="num text-right">
+                      {formatInt(r.assentos_ociosos)}
+                    </TableCell>
+                  </TableRow>
+                )}
+              />
             </EstadoTabela>
           </CardContent>
         </Card>

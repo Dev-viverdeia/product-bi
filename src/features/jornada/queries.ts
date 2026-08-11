@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import type { Periodo } from '@/components/filters/periodo-filtro'
-import { rpc } from '@/lib/rpc'
+import { LIMITE_LISTA, rpc } from '@/lib/rpc'
 import { supabase } from '@/lib/supabase'
 
 export function useJornadaKpis(dias: Periodo) {
@@ -18,7 +18,7 @@ export function useRaioXTelas(dias: Periodo) {
   return useQuery({
     queryKey: ['jornada', 'raio-x', dias],
     queryFn: async () =>
-      (await rpc(supabase.rpc('bi_raio_x_telas', { p_dias: dias, p_limite: 20 }))) ?? [],
+      (await rpc(supabase.rpc('bi_raio_x_telas', { p_dias: dias, p_limite: LIMITE_LISTA }))) ?? [],
   })
 }
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BentoGrid, BentoItem } from '@/components/layout/bento'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
+import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/charts'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
@@ -22,6 +23,7 @@ import {
 } from '@/components/ui/table'
 import { formatInt, formatPercent } from '@/lib/format'
 import { fundoIntensidade } from '@/lib/intensidade'
+import { LIMITE_LISTA } from '@/lib/rpc'
 import {
   useEntradaKpis,
   useErrosLogin,
@@ -218,8 +220,13 @@ export function EntradaPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={mastersTop.isLoading} isError={mastersTop.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={mastersTop.data ?? []}
+                        limiteDaFonte={LIMITE_LISTA}
+                        chave={(m) => String(m.email)}
+                        buscarEm={(m) => [m.nome, m.email]}
+                        rotuloBusca="Buscar por nome ou e-mail"
+                        cabecalho={
                           <TableRow>
                             <TableHead>Master</TableHead>
                             <TableHead>Organização</TableHead>
@@ -227,24 +234,22 @@ export function EntradaPage() {
                             <TableHead className="text-right">Usados</TableHead>
                             <TableHead className="text-right">Conversão</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(mastersTop.data ?? []).map((m) => (
-                            <TableRow key={m.email}>
-                              <TableCell>
-                                <div className="font-medium">{m.nome ?? '—'}</div>
-                                <div className="text-muted-foreground text-xs">{m.email}</div>
-                              </TableCell>
-                              <TableCell>{m.organizacao ?? '—'}</TableCell>
-                              <TableCell className="num text-right">{formatInt(m.convites)}</TableCell>
-                              <TableCell className="num text-right">{formatInt(m.usados)}</TableCell>
-                              <TableCell className="num text-right">
-                                {m.conversao != null ? formatPercent(m.conversao) : '—'}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(m) => (
+                          <TableRow>
+                            <TableCell>
+                              <div className="font-medium">{m.nome ?? '—'}</div>
+                              <div className="text-muted-foreground text-xs">{m.email}</div>
+                            </TableCell>
+                            <TableCell>{m.organizacao ?? '—'}</TableCell>
+                            <TableCell className="num text-right">{formatInt(m.convites)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(m.usados)}</TableCell>
+                            <TableCell className="num text-right">
+                              {m.conversao != null ? formatPercent(m.conversao) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>
@@ -286,22 +291,25 @@ export function EntradaPage() {
                   </CardHeader>
                   <CardContent>
                     <EstadoTabela isLoading={errosTela.isLoading} isError={errosTela.isError}>
-                      <Table>
-                        <TableHeader>
+                      <TabelaLonga
+                        linhas={errosTela.data ?? []}
+                        limiteDaFonte={LIMITE_LISTA}
+                        chave={(e) => String(e.tela)}
+                        buscarEm={(e) => [e.tela]}
+                        rotuloBusca="Buscar por tela"
+                        cabecalho={
                           <TableRow>
                             <TableHead>Tela</TableHead>
                             <TableHead className="text-right">Ocorrências</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(errosTela.data ?? []).map((e) => (
-                            <TableRow key={e.tela}>
-                              <TableCell className="font-mono text-xs">{e.tela}</TableCell>
-                              <TableCell className="num text-right">{formatInt(e.ocorrencias)}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                        }
+                        renderLinha={(e) => (
+                          <TableRow>
+                            <TableCell className="font-mono text-xs">{e.tela}</TableCell>
+                            <TableCell className="num text-right">{formatInt(e.ocorrencias)}</TableCell>
+                          </TableRow>
+                        )}
+                      />
                     </EstadoTabela>
                   </CardContent>
                 </Card>
