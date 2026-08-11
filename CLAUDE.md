@@ -120,6 +120,7 @@ Módulo novo: página em `pages/` ou `features/` → rota em `src/app/router.tsx
 
 - **Navegação no topo**, não lateral: barra navy flutuante (`AppHeader`). A sidebar foi removida — não reintroduzir.
 - **Mosaico, não empilhamento**: a página é um `BentoGrid` de 12 colunas com **um único gap**. `BentoItem` aceita `span` e `rows`. Card preenche a altura via `[&>*]:h-full` na primitiva; não repetir nas páginas.
+- **Cabeçalho de módulo (título + filtros) usa `BentoCabecalho`** — nunca pendurar `flex-wrap` direto no `BentoItem`: todo filho direto herda o `h-full` do mosaico e, quando o flex quebra linha (mobile), o filho inflado estoura por cima do bloco de baixo. Foi defeito real medido em 7 telas (128–148px de sobreposição em 375px).
 - **Abas por contexto** (`ModuloTabs`) quando a tela responde 3+ perguntas distintas. Visão Geral e Organizações ficam sem, de propósito. A aba vive na URL (`?aba=`) e é declarada uma vez em `nav-items.ts` — a barra do topo consome a mesma lista.
   - Fora das abas: cabeçalho, filtro de período, KPIs **e avisos de limitação do dado**.
 - **Lista usa `TabelaLonga`** (busca + paginação, 12 por página). Vale para toda tabela cuja quantidade de linhas vem do dado — nomes, módulos, etapas, safras, destinos. Se a RPC corta em N linhas, a tela **declara o corte**.

@@ -14,7 +14,7 @@ import {
 
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid, TimeSeriesChart } from '@/components/charts'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
-import { BentoGrid, BentoItem } from '@/components/layout/bento'
+import { BentoCabecalho, BentoGrid, BentoItem } from '@/components/layout/bento'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
@@ -95,7 +95,7 @@ export function CsPage() {
     <div className="space-y-4">
       {/* Fora das abas: contexto do módulo inteiro e os avisos sobre o dado. */}
       <BentoGrid>
-        <BentoItem span={12} className="flex flex-wrap items-end justify-between gap-3">
+        <BentoCabecalho>
           <div>
             <h2 className="text-2xl font-semibold tracking-tight">Sucesso do cliente</h2>
             <p className="text-muted-foreground text-sm">
@@ -104,7 +104,7 @@ export function CsPage() {
             </p>
           </div>
           <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
-        </BentoItem>
+        </BentoCabecalho>
 
         {/* Limitações são parte do dado: ficam visíveis, não em nota de rodapé. */}
         <BentoItem span={12}>

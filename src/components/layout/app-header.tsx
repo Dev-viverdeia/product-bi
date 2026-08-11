@@ -168,7 +168,7 @@ function ItemDeNavegacao({ item }: { item: NavItem }) {
           fundoDoPill(destacado),
         )}
       >
-        <item.icon className="hidden size-4 shrink-0 xl:block" />
+        <item.icon className="hidden size-4 shrink-0 2xl:block" />
         {item.shortTitle}
       </NavLink>
       {temAbas ? (
@@ -245,7 +245,7 @@ function NavMobile() {
   return (
     <Sheet open={aberto} onOpenChange={setAberto}>
       <SheetTrigger
-        className="text-nav-foreground/80 hover:bg-nav-foreground/10 hover:text-nav-foreground focus-visible:ring-nav-foreground/60 -ml-1 rounded-md p-2 focus-visible:ring-2 focus-visible:outline-none lg:hidden"
+        className="text-nav-foreground/80 hover:bg-nav-foreground/10 hover:text-nav-foreground focus-visible:ring-nav-foreground/60 -ml-1 rounded-md p-2 focus-visible:ring-2 focus-visible:outline-none xl:hidden"
         aria-label="Abrir navegação"
       >
         <MenuIcon className="size-5" />
@@ -290,8 +290,9 @@ function NavMobile() {
  * Escura sobre página clara — é a âncora de marca, e o contraste é o que faz o
  * mosaico abaixo respirar. Navy é componente aqui, não fundo de página.
  *
- * Abaixo de lg os nove itens não cabem lado a lado, então a lista vira um Sheet
- * — rolagem horizontal escondida em barra escura é armadilha de descoberta.
+ * Abaixo de xl os dez itens não cabem lado a lado (medido: 1.189px só de
+ * rótulos, com o alerta de pipeline no ar), então a lista vira um Sheet —
+ * rolagem horizontal escondida em barra escura é armadilha de descoberta.
  */
 export function AppHeader() {
   const [params] = useSearchParams()
@@ -318,10 +319,13 @@ export function AppHeader() {
         </Link>
 
         {/* Ícone + rótulo: o ícone dá alvo de reconhecimento rápido e o rótulo
-            desambigua — nove seções só com ícone viraria adivinhação. O ícone
-            some antes do rótulo quando aperta (xl), porque entre os dois é o
-            texto que carrega o significado. */}
-        <nav className="mx-auto hidden items-center gap-1 lg:flex" aria-label="Seções">
+            desambigua — dez seções só com ícone viraria adivinhação. O ícone
+            some antes do rótulo quando aperta (entra só em 2xl), porque entre
+            os dois é o texto que carrega o significado. Régua MEDIDA com o
+            alerta de pipeline no ar: rótulos = 1.189px (cabe a partir de xl),
+            rótulos + ícones = 1.409px (cabe a partir de 2xl) — abaixo disso a
+            barra estourava a página com scroll horizontal. */}
+        <nav className="mx-auto hidden items-center gap-1 xl:flex" aria-label="Seções">
           {navItems.map((item) => (
             <ItemDeNavegacao key={item.to} item={item} />
           ))}
@@ -329,7 +333,7 @@ export function AppHeader() {
 
         {/* Ações circulares. O aviso de sync ocupa o lugar do sino e só existe
             quando há o que avisar. */}
-        <div className="ml-auto flex items-center gap-1.5 lg:ml-0">
+        <div className="ml-auto flex items-center gap-1.5 xl:ml-0">
           <AlertaPipeline />
           <ThemeToggle className="text-nav-foreground/80 hover:bg-nav-foreground/10 hover:text-nav-foreground focus-visible:ring-nav-foreground/60 size-9 rounded-full bg-white/10 hover:bg-white/16" />
           <MenuUsuario />

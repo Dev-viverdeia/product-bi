@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ActivityIcon, ClockIcon, MonitorIcon, MousePointerClickIcon } from 'lucide-react'
-import { BentoGrid, BentoItem } from '@/components/layout/bento'
+import { BentoCabecalho, BentoGrid, BentoItem } from '@/components/layout/bento'
 
 import {
   CategoryBarChart,
@@ -68,8 +68,8 @@ export function VisaoGeralPage() {
 
   return (
     <BentoGrid>
-      {/* Filtro de período fica acima do mosaico: escopa a tela inteira */}
-      <BentoItem span={12} className="flex flex-wrap items-end justify-between gap-3">
+      {/* Filtros ficam acima do mosaico: escopam a tela inteira */}
+      <BentoCabecalho>
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">Visão geral</h2>
           <p className="text-muted-foreground text-sm">
@@ -81,7 +81,7 @@ export function VisaoGeralPage() {
           <SegmentoFiltro />
           <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
         </div>
-      </BentoItem>
+      </BentoCabecalho>
 
       <BentoItem span={12}>
         <KpiGrid>

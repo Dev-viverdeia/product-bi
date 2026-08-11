@@ -54,6 +54,33 @@ const alturas = {
 export type BentoSpan = keyof typeof larguras
 export type BentoRows = keyof typeof alturas
 
+/**
+ * Linha de cabeçalho do módulo (título + filtros) dentro do mosaico.
+ *
+ * Existe por causa de uma armadilha do próprio BentoItem: todo filho direto
+ * herda `h-full` (é o que faz os cards de uma linha fecharem juntos). Num
+ * cabeçalho `flex-wrap` isso infla cada filho para a altura do container
+ * inteiro, e quando título e filtros quebram em duas linhas — mobile — a
+ * segunda linha estoura por cima do bloco de baixo (medido: 128–148px de
+ * sobreposição em 375px). O wrapper único absorve o `h-full`; o flex vive
+ * dentro dele, livre para quebrar.
+ */
+export function BentoCabecalho({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <BentoItem span={12}>
+      <div className={cn('flex flex-wrap items-end justify-between gap-3', className)}>
+        {children}
+      </div>
+    </BentoItem>
+  )
+}
+
 export function BentoItem({
   span = 12,
   rows,

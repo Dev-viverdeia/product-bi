@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { BotIcon, MessageSquareIcon, RepeatIcon, ShieldCheckIcon, WrenchIcon } from 'lucide-react'
-import { BentoGrid, BentoItem } from '@/components/layout/bento'
+import { BentoCabecalho, BentoGrid, BentoItem } from '@/components/layout/bento'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
@@ -76,7 +76,7 @@ export function IaPage() {
       {/* Fora das abas: contexto do módulo inteiro. Trocar de aba não pode
           custar o número de referência nem obrigar a reajustar o período. */}
       <BentoGrid>
-        <BentoItem span={12} className="flex flex-wrap items-end justify-between gap-3">
+        <BentoCabecalho>
           <div>
             <h2 className="text-2xl font-semibold tracking-tight">Consultor & Builder</h2>
             <p className="text-muted-foreground text-sm">
@@ -85,7 +85,7 @@ export function IaPage() {
             </p>
           </div>
           <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
-        </BentoItem>
+        </BentoCabecalho>
 
         <BentoItem span={12}>
           <KpiGrid>
