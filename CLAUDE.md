@@ -60,7 +60,7 @@ Páginas usam SEMPRE o kit — nunca montar Recharts cru em página de produto:
   - **O headline sai do dado que o próprio card desenha** e nunca é fatia sobre lista cortada: RPC com `LIMITE_LISTA` ou `p_limite` só permite liderar pela primeira linha (a ordenação garante), nunca por um total somado. Antes de usar percentual, conferir no banco se a função tem `LIMIT`.
 - `ChartCard` — moldura de gráfico: `CardCabecalho` + estados loading/erro/vazio/refetch. `tone="brand"` para o bloco de destaque, **um por tela**.
 - `TabelaCard` (`src/components/tabela/`) — o par do ChartCard para lista: mesmo cabeçalho + estados de carregando e erro. Toda tabela de produto vive dentro dele. Ficam em `Card` cru só o formulário de login e os avisos de limitação do dado.
-- `KpiCard`/`KpiGrid` — stat tile com count-up, delta assinado (`upIsGood` decide a cor), sparkline; grid com entrada escalonada.
+- `KpiCard`/`KpiGrid` — stat tile com count-up, delta assinado (`upIsGood` decide a cor), sparkline; grid com entrada escalonada. Três estados de exceção, todos distintos: erro ("não foi possível carregar"), e **sem amostra** (`value: null` + `motivoSemValor` — travessão com o porquê, para percentual suprimido pela régua de 30). Nunca `?? 0` em valor de KPI.
 - `TimeSeriesChart` — linha/área; máximo de 2 séries **garantido por tipo**; 2ª série tracejada + legenda com chave de linha; tooltip com crosshair e valores formatados.
 - `CategoryBarChart` — colunas ou barras horizontais; ≤24px, ponta 4px, base no zero, valor na ponta; eixos `width="auto"` (largura fixa corta rótulo).
 - `DonutChart` — composição; ordena desc e agrega excedente em "Outros" (máx. 5 fatias); total no centro.
@@ -126,6 +126,7 @@ Módulo novo: página em `pages/` ou `features/` → rota em `src/app/router.tsx
   - Fica em `<Table>` cru o que é **bloco, não lista**: funil de etapas fixas, comparação de 2–3 grupos nomeados, baldes de status. O leitor lê o conjunto inteiro; busca e paginação ali só atrapalhariam (e nem apareceriam — a `TabelaLonga` esconde os controles abaixo de uma página).
   - **Matriz não pagina**: a grade de cohort corta nas 12 safras mais recentes e diz quantas ficaram de fora. Paginar cortaria a leitura diagonal no meio.
 - **Estado usa `StatusPill`**, sempre com ícone e rótulo — nunca só cor.
+- **Recorte persona/plano** (contrato na seção Transversal do roadmap): filtro global `SegmentoFiltro` ao lado do período nas telas de grão cliente, estado na URL (`?papel=` e `?plano=`) e propagado pela navegação do shell via `comSegmento` — recorte é do app, não da tela. As RPCs centrais recebem `p_papel`/`p_plano` (null = todos). **Quem suprime percentual/taxa/média com denominador < 30 é o banco** (migration `20260811190000`); a tela só declara, com `notaAmostra`. Valores, rótulos e helpers do contrato vivem em `src/lib/segmento.ts` — não duplicar lista de papéis/planos em página.
 
 ## Comandos
 
