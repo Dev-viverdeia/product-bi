@@ -55,7 +55,11 @@ Gráficos são o coração do produto — capricho máximo aqui. Regras do DS (v
 
 Páginas usam SEMPRE o kit — nunca montar Recharts cru em página de produto:
 
-- `ChartCard` — moldura obrigatória: estados loading/erro/vazio/refetch. **Gramática do cabeçalho: identidade à esquerda, afordância à direita** — `icon` + título curto numa linha, `headline` com o número que responde o card, e a `description` vira o conteúdo do botão circular de informação. A definição da métrica não sai da tela, sai do caminho. `tone="brand"` para o bloco de destaque.
+- `CardCabecalho` (`src/components/ui-marca/`) — **uma gramática de cabeçalho para todo card de conteúdo**: identidade à esquerda, afordância à direita. `icon` + título curto numa linha, `headline` com o número que responde o card (mais `headlineLabel`), e a `description` vira o conteúdo do botão circular de informação — a definição da métrica não sai da tela, sai do caminho. `action` substitui o botão quando o card tem controle próprio (o seletor de tela na Jornada).
+  - **Todo card de conteúdo tem `icon` e `headline`.** Card sem número que o responda é sinal de que a pergunta dele não está clara.
+  - **O headline sai do dado que o próprio card desenha** e nunca é fatia sobre lista cortada: RPC com `LIMITE_LISTA` ou `p_limite` só permite liderar pela primeira linha (a ordenação garante), nunca por um total somado. Antes de usar percentual, conferir no banco se a função tem `LIMIT`.
+- `ChartCard` — moldura de gráfico: `CardCabecalho` + estados loading/erro/vazio/refetch. `tone="brand"` para o bloco de destaque, **um por tela**.
+- `TabelaCard` (`src/components/tabela/`) — o par do ChartCard para lista: mesmo cabeçalho + estados de carregando e erro. Toda tabela de produto vive dentro dele. Ficam em `Card` cru só o formulário de login e os avisos de limitação do dado.
 - `KpiCard`/`KpiGrid` — stat tile com count-up, delta assinado (`upIsGood` decide a cor), sparkline; grid com entrada escalonada.
 - `TimeSeriesChart` — linha/área; máximo de 2 séries **garantido por tipo**; 2ª série tracejada + legenda com chave de linha; tooltip com crosshair e valores formatados.
 - `CategoryBarChart` — colunas ou barras horizontais; ≤24px, ponta 4px, base no zero, valor na ponta; eixos `width="auto"` (largura fixa corta rótulo).
