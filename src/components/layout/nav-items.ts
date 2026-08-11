@@ -162,6 +162,7 @@ export const navItems: NavItem[] = [
  * ações, junto com tema e sair.
  */
 export const navFerramentas: NavItem[] = [
+  { title: 'Regras do resumo', shortTitle: 'Regras', to: '/regras', icon: ListChecksIcon },
   { title: 'Design system', shortTitle: 'Design', to: '/design', icon: PaletteIcon },
 ]
 

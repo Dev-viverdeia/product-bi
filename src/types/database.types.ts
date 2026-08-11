@@ -49,6 +49,40 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bi_achados_clientes: {
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
+        Returns: {
+          ancora_aba: string
+          ancora_id: string
+          familia: string
+          gabarito: string
+          gabarito_acao: string
+          motivo: string
+          parametros: Json
+          regra: string
+          score: number
+          severidade: string
+          suprimida: boolean
+          titulo: string
+        }[]
+      }
+      bi_achados_visao_geral: {
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
+        Returns: {
+          ancora_aba: string
+          ancora_id: string
+          familia: string
+          gabarito: string
+          gabarito_acao: string
+          motivo: string
+          parametros: Json
+          regra: string
+          score: number
+          severidade: string
+          suprimida: boolean
+          titulo: string
+        }[]
+      }
       bi_aha_moment: {
         Args: { p_papel?: string; p_plano?: string }
         Returns: {
@@ -264,6 +298,7 @@ export type Database = {
           status: string
         }[]
       }
+      bi_data_referencia: { Args: never; Returns: string }
       bi_dias_ativos_distribuicao: {
         Args: { p_dias?: number; p_papel?: string; p_plano?: string }
         Returns: {
@@ -586,6 +621,20 @@ export type Database = {
           valor_brl: number
         }[]
       }
+      bi_regras: {
+        Args: never
+        Returns: {
+          familia: string
+          gabarito: string
+          gabarito_acao: string
+          id: string
+          limiar_descricao: string
+          ordem: number
+          pergunta: string
+          tela: string
+          titulo: string
+        }[]
+      }
       bi_retencao_cohort: {
         Args: { p_papel?: string; p_plano?: string }
         Returns: {
@@ -740,6 +789,7 @@ export type Database = {
           ativos_ant: number
           aulas: number
           aulas_ant: number
+          base: number
           novos: number
           novos_ant: number
           pageviews: number

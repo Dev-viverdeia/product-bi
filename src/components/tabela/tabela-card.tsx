@@ -13,6 +13,8 @@ type TabelaCardProps = CardCabecalhoProps & {
   onRetry?: () => void
   /** linhas do esqueleto — aproxime do tamanho real para a tela não pular */
   linhasEsqueleto?: number
+  /** alvo da âncora do bloco de resumo ("ver o card que prova") */
+  id?: string
   className?: string
   children: ReactNode
 }
@@ -32,12 +34,13 @@ export function TabelaCard({
   isError = false,
   onRetry,
   linhasEsqueleto = 6,
+  id,
   className,
   children,
   ...cabecalho
 }: TabelaCardProps) {
   return (
-    <Card className={cn('glass-card gap-3', className)}>
+    <Card id={id} className={cn('glass-card gap-3', className)}>
       <CardCabecalho {...cabecalho} />
 
       <CardContent className="min-w-0">

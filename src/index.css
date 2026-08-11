@@ -395,6 +395,15 @@
     --data-grid: rgba(255, 255, 255, 0.09);
     --data-axis: rgba(255, 255, 255, 0.22);
     --data-ink: #aeb8c6;
+
+    /* Status pelo mesmo princípio do dataviz: o verde e o coral do tema claro
+       são escuros e somem sobre navy. A StatusPill vive aqui dentro desde que
+       o bloco de resumo virou o card de destaque da tela, e ela não pode
+       depender só da cor — precisa continuar legível. Valores do tema escuro,
+       não cor nova. */
+    --destructive: #e58a8a;
+    --success: #6fcfa5;
+    --muted: rgba(255, 255, 255, 0.1);
   }
 
   .glass-card::before {

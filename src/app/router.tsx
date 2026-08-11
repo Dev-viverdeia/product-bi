@@ -39,6 +39,9 @@ const ReceitaPage = lazy(() =>
   import('@/features/receita/receita-page').then((m) => ({ default: m.ReceitaPage })),
 )
 const CsPage = lazy(() => import('@/features/cs/cs-page').then((m) => ({ default: m.CsPage })))
+const RegrasPage = lazy(() =>
+  import('@/pages/regras/regras-page').then((m) => ({ default: m.RegrasPage })),
+)
 const DesignPage = lazy(() =>
   import('@/pages/design/design-page').then((m) => ({ default: m.DesignPage })),
 )
@@ -65,6 +68,7 @@ export function AppRouter() {
             <Route path="/jornada" element={<JornadaPage />} />
             <Route path="/receita" element={<ReceitaPage />} />
             <Route path="/cs" element={<CsPage />} />
+            <Route path="/regras" element={<RegrasPage />} />
             <Route path="/design" element={<DesignPage />} />
           </Route>
         </Route>

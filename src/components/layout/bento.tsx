@@ -84,11 +84,14 @@ export function BentoCabecalho({
 export function BentoItem({
   span = 12,
   rows,
+  id,
   children,
   className,
 }: {
   span?: BentoSpan
   rows?: BentoRows
+  /** alvo de âncora — usado quando o alvo é a faixa inteira, não um card */
+  id?: string
   children: ReactNode
   className?: string
 }) {
@@ -102,6 +105,7 @@ export function BentoItem({
   // porque é regra do mosaico, não decisão de tela.
   return (
     <div
+      id={id}
       className={cn('min-w-0 [&>*]:h-full', larguras[span], rows && alturas[rows], className)}
     >
       {children}

@@ -16,6 +16,7 @@ import { labelRota, labelTipoEvento } from '@/lib/labels-plataforma'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
 import { SegmentoFiltro } from '@/components/filters/segmento-filtro'
 import { useSegmento } from '@/components/filters/use-segmento'
+import { ResumoCard } from '@/features/resumo/resumo-card'
 import {
   useAtividadeDiaria,
   useEventosPorTipo,
@@ -83,7 +84,13 @@ export function VisaoGeralPage() {
         </div>
       </BentoCabecalho>
 
+      {/* Faixa 2 da anatomia: o resumo é o card de destaque da tela — o lugar
+          mais nobre pertence ao que direciona, não ao gráfico mais bonito. */}
       <BentoItem span={12}>
+        <ResumoCard tela="visao-geral" periodo={periodo} recorte={recorte} />
+      </BentoItem>
+
+      <BentoItem span={12} id="card-kpis">
         <KpiGrid>
           <KpiCard
             label="Usuários ativos"
@@ -138,7 +145,7 @@ export function VisaoGeralPage() {
 
       <BentoItem span={8}>
         <ChartCard
-          tone="brand"
+          id="card-atividade"
           icon={ActivityIcon}
           title="Usuários ativos por dia"
           headline={mediaDiaria != null ? formatInt(mediaDiaria) : '—'}
@@ -190,6 +197,7 @@ export function VisaoGeralPage() {
 
       <BentoItem span={8}>
         <ChartCard
+          id="card-eventos"
           icon={MousePointerClickIcon}
           title="Ações na plataforma"
           headline={formatCompact(totalEventos)}

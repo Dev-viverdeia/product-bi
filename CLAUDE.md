@@ -84,7 +84,18 @@ Vite 8 · React 19 · TypeScript strict · Tailwind v4 · shadcn/ui (new-york) �
 - **Toda DDL vira migration versionada em `supabase/migrations/`**, mesmo quando aplicada via MCP (aplicar via MCP + salvar o mesmo SQL no repo, com timestamp no nome).
 - Após qualquer DDL: rodar advisors (security e performance) e zerar warnings; regenerar types com `npm run db:types` (ou via MCP → `src/types/database.types.ts`).
 - Funções auxiliares de policy vivem no schema `private` (fora da API REST). Usar `private.is_admin()` nas policies de novas tabelas.
-- RLS ligada em toda tabela nova, sem exceção.
+- RLS ligada em toda tabela nova, sem exceção — **com a policy de leitura junto, no mesmo commit**. As RPCs são SECURITY INVOKER: RLS sem policy faz a função devolver **zero linha em silêncio, sem erro**. Custou caro duas vezes; na segunda, o bloco de resumo publicou "As 0 regras desta tela foram avaliadas", que é uma frase honesta sobre um estado falso. Schema novo também precisa de `grant usage`.
+
+### Motor de achados (`insights`)
+
+O bloco "Resumo e direcionamento" sai de um motor determinístico — **sem modelo de linguagem no caminho**. Regras que não são estéticas:
+
+- **O achado é calculado, não redigido.** `insights.regra` guarda a frase como gabarito com marcadores; `insights.calcular_achados_<tela>` calcula os valores. Quem preenche é `src/features/resumo/gabarito.ts`, com os formatadores pt-BR de sempre.
+- **O calculador só lê `public.bi_*`** — nunca `marts.`/`etl.`. É o que garante que o número da frase é O MESMO do card, e não uma segunda conta que pode divergir. Teste no CI reprova (`contrato-do-motor.test.ts`). A única exceção é `marts.data_referencia()`, que compõe a chave do cache e não é métrica.
+- **Zero dígito no gabarito.** A régua viaja em `parametros` emitido pela mesma função que calcula — mude a janela no SQL e a frase acompanha. Teste no CI reprova.
+- **Score é múltiplo do próprio limiar**, nunca a magnitude bruta: sem isso, regras de unidades diferentes (pontos percentuais × porcentagem × multiplicador) competem numa escala que não existe e a ordem sai do acaso.
+- **Máximo 3 achados, 1 por família**, e o bloco tem permissão de dizer que não há nada a dizer — inclusive listando o que foi suprimido e por quê.
+- **Cache em `insights.achado_cache`**, chaveado por `(tela, período, recorte, data do dado)`. Sem ele são 2,5s por tela e o bloco estoura o timeout sob a concorrência da página; com ele, 5ms. A chave inclui a data do dado, então o sync invalida sozinho.
 
 ### Pipeline de dados (BI ← plataforma)
 
@@ -156,6 +167,7 @@ Módulo novo: página em `pages/` ou `features/` → rota em `src/app/router.tsx
   - Fica em `<Table>` cru o que é **bloco, não lista**: funil de etapas fixas, comparação de 2–3 grupos nomeados, baldes de status. O leitor lê o conjunto inteiro; busca e paginação ali só atrapalhariam (e nem apareceriam — a `TabelaLonga` esconde os controles abaixo de uma página).
   - **Matriz não pagina**: a grade de cohort corta nas 12 safras mais recentes e diz quantas ficaram de fora. Paginar cortaria a leitura diagonal no meio.
 - **Estado usa `StatusPill`**, sempre com ícone e rótulo — nunca só cor.
+- **Toda tela abre com o `ResumoCard`** (`src/features/resumo/`), largura total, fora das abas, e ele é **o `.brand-card` da tela** — o lugar mais nobre pertence ao que direciona, não ao gráfico mais bonito. Card apontado por achado precisa de `id` (`ChartCard`/`TabelaCard`/`BentoItem` aceitam) para a âncora "ver o card que prova" funcionar.
 - **Recorte persona/plano** (contrato na seção Transversal do roadmap): filtro global `SegmentoFiltro` ao lado do período nas telas de grão cliente, estado na URL (`?papel=` e `?plano=`) e propagado pela navegação do shell via `comSegmento` — recorte é do app, não da tela. As RPCs centrais recebem `p_papel`/`p_plano` (null = todos). **Quem suprime percentual/taxa/média com denominador < 30 é o banco** (migration `20260811190000`); a tela só declara, com `notaAmostra`. Valores, rótulos e helpers do contrato vivem em `src/lib/segmento.ts` — não duplicar lista de papéis/planos em página.
 
 ## Comandos

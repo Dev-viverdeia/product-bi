@@ -20,6 +20,7 @@ import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/char
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
 import { SegmentoFiltro } from '@/components/filters/segmento-filtro'
 import { useSegmento } from '@/components/filters/use-segmento'
+import { ResumoCard } from '@/features/resumo/resumo-card'
 import { StatusPill } from '@/components/ui-marca/status-pill'
 import { TableCell, TableHead, TableRow } from '@/components/ui/table'
 import {
@@ -143,6 +144,12 @@ export function ClientesPage() {
           </div>
         </BentoCabecalho>
 
+        {/* Faixa 2 da anatomia: o resumo é o card de destaque da tela — o lugar
+            mais nobre pertence ao que direciona, não ao gráfico mais bonito. */}
+        <BentoItem span={12}>
+          <ResumoCard tela="clientes" periodo={periodo} recorte={recorte} />
+        </BentoItem>
+
         <BentoItem span={12}>
           <KpiGrid>
             {/* `?? null`, nunca `?? 0`: a RPC suprime a taxa quando a amostra
@@ -207,6 +214,7 @@ export function ClientesPage() {
 
               <BentoItem span={12}>
                 <ChartCard
+                  id="card-retencao-papel"
                   icon={UserCheckIcon}
                   title="Retenção por papel"
                   headline={gapPapeis ? `${formatDecimal(gapPapeis.pp)} pp` : '—'}
@@ -263,6 +271,7 @@ export function ClientesPage() {
 
               <BentoItem span={4}>
                 <ChartCard
+                  id="card-frequencia"
                   icon={UsersRoundIcon}
                   title="Frequência de uso"
                   headline={alemDeUmDia != null ? formatPercent(alemDeUmDia) : '—'}
@@ -289,7 +298,6 @@ export function ClientesPage() {
 
               <BentoItem span={4}>
                 <ChartCard
-                  tone="brand"
                   icon={LayersIcon}
                   title="Amplitude de uso"
                   headline={multiModulo != null ? formatPercent(multiModulo) : '—'}
@@ -376,6 +384,7 @@ export function ClientesPage() {
 
               <BentoItem span={8}>
                 <TabelaCard
+                  id="card-churn-modulos"
                   icon={SkullIcon}
                   title="Autópsia de churn — módulos nunca usados"
                   headline={piorGap?.gap_pp != null ? `${formatDecimal(piorGap.gap_pp)} pp` : '—'}
@@ -447,6 +456,7 @@ export function ClientesPage() {
 
               <BentoItem span={4}>
                 <ChartCard
+                  id="card-retencao-amplitude"
                   icon={ShieldCheckIcon}
                   title="Multi-módulo retém mais?"
                   headline={
@@ -483,6 +493,7 @@ export function ClientesPage() {
             <BentoGrid>
               <BentoItem span={12}>
                 <TabelaCard
+                  id="card-aha"
                   icon={LightbulbIcon}
                   title="Momento “aha” — o que a 1ª semana prevê"
                   headline={melhorSinal?.lift != null ? `${formatDecimal(melhorSinal.lift)}×` : '—'}

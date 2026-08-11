@@ -17,6 +17,8 @@ type ChartCardProps = CardCabecalhoProps & {
   isRefreshing?: boolean
   /** 'brand' preenche em navy — bloco de destaque do mosaico, um por tela */
   tone?: 'glass' | 'brand'
+  /** alvo da âncora do bloco de resumo ("ver o card que prova") */
+  id?: string
   className?: string
   contentClassName?: string
   children: ReactNode
@@ -35,6 +37,7 @@ export function ChartCard({
   emptyMessage = 'Sem dados para o período selecionado.',
   isRefreshing = false,
   tone = 'glass',
+  id,
   className,
   contentClassName,
   children,
@@ -42,6 +45,7 @@ export function ChartCard({
 }: ChartCardProps) {
   return (
     <Card
+      id={id}
       className={cn(
         tone === 'brand' ? 'brand-card' : 'glass-card',
         // único desvio da primitiva: no card de gráfico o cabeçalho encosta no
