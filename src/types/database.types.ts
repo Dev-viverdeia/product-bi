@@ -50,7 +50,7 @@ export type Database = {
     }
     Functions: {
       bi_aha_moment: {
-        Args: never
+        Args: { p_papel?: string; p_plano?: string }
         Returns: {
           acao: string
           fizeram: number
@@ -61,7 +61,7 @@ export type Database = {
         }[]
       }
       bi_amplitude_modulos: {
-        Args: { p_dias?: number }
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
         Returns: {
           clientes: number
           modulos: number
@@ -76,7 +76,7 @@ export type Database = {
         }[]
       }
       bi_atividade_diaria: {
-        Args: { p_dias?: number }
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
         Returns: {
           ativos: number
           data: string
@@ -92,7 +92,7 @@ export type Database = {
         }[]
       }
       bi_churn_modulos: {
-        Args: never
+        Args: { p_papel?: string; p_plano?: string }
         Returns: {
           gap_pp: number
           medido_desde: string
@@ -102,7 +102,7 @@ export type Database = {
         }[]
       }
       bi_churn_resumo: {
-        Args: never
+        Args: { p_papel?: string; p_plano?: string }
         Returns: {
           ativos: number
           churned: number
@@ -111,14 +111,14 @@ export type Database = {
         }[]
       }
       bi_churn_ultimo_modulo: {
-        Args: never
+        Args: { p_papel?: string; p_plano?: string }
         Returns: {
           clientes: number
           modulo: string
         }[]
       }
       bi_clientes_em_risco: {
-        Args: { p_limite?: number }
+        Args: { p_limite?: number; p_papel?: string; p_plano?: string }
         Returns: {
           dias_ate_vencer: number
           dias_inativo: number
@@ -264,7 +264,7 @@ export type Database = {
         }[]
       }
       bi_dias_ativos_distribuicao: {
-        Args: { p_dias?: number }
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
         Returns: {
           clientes: number
           faixa: string
@@ -288,8 +288,9 @@ export type Database = {
         }[]
       }
       bi_engajamento_clientes: {
-        Args: { p_dias?: number }
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
         Returns: {
+          base_habito: number
           dau_medio: number
           dias_ativos_medio: number
           mau: number
@@ -322,7 +323,7 @@ export type Database = {
         }[]
       }
       bi_eventos_por_tipo: {
-        Args: { p_dias?: number }
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
         Returns: {
           eventos: number
           tipo: string
@@ -367,7 +368,7 @@ export type Database = {
         }[]
       }
       bi_heatmap_navegacao: {
-        Args: { p_dias?: number }
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
         Returns: {
           dia_semana: number
           hora: number
@@ -519,7 +520,12 @@ export type Database = {
         }[]
       }
       bi_power_users: {
-        Args: { p_dias?: number; p_limite?: number }
+        Args: {
+          p_dias?: number
+          p_limite?: number
+          p_papel?: string
+          p_plano?: string
+        }
         Returns: {
           dias_ativos: number
           email: string
@@ -579,7 +585,7 @@ export type Database = {
         }[]
       }
       bi_retencao_cohort: {
-        Args: never
+        Args: { p_papel?: string; p_plano?: string }
         Returns: {
           clientes: number
           cohort_mes: string
@@ -590,10 +596,18 @@ export type Database = {
         }[]
       }
       bi_retencao_por_amplitude: {
-        Args: never
+        Args: { p_papel?: string; p_plano?: string }
         Returns: {
           clientes: number
           modulos: number
+          pct_retidos: number
+        }[]
+      }
+      bi_retencao_por_papel: {
+        Args: { p_plano?: string }
+        Returns: {
+          clientes: number
+          papel: string
           pct_retidos: number
         }[]
       }
@@ -683,7 +697,12 @@ export type Database = {
         }[]
       }
       bi_top_telas: {
-        Args: { p_dias?: number; p_limite?: number }
+        Args: {
+          p_dias?: number
+          p_limite?: number
+          p_papel?: string
+          p_plano?: string
+        }
         Returns: {
           path: string
           usuarios: number
@@ -713,7 +732,7 @@ export type Database = {
         }[]
       }
       bi_visao_geral_kpis: {
-        Args: { p_dias?: number }
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
         Returns: {
           ativos: number
           ativos_ant: number
@@ -733,6 +752,14 @@ export type Database = {
         | "ready"
         | "error"
       user_role: "admin" | "member"
+      wa_thread_status: "open" | "closed" | "archived"
+      wa_ticket_priority: "low" | "normal" | "high" | "urgent"
+      wa_ticket_status:
+        | "open"
+        | "pending"
+        | "waiting_third_party"
+        | "solved"
+        | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -867,6 +894,15 @@ export const Constants = {
         "error",
       ],
       user_role: ["admin", "member"],
+      wa_thread_status: ["open", "closed", "archived"],
+      wa_ticket_priority: ["low", "normal", "high", "urgent"],
+      wa_ticket_status: [
+        "open",
+        "pending",
+        "waiting_third_party",
+        "solved",
+        "closed",
+      ],
     },
   },
 } as const
