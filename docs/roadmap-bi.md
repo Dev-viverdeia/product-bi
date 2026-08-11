@@ -223,6 +223,36 @@ hands_on 2.552 · master_user 739 · membro_club 169 · outros 11; pro 1.945 ·
 enterprise 756 · starter 610 · sem plano 160. Papel × plano combinados podem
 cair abaixo de 30 — a supressão é parte do contrato, não enfeite.
 
+## Fase 2 — Profundidade e direcionamento (em desenho, 11/ago/2026)
+
+Pedido do Mateus: o BI não pode ser "uma plataforma que exibe cards com
+gráficos". Precisa ser completo, bem explicado, direcionar decisão — e cada
+tela passa a ter **os gráficos e um resumo com o direcionamento**. As análises
+atuais estão rasas e precisam ficar profundas. Pré-requisito declarado por ele:
+mapear **todo** o banco do produto, entendendo bem.
+
+### Decisões já tomadas (não reabrir sem ele)
+
+| Decisão | O que fica valendo |
+| --- | --- |
+| **Público do resumo** | Os dois: o CEO precisa **conseguir decidir** lendo, e o time de produto precisa **saber como seguir**. Um achado, dois níveis de leitura — a frase de cima é executiva (número + régua, sem jargão), a linha de baixo é a ação e o link para o card que prova |
+| **Profundidade é verificável** | Escada de 4 níveis (descritivo → comparativo → diagnóstico → prescritivo). Tela só é dada por pronta com 2+ cards diagnósticos e uma saída prescritiva. "Profundo" deixa de ser gosto |
+| **O achado é calculado, não redigido** | A detecção roda determinística, com a mesma régua de supressão das RPCs. Texto sem número calculado por trás não entra na tela — a regra "nunca mostrar número errado" vale para a frase como vale para o gráfico |
+| **Resumo pode não ter o que dizer** | Sem achado relevante, o bloco declara "nada fora do padrão no período". Resumo que sempre acha algo vira ruído e queima a credibilidade da tela |
+| **Saúde do projeto de código** | Módulo desejado, e é o **último** da fila. Fonte de dado é externa (repositório, CI, deploy, advisors) — não sai do banco do produto, então é integração nova, não recorte do que já existe. Não confundir com a Entrega 10 (saúde da plataforma: backend/banco/cyber) |
+
+### Em elaboração
+
+Mapeamento exaustivo dos três bancos por domínio (plataforma 216 tabelas · CS
+Pulse 382 · BI), inventário crítico dos ~48 cards das 10 telas, auditoria do
+kit de gráficos e escolha da arquitetura do resumo. A proposta consolidada
+— anatomia padrão da tela, plano por módulo, módulos novos e sequência de
+fases — vai a OK antes de qualquer código, como manda o método acima.
+
+**Descoberta que destrava o mapeamento:** o MCP alcança os três bancos
+direto, sem depender do `postgres_fdw`. O pipeline parado bloqueia a carga dos
+marts, não a análise do schema de origem.
+
 ## Pendências abertas pela auditoria de 08/ago/2026
 
 Relatório completo: `docs/auditoria-dados-2026-08.md`. As telas 1–9 estão
