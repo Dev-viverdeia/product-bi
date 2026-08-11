@@ -87,28 +87,28 @@ export function JornadaPage() {
           <KpiGrid>
             <KpiCard
               label="Sessões"
-              value={kpis.data?.sessoes ?? 0}
+              value={kpis.data?.sessoes ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Telas por sessão"
-              value={kpis.data?.telas_por_sessao ?? 0}
+              value={kpis.data?.telas_por_sessao ?? null}
               format={formatDecimal}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Duração mediana (min)"
-              value={kpis.data?.minutos_medianos ?? 0}
+              value={kpis.data?.minutos_medianos ?? null}
               format={formatDecimal}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Sessões de tela única"
-              value={kpis.data?.pct_uma_tela ?? 0}
+              value={kpis.data?.pct_uma_tela ?? null}
               format={formatPercent}
               isLoading={kpis.isLoading}
               isError={kpis.isError}

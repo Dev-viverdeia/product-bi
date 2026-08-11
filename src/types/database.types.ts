@@ -115,6 +115,7 @@ export type Database = {
         Returns: {
           clientes: number
           modulo: string
+          pct: number
         }[]
       }
       bi_clientes_em_risco: {
@@ -295,6 +296,7 @@ export type Database = {
           dias_ativos_medio: number
           mau: number
           pct_habito_semanal: number
+          pct_mais_de_um_dia: number
           pct_multimodulo: number
           stickiness: number
         }[]

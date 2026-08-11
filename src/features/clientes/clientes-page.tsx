@@ -90,31 +90,20 @@ export function ClientesPage() {
     }
   }, [papeisComTaxa])
 
-  const ultimoModulo = useMemo(() => {
-    const ms = churnUltimo.data ?? []
-    if (ms.length === 0) return null
-    const maior = ms.reduce((a, b) => (b.clientes > a.clientes ? b : a))
-    const total = ms.reduce((soma, m) => soma + m.clientes, 0)
-    return total > 0 ? { modulo: maior.modulo, parte: maior.clientes / total } : null
-  }, [churnUltimo.data])
+  // A fatia vem calculada e suprimida do banco. A RPC ordena por clientes, então
+  // a primeira linha é a maior — não somar aqui: total no front escapa da régua.
+  const ultimoModulo = churnUltimo.data?.[0] ?? null
 
   // Frequência e amplitude respondem "quantos usam de verdade": em ambos, o
   // sinal é quem passou do mínimo, não a faixa mais cheia.
-  const alemDeUmDia = useMemo(() => {
-    const fs = diasAtivos.data ?? []
-    const total = fs.reduce((soma, d) => soma + d.clientes, 0)
-    if (total === 0) return null
-    const umDia = fs.find((d) => d.faixa.startsWith('1'))?.clientes ?? 0
-    return (total - umDia) / total
-  }, [diasAtivos.data])
-
-  const multiModulo = useMemo(() => {
-    const as = amplitude.data ?? []
-    const total = as.reduce((soma, a) => soma + a.clientes, 0)
-    if (total === 0) return null
-    const varios = as.filter((a) => a.modulos > 1).reduce((soma, a) => soma + a.clientes, 0)
-    return varios / total
-  }, [amplitude.data])
+  //
+  // Os dois saem do banco, junto com os outros percentuais da tela. Calculá-los
+  // aqui custou caro: a versão anterior subtraía o balde "1–2 dias" inteiro do
+  // total e publicava 37,2% onde a resposta é 57,8% — e percentual derivado de
+  // contagem no front escapa da régua de supressão, porque contagem nunca é
+  // suprimida.
+  const alemDeUmDia = engajamento.data?.pct_mais_de_um_dia ?? null
+  const multiModulo = engajamento.data?.pct_multimodulo ?? null
 
   // Listas de ação podem vir cortadas em LIMITE_LISTA: lidero pela primeira
   // linha, que a ordenação garante, nunca por um total somado.
@@ -249,9 +238,11 @@ export function ClientesPage() {
                 <ChartCard
                   icon={LogOutIcon}
                   title="Onde a jornada termina"
-                  headline={ultimoModulo ? formatPercent(ultimoModulo.parte) : '—'}
+                  headline={
+                    ultimoModulo?.pct != null ? formatPercent(ultimoModulo.pct) : '—'
+                  }
                   headlineLabel={ultimoModulo ? `param em ${ultimoModulo.modulo}` : undefined}
-                  description="Último módulo usado antes do churn"
+                  description="Último módulo usado antes do churn · a fatia mede popularidade do módulo tanto quanto mortalidade: o módulo mais usado tende a ser o último de qualquer jornada"
                   isLoading={churnUltimo.isLoading}
                   isError={churnUltimo.isError}
                   onRetry={() => void churnUltimo.refetch()}

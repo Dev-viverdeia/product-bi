@@ -41,6 +41,9 @@ import {
 const QUADRO_KICKOFF = 'Kickoff'
 const QUADRO_REVERSAO = 'Reversão'
 
+/** Motivo único de travessão nos KPIs enquanto o espelho do Pulse não roda. */
+const SEM_CARGA = 'sem carga do Pulse'
+
 export function CsPage() {
   const [periodo, setPeriodo] = useState<Periodo>(30)
 
@@ -142,32 +145,40 @@ export function CsPage() {
 
         <BentoItem span={12}>
           <KpiGrid>
+            {/* Sem carga, a RPC devolve 0 porque as tabelas estão vazias — e "0
+                atendimentos" lê como "ninguém foi atendido", que é o oposto da
+                verdade. Enquanto o espelho não roda, o tile mostra travessão e
+                diz por quê. */}
             <KpiCard
               label="Atendimentos"
-              value={Number(kpis.data?.atendimentos ?? 0)}
+              value={semCarga || kpis.data == null ? null : Number(kpis.data.atendimentos)}
               format={formatInt}
+              motivoSemValor={SEM_CARGA}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Pessoas impactadas por comunicação"
-              value={Number(kpis.data?.pessoas_impactadas ?? 0)}
+              value={semCarga || kpis.data == null ? null : Number(kpis.data.pessoas_impactadas)}
               format={formatCompact}
+              motivoSemValor={SEM_CARGA}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Solicitações de cancelamento"
-              value={Number(kpis.data?.solicitacoes_cancelamento ?? 0)}
+              value={semCarga || kpis.data == null ? null : Number(kpis.data.solicitacoes_cancelamento)}
               format={formatInt}
+              motivoSemValor={SEM_CARGA}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             {/* Estado da carteira, não evento do período — por isso não muda com o filtro */}
             <KpiCard
               label="Clientes revertidos (total)"
-              value={Number(kpis.data?.revertidos ?? 0)}
+              value={semCarga || kpis.data == null ? null : Number(kpis.data.revertidos)}
               format={formatInt}
+              motivoSemValor={SEM_CARGA}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
@@ -237,7 +248,7 @@ export function CsPage() {
                 <TabelaCard
                   icon={UserRoundCheckIcon}
                   title="Quem atendeu"
-                  headline={formatInt((atendentes.data ?? []).length)}
+                  headline={semCarga ? '—' : formatInt((atendentes.data ?? []).length)}
                   headlineLabel="pessoas atenderam no período"
                   description="Quem de fato respondeu o ciclo (primeira mensagem humana de saída), que é diferente de quem está formalmente atribuído à conversa."
                   isLoading={atendentes.isLoading}
@@ -537,9 +548,11 @@ export function CsPage() {
                 <TabelaCard
                   icon={ClipboardCheckIcon}
                   title="Kickoff — clientes por etapa"
-                  headline={formatInt(
-                    (kickoff.data ?? []).reduce((soma, e) => soma + Number(e.cards), 0),
-                  )}
+                  headline={
+                    semCarga
+                      ? '—'
+                      : formatInt((kickoff.data ?? []).reduce((soma, e) => soma + Number(e.cards), 0))
+                  }
                   headlineLabel="clientes no quadro"
                   description="Quadro automatizado por motor e webhooks — cards não param na primeira etapa."
                   isLoading={kickoff.isLoading}
@@ -571,9 +584,11 @@ export function CsPage() {
                 <TabelaCard
                   icon={RotateCcwIcon}
                   title="Reversão — tentativas em curso"
-                  headline={formatInt(
-                    (reversao.data ?? []).reduce((soma, e) => soma + Number(e.cards), 0),
-                  )}
+                  headline={
+                    semCarga
+                      ? '—'
+                      : formatInt((reversao.data ?? []).reduce((soma, e) => soma + Number(e.cards), 0))
+                  }
                   headlineLabel="empresas já perseguidas"
                   description="Fluxo operacional de recuperação. Estar aqui não significa recuperado — parte destes casos já foi recuperada e parte já foi perdida; quem decide isso é o acordo registrado, não a posição no quadro."
                   isLoading={reversao.isLoading}

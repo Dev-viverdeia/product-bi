@@ -87,7 +87,7 @@ export function VisaoGeralPage() {
         <KpiGrid>
           <KpiCard
             label="Usuários ativos"
-            value={kpis.data?.ativos ?? 0}
+            value={kpis.data?.ativos ?? null}
             format={formatInt}
             delta={
               kpis.data
@@ -99,7 +99,7 @@ export function VisaoGeralPage() {
           />
           <KpiCard
             label="Novos clientes"
-            value={kpis.data?.novos ?? 0}
+            value={kpis.data?.novos ?? null}
             format={formatInt}
             delta={
               kpis.data
@@ -111,7 +111,7 @@ export function VisaoGeralPage() {
           />
           <KpiCard
             label="Aulas concluídas"
-            value={kpis.data?.aulas ?? 0}
+            value={kpis.data?.aulas ?? null}
             format={formatInt}
             delta={
               kpis.data
@@ -123,7 +123,7 @@ export function VisaoGeralPage() {
           />
           <KpiCard
             label="Pageviews"
-            value={kpis.data?.pageviews ?? 0}
+            value={kpis.data?.pageviews ?? null}
             format={formatCompact}
             delta={
               kpis.data

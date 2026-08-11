@@ -79,28 +79,28 @@ export function SolucoesPage() {
           <KpiGrid>
             <KpiCard
               label="Soluções publicadas"
-              value={kpis.data?.publicadas ?? 0}
+              value={kpis.data?.publicadas ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Iniciadas no período"
-              value={kpis.data?.iniciadas_periodo ?? 0}
+              value={kpis.data?.iniciadas_periodo ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Concluídas no período"
-              value={kpis.data?.concluidas_periodo ?? 0}
+              value={kpis.data?.concluidas_periodo ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Conclusão (histórica)"
-              value={kpis.data?.taxa_conclusao_historica ?? 0}
+              value={kpis.data?.taxa_conclusao_historica ?? null}
               format={formatPercent}
               isLoading={kpis.isLoading}
               isError={kpis.isError}

@@ -94,28 +94,28 @@ export function FormacoesPage() {
           <KpiGrid>
             <KpiCard
               label="Alunos ativos"
-              value={kpis.data?.alunos_ativos ?? 0}
+              value={kpis.data?.alunos_ativos ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Aulas concluídas"
-              value={kpis.data?.aulas_concluidas ?? 0}
+              value={kpis.data?.aulas_concluidas ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Certificados emitidos"
-              value={kpis.data?.certificados ?? 0}
+              value={kpis.data?.certificados ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="NPS médio das aulas"
-              value={kpis.data?.nps_medio ?? 0}
+              value={kpis.data?.nps_medio ?? null}
               format={formatDecimal}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
@@ -212,7 +212,7 @@ export function FormacoesPage() {
                       : '—'
                   }
                   headlineLabel={melhorDuracao ? `na faixa ${melhorDuracao.faixa}` : undefined}
-                  description="Taxa de conclusão normalizada por curso (conclusões da aula ÷ aula mais vista do mesmo curso) · só cursos com 50+ conclusões · a barra de 60+ min sobe por serem masterclasses/lives com audiência dedicada"
+                  description="Taxa de conclusão normalizada por curso (conclusões da aula ÷ aula mais vista do mesmo curso) · só curso E aula publicados, com 50+ conclusões · faixa com menos de 10 aulas não vira média · a queda com a duração é real mas suave, e acima de 30 min não há aula publicada suficiente para afirmar — o precipício que esta tela mostrava vinha de 76 aulas longas em cursos não publicados"
                   isLoading={duracao.isLoading}
                   isError={duracao.isError}
                   onRetry={() => void duracao.refetch()}

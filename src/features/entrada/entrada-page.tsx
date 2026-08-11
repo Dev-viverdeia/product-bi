@@ -92,28 +92,28 @@ export function EntradaPage() {
           <KpiGrid>
             <KpiCard
               label="Convites criados"
-              value={kpis.data?.convites ?? 0}
+              value={kpis.data?.convites ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Conversão convite → cadastro"
-              value={kpis.data?.conversao ?? 0}
+              value={kpis.data?.conversao ?? null}
               format={formatPercent}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Onboarding concluído (dos cadastrados)"
-              value={kpis.data?.onboarding_pct ?? 0}
+              value={kpis.data?.onboarding_pct ?? null}
               format={formatPercent}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Erros de login"
-              value={kpis.data?.erros_login ?? 0}
+              value={kpis.data?.erros_login ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
@@ -199,7 +199,7 @@ export function EntradaPage() {
                   title="Onde os incompletos param"
                   headline={formatInt(incompletos)}
                   headlineLabel="não concluíram o onboarding"
-                  description="Distribuição por etapa atual de quem não concluiu (89,5% da base concluem)"
+                  description="Distribuição por etapa atual de quem não concluiu · o número que estava aqui era escrito à mão e estava errado (dizia 89,5% quando a régua e_cliente dá 92,5%); percentual só entra vindo do banco"
                   isLoading={onboarding.isLoading}
                   isError={onboarding.isError}
                   onRetry={() => void onboarding.refetch()}

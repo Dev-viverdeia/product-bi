@@ -72,28 +72,28 @@ export function OrganizacoesPage() {
         <KpiGrid>
           <KpiCard
             label="Organizações ativas"
-            value={kpis.data?.orgs_ativas ?? 0}
+            value={kpis.data?.orgs_ativas ?? null}
             format={formatInt}
             isLoading={kpis.isLoading}
             isError={kpis.isError}
           />
           <KpiCard
             label="Membros em organizações"
-            value={kpis.data?.membros_total ?? 0}
+            value={kpis.data?.membros_total ?? null}
             format={formatInt}
             isLoading={kpis.isLoading}
             isError={kpis.isError}
           />
           <KpiCard
             label="Time ativo (média)"
-            value={kpis.data?.pct_time_ativo_medio ?? 0}
+            value={kpis.data?.pct_time_ativo_medio ?? null}
             format={formatPercent}
             isLoading={kpis.isLoading}
             isError={kpis.isError}
           />
           <KpiCard
             label="Orgs com master ativo"
-            value={kpis.data?.orgs_master_ativo ?? 0}
+            value={kpis.data?.orgs_master_ativo ?? null}
             format={formatPercent}
             isLoading={kpis.isLoading}
             isError={kpis.isError}

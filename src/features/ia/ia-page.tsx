@@ -91,28 +91,28 @@ export function IaPage() {
           <KpiGrid>
             <KpiCard
               label="Usuários do Consultor"
-              value={kpis.data?.usuarios_consultor ?? 0}
+              value={kpis.data?.usuarios_consultor ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Mensagens enviadas"
-              value={kpis.data?.mensagens_consultor ?? 0}
+              value={kpis.data?.mensagens_consultor ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Usuários do Builder"
-              value={kpis.data?.usuarios_builder ?? 0}
+              value={kpis.data?.usuarios_builder ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Soluções geradas"
-              value={kpis.data?.solucoes_builder ?? 0}
+              value={kpis.data?.solucoes_builder ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}

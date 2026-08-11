@@ -108,28 +108,28 @@ export function ReceitaPage() {
           <KpiGrid>
             <KpiCard
               label="Receita reconhecida"
-              value={kpis.data?.receita_brl ?? 0}
+              value={kpis.data?.receita_brl ?? null}
               format={formatCurrencyCompact}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Faturas pagas"
-              value={kpis.data?.faturas ?? 0}
+              value={kpis.data?.faturas ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Compradores"
-              value={kpis.data?.compradores ?? 0}
+              value={kpis.data?.compradores ?? null}
               format={formatInt}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
             />
             <KpiCard
               label="Ticket mediano"
-              value={kpis.data?.ticket_mediano ?? 0}
+              value={kpis.data?.ticket_mediano ?? null}
               format={formatCurrency}
               isLoading={kpis.isLoading}
               isError={kpis.isError}
