@@ -94,7 +94,9 @@ Vite 8 · React 19 · TypeScript strict · Tailwind v4 · shadcn/ui (new-york) �
 - Sync: funções `etl.sync_*` incrementais por watermark (fatias de ≤45 dias por chamada) + `etl.executar_sync()` no pg_cron `bi_sync_plataforma` a cada 30 min. Agregações pesadas SEMPRE nos marts locais, nunca na produção.
 - Regras herdadas da plataforma em toda métrica: exclusões de `bi_cohort_base` (campo `e_cliente` na dim) e timezone `America/Sao_Paulo` (colunas `*_brt` pré-computadas).
 - Enums remotos precisam de tipo local homônimo antes de `import foreign schema` (hoje só `consultor_planejamento_status`).
-- Discovery completo do banco da plataforma: `docs/discovery-banco-plataforma.md`.
+- **Mapa das origens: `docs/mapa-dados-plataforma.md`** — 211 tabelas dos 3 bancos com volume, período, qualidade e as perguntas que cada domínio destrava. É a referência de origem; `discovery-banco-plataforma.md` e `dicionario-dados-plataforma.md` viraram material histórico.
+- **O MCP do Supabase alcança os três bancos direto** (plataforma, CS Pulse, BI). O FDW parado bloqueia a carga dos marts, não a análise do schema de origem — não esperar o pipeline para investigar dado.
+- ⚠️ **A plataforma apaga histórico por cron dominical.** `cleanup-analytics-views` (navegação com +30d) está inativo hoje, mas já rodou: os pageviews de 03–09/07/2026 **só existem no nosso mart**. As purgas de `notifications` estão ativas. O BI não é só consumidor — é arquivo.
 
 ## Estrutura
 

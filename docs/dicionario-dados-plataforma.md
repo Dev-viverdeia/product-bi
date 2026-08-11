@@ -1,5 +1,13 @@
 # Dicionário de dados — Plataforma Viver de IA
 
+> ⚠️ **Superado como referência de origem por `mapa-dados-plataforma.md`**
+> (11/08/2026), que mapeia 211 tabelas com volume, período, qualidade e as
+> perguntas de decisão que cada domínio destrava. Este arquivo continua útil
+> como índice por domínio e para os payloads JSONB, mas o mapa é a fonte.
+> Em especial, este documento **não conhece o schema `via_hub`**, onde está a
+> receita real do produto (R$ 32,2 mi), nem os schemas `auth`, `storage`,
+> `meta`, `archive` e `backup`.
+
 **Banco:** `product_viverdeia_platform` · ref `zotzvtepvpnkcoobdubt` · `sa-east-1` · Postgres 15.
 Mapeamento completo em 2026-08-06 (complementa `discovery-banco-plataforma.md`, que traz volumes e qualidade).
 

@@ -241,17 +241,31 @@ mapear **todo** o banco do produto, entendendo bem.
 | **Resumo pode não ter o que dizer** | Sem achado relevante, o bloco declara "nada fora do padrão no período". Resumo que sempre acha algo vira ruído e queima a credibilidade da tela |
 | **Saúde do projeto de código** | Módulo desejado, e é o **último** da fila. Fonte de dado é externa (repositório, CI, deploy, advisors) — não sai do banco do produto, então é integração nova, não recorte do que já existe. Não confundir com a Entrega 10 (saúde da plataforma: backend/banco/cyber) |
 
-### Em elaboração
+### Levantamento concluído em 11/ago
 
-Mapeamento exaustivo dos três bancos por domínio (plataforma 216 tabelas · CS
-Pulse 382 · BI), inventário crítico dos ~48 cards das 10 telas, auditoria do
-kit de gráficos e escolha da arquitetura do resumo. A proposta consolidada
-— anatomia padrão da tela, plano por módulo, módulos novos e sequência de
-fases — vai a OK antes de qualquer código, como manda o método acima.
+- **`proposta-fase-2-profundidade.md`** — documento de decisão: anatomia padrão
+  da tela, escada de profundidade com régua de composição verificada no CI,
+  arquitetura do resumo, plano por módulo, módulos novos e sequência de fases.
+  **Aguarda OK por fase.**
+- **`mapa-dados-plataforma.md`** — 211 tabelas dos três bancos, 138 perguntas de
+  decisão que o BI não responde, 192 achados de qualidade.
 
-**Descoberta que destrava o mapeamento:** o MCP alcança os três bancos
-direto, sem depender do `postgres_fdw`. O pipeline parado bloqueia a carga dos
-marts, não a análise do schema de origem.
+Três resultados que mudam o plano, todos reconferidos no banco:
+
+1. **A receita real do produto está no schema `via_hub`**, que ninguém tinha
+   aberto: R$ 32,2 milhões desde dez/2025, vivo até hoje, em 6 gateways. A
+   Entrega 9 mede ~2,7% disso porque `hubla_webhooks` era um gateway entre seis
+   — o webhook não quebrou, a empresa trocou de gateway. E R$ 1,15 milhão das
+   compras de julho foi reembolsado (34,5% do mês), o que nenhuma tela mostra.
+2. **Nove das dez telas reprovam na escada de profundidade** — o parque tem 78
+   cards descritivos contra 4 diagnósticos.
+3. **O BI virou arquivo sem saber.** A purga dominical da plataforma já apagou
+   os pageviews de 03–09/07/2026; eles só existem no nosso mart. A purga de
+   navegação está inativa hoje, a de notificações está ativa.
+
+**Descoberta que destravou o mapeamento:** o MCP alcança os três bancos direto,
+sem depender do `postgres_fdw`. O pipeline parado bloqueia a carga dos marts,
+não a análise do schema de origem.
 
 ## Pendências abertas pela auditoria de 08/ago/2026
 
