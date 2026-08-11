@@ -93,6 +93,21 @@ Vite 8 · React 19 · TypeScript strict · Tailwind v4 · shadcn/ui (new-york) �
 - Schemas: `plataforma` (58 foreign tables, somente leitura) · `marts` (dim/fact consumidos pelo app) · `etl` (watermarks `sync_state` + log `sync_runs`). Nenhum exposto na API REST; RLS deny-all neles é intencional (advisors INFO esperados).
 - Sync: funções `etl.sync_*` incrementais por watermark (fatias de ≤45 dias por chamada) + `etl.executar_sync()` no pg_cron `bi_sync_plataforma` a cada 30 min. Agregações pesadas SEMPRE nos marts locais, nunca na produção.
 - Regras herdadas da plataforma em toda métrica: exclusões de `bi_cohort_base` (campo `e_cliente` na dim) e timezone `America/Sao_Paulo` (colunas `*_brt` pré-computadas).
+
+#### Modelo de domínio: quem é cliente, quem comprou (decisão do Mateus, 11/ago)
+
+**Cliente = usuário da plataforma** sob a régua `e_cliente`. O comprador e quem ele convidou são, os dois, clientes — o BI não conta gente de fora da plataforma.
+
+**Quem comprou é `is_master_user`, não o papel.** O master user recebe o convite, é dono da organização e é quem comprou o Viver de IA; os demais entram por convite dele. Duas colunas parecidas que **não** são a mesma coisa:
+
+| Coluna | O que é | Cuidado |
+| --- | --- | --- |
+| `is_master` (`dim_usuario`) | **dono de organização = comprador**. Bate 1:1 com `organizations.master_user_id` (2.064 pessoas) | é a régua estrutural — use esta para separar comprador de convidado |
+| `papel` (`dim_usuario`) | **tipo de contrato comprado** (`master_user`, `membro_club`, `hands_on`…) | 445 dos `membro_club` também são donos de org, e 223 `master_user` não são. Papel ≠ posição na organização |
+
+Consequência para a análise: o recorte que explica retenção é **comprador × convidado** (36,9% × 18,9%), não o papel isolado — o produto retém quem paga e perde quem foi convidado. Como 91% dos clientes estão dentro de uma organização, isso é o centro do produto, não um segmento dele.
+
+**Papel é do momento, não histórico:** a dim guarda o papel atual, e a plataforma já migrou gente em lote (5.222 de `freemium` para `hands_on`). Toda leitura por papel é "de quem hoje é X" — declarar isso onde a série atravessa uma migração.
 - Enums remotos precisam de tipo local homônimo antes de `import foreign schema` (hoje só `consultor_planejamento_status`).
 - **Mapa das origens: `docs/mapa-dados-plataforma.md`** — 211 tabelas dos 3 bancos com volume, período, qualidade e as perguntas que cada domínio destrava. É a referência de origem; `discovery-banco-plataforma.md` e `dicionario-dados-plataforma.md` viraram material histórico.
 - **O MCP do Supabase alcança os três bancos direto** (plataforma, CS Pulse, BI). O FDW parado bloqueia a carga dos marts, não a análise do schema de origem — não esperar o pipeline para investigar dado.

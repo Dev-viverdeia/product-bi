@@ -373,7 +373,26 @@ recuperabilidade** (quem dá para salvar, não quem já morreu) · retenção po
 amplitude **controlada por volume de uso** (amplitude é causa ou é a mesma
 variável medida duas vezes?).
 
-**Retenção por papel fica como está** — é o melhor card do BI e vira o modelo.
+**Retenção por papel ganha o recorte que faltava.** O card entregue na Fase A
+mostra Master 34,9% · Membro do Club 33,5% · Hands-on 18,3%, e os números estão
+certos — mas a leitura natural ("três personas") erra o alvo. **[conferido]**
+Com o modelo de domínio correto (o master user é quem comprou e é dono da org;
+os demais entram por convite dele), o corte estrutural é outro:
+
+| Grupo | Clientes | Retenção |
+| --- | ---: | ---: |
+| Comprador (dono de organização) | 909 | **36,9%** |
+| Convidado / membro | 2.925 | **18,9%** |
+
+Uma diferença de 18 pontos, com uma história só: **o produto retém quem paga e
+perde quem foi convidado.** Papel isolado embaralha os dois grupos —
+445 `membro_club` são donos de organização e 223 `master_user` não são.
+
+O card passa a liderar por esse corte, com papel como segunda camada. E ele
+deixa de ser um card de Clientes para virar **a leitura central do produto**:
+casa com o efeito master de Organizações (52,5% × 14,1% de time ativo) e com o
+funil de assentos (só 37,6% dos convidados entram). São três telas medindo a
+mesma coisa sem saber.
 
 ### 6.2 Visão Geral — prioridade 2
 

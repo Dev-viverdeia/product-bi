@@ -206,7 +206,8 @@ experiência com IA de ~15k clientes — dado subutilizado. A partir da Entrega 
 | Papel | `hands_on` · `master_user` · `membro_club` — 99,2% dos 14.373 clientes. Os 7 papéis restantes (99 clientes) não viram opção de filtro: recorte que nasce suprimido não é oferta, e o "todos" já os inclui |
 | Plano | `starter` · `pro` · `enterprise` · sem plano (867 clientes — grupo real, não erro de dado) |
 | Fonte | `marts.dim_usuario` (`papel`, `plano`), sempre sob `e_cliente` |
-| Semântica | recorte pelo papel/plano **atual** (a dim não guarda histórico): "retenção dos hands_on" lê "de quem hoje é hands_on". Papel na época do evento exigiria snapshot histórico — fora deste contrato |
+| Semântica | recorte pelo papel/plano **atual** (a dim não guarda histórico): "retenção dos hands_on" lê "de quem hoje é hands_on". Papel na época do evento exigiria snapshot histórico — fora deste contrato. **Decisão do Mateus (11/ago): fica o papel atual**, porque papel é tipo de contrato comprado (estrutural), não estágio de ciclo de vida; a ressalva das migrações em lote é declarada na tela |
+| **Comprador × convidado** | terceira dimensão, acrescentada em 11/ago: `is_master` separa quem **comprou** (dono da organização, 2.064 pessoas) de quem entrou pelo convite dele. É o recorte que mais explica retenção — mais que papel — e não se confunde com ele (445 `membro_club` são donos; 223 `master_user` não são) |
 | Unidade | o filtro restringe o **conjunto de clientes**; eventos, pageviews e progresso contam só os desses clientes |
 | Supressão | percentual, taxa e mediana só com denominador ≥ 30 na janela filtrada; abaixo disso a tela mostra a contagem absoluta e declara que a amostra não sustenta percentual. Contagem nunca é suprimida. Delta exige ≥ 30 nos dois períodos |
 | UI | filtro global ao lado do período, na URL (`?papel=` e `?plano=`), combináveis entre si. Some nas telas de grão empresa (CS); em Organizações entra só onde a métrica é de pessoa |
