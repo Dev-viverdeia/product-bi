@@ -267,6 +267,23 @@ limiar (sem isso a ordem dos achados saía do acaso da escala), o cache (sem ele
 o bloco estourava o timeout) e a policy do catálogo, que faltando fez a RPC
 devolver zero linha em silêncio — a armadilha que este documento já registrava.
 
+### Fase 2 — em andamento (primeira leva entregue em 11/ago)
+
+**Entregue:** a escada de profundidade virou trava de CI — todo card declara o
+degrau, e o teste conta a composição da tela contra a régua. O kit ganhou faixa
+de referência e de-ênfase (`--data-referencia`, `--data-mute`), e a dívida do
+`--data-ink` fechou. **A Visão Geral subiu a escada:** saíram os dois cards que
+mediam errado, entraram quatro que respondem outra coisa — quem apareceu contra
+a base, de onde veio o número de ativos, uso raso × profundo, e a saúde do
+rastreio.
+
+**Falta:** as outras sete telas com dado local. Cada uma entra na lista
+`TELAS_NA_REGUA` quando a composição passar; até lá o placar fica visível.
+
+Dois achados da leva, medidos: **35,2% dos ativos entraram no próprio período**
+(o crescimento é comprado, não retido) e **Soluções tem 1,6% de compromisso**
+contra praticamente tudo nos outros módulos — atrai atenção e não converte.
+
 ### Levantamento concluído em 11/ago
 
 - **`proposta-fase-2-profundidade.md`** — documento de decisão: anatomia padrão
