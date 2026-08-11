@@ -321,7 +321,9 @@
    UTILITIES DO DS
    ============================================================= */
 @utility num {
-  /* Números de dado: mono + tabular, alinhados à direita em tabela */
+  /* Números de dado: mono + largura tabular (colunas alinham entre linhas).
+     O alinhamento à direita é da célula (text-right), não daqui — esta mesma
+     utility veste valor de KPI e número em texto corrido. */
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;

@@ -76,8 +76,8 @@ export function KpiCard({
 
   if (isLoading) {
     return (
-      <Card className={cn('glass-card py-5', className)}>
-        <CardContent className="space-y-3 px-5">
+      <Card className={cn('glass-card', className)}>
+        <CardContent className="space-y-3">
           <Skeleton className="h-3.5 w-24 rounded-md" />
           <Skeleton className="h-8 w-32 rounded-md" />
           <Skeleton className="h-3.5 w-36 rounded-md" />
@@ -92,9 +92,10 @@ export function KpiCard({
 
   return (
     <motion.div variants={gridItem} className="h-full">
-      <Card className={cn('glass-card h-full py-5', className)}>
-        <CardContent className="flex h-full flex-col gap-1.5 px-5">
-          <p className="text-muted-foreground text-sm">{label}</p>
+      <Card className={cn('glass-card h-full', className)}>
+        <CardContent className="flex h-full flex-col gap-1">
+          {/* rótulo um degrau abaixo do delta: ele identifica, o número responde */}
+          <p className="text-muted-foreground text-xs">{label}</p>
 
           {/* Figuras proporcionais de propósito: tabular-nums é só para colunas */}
           <p className="text-3xl font-semibold tracking-tight">
@@ -102,7 +103,7 @@ export function KpiCard({
           </p>
 
           {delta ? (
-            <p className="flex items-center gap-1 text-sm">
+            <p className="flex items-center gap-1 text-xs">
               <span
                 className={cn(
                   'inline-flex items-center gap-0.5 font-medium',

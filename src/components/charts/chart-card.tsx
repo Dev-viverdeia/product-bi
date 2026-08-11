@@ -61,7 +61,15 @@ export function ChartCard({
   children,
 }: ChartCardProps) {
   return (
-    <Card className={cn(tone === 'brand' ? 'brand-card' : 'glass-card', 'gap-4', className)}>
+    <Card
+      className={cn(
+        tone === 'brand' ? 'brand-card' : 'glass-card',
+        // único desvio da primitiva: no card de gráfico o cabeçalho encosta no
+        // desenho — o headline e a curva são a mesma leitura.
+        'gap-3',
+        className,
+      )}
+    >
       {/*
         Gramática do cabeçalho: identidade à esquerda, afordância à direita.
 
@@ -117,14 +125,14 @@ export function ChartCard({
       {/* min-w-0: em flex/grid o filho tem min-width auto, e o ResponsiveContainer
           do Recharts mede o pai antes de encolher — sem isto ele renderiza alguns
           px além da caixa e o gráfico era cortado no mobile pelo overflow-hidden. */}
-      <CardContent className={cn('min-h-[220px] min-w-0', contentClassName)}>
+      <CardContent className={cn('min-h-[200px] min-w-0', contentClassName)}>
         {isLoading ? (
-          <div className="flex h-full min-h-[220px] flex-col gap-3">
+          <div className="flex h-full min-h-[200px] flex-col gap-3">
             <Skeleton className="h-full min-h-[180px] w-full rounded-md" />
             <Skeleton className="mx-auto h-3 w-40 rounded-md" />
           </div>
         ) : isError ? (
-          <div className="flex h-full min-h-[220px] flex-col items-center justify-center gap-3 text-center">
+          <div className="flex h-full min-h-[200px] flex-col items-center justify-center gap-3 text-center">
             <AlertCircleIcon className="text-muted-foreground size-6" />
             <p className="text-muted-foreground text-sm">
               Não foi possível carregar os dados.
@@ -136,7 +144,7 @@ export function ChartCard({
             ) : null}
           </div>
         ) : isEmpty ? (
-          <div className="flex h-full min-h-[220px] flex-col items-center justify-center gap-3 text-center">
+          <div className="flex h-full min-h-[200px] flex-col items-center justify-center gap-3 text-center">
             <ChartColumnIcon className="text-muted-foreground size-6" />
             <p className="text-muted-foreground text-sm">{emptyMessage}</p>
           </div>

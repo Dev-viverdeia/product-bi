@@ -29,7 +29,10 @@ Regras inegociáveis herdadas do DS:
 - Ícones Lucide, stroke 1.5–2, `currentColor`. Banido ícone Sparkles/"AI sparkle".
 - Sem emoji decorativo em UI; sem clichês de IA em copy.
 - Todo controle tem os 3 estados (`:hover`, `:active`, `:focus-visible`); disabled muta por cor, não por opacity. Contraste AA nos 2 temas, sempre.
-- **Ajuste deliberado em `src/components/ui/card.tsx`**: `rounded-xl` → `rounded-lg` (card padrão do DS = 20px). Se regenerar o card via shadcn CLI, reaplicar.
+- **Ajustes deliberados em `src/components/ui/` — reaplicar se regenerar pelo CLI:**
+  - `card.tsx`: `rounded-xl` → `rounded-lg` (card padrão do DS = 20px) e respiro `py-5`/`px-5`/`gap-5`. **20px é a régua única de todo card do produto** — ChartCard e KpiCard não repetem o valor, herdam da primitiva.
+  - `table.tsx`: cabeçalho recessivo (`text-xs`, `text-muted-foreground`, altura automática) e célula `px-3 py-2.5` → linha de 41px, doze linhas sem passar da dobra.
+  - Por que na primitiva e não em `@layer components` no `index.css`: utilitário do Tailwind vence a camada de componentes, então padding e cor voltavam ao padrão do shadcn — mesma armadilha do `.brand-card`.
 - ⚠️ O gradiente do `.glass-card` é **de opacidade alta e faixa curta**. A receita antiga ia de 96% a 58% e fazia o card **mudar de cor conforme a altura** — dois brancos diferentes na mesma tela. Não restaurar o gradiente longo.
 - ⚠️ `.brand-card` **redeclara tokens semânticos** em vez de sobrescrever `color`: utilitário do Tailwind vence CSS da camada de componentes, e `color: #fff` deixa o título navy sobre navy. A rampa de dataviz dentro dele é a do tema escuro, já validada. Uso: **um por tela**.
 - **Superfícies da marca em `src/index.css`**: `.page-atmosphere` (radiais sutis, vai no shell e em páginas públicas), `.glass-card` (card padrão: branco, hairline e sombra; solidifica com `prefers-reduced-transparency`/`prefers-contrast`) e `.brand-card` (destaque navy). Sem hover/lift em card que não é clicável.
