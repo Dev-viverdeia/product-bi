@@ -59,6 +59,41 @@ export function useTopTelas(dias: Periodo, recorte: Recorte) {
   })
 }
 
+/** Ativos decompostos em novos, reativados e retidos — de onde veio o número. */
+export function useComposicaoCrescimento(dias: Periodo, recorte: Recorte) {
+  return useQuery({
+    queryKey: ['bi', 'composicao-crescimento', dias, recorte.papel, recorte.plano],
+    queryFn: async () =>
+      (await rpc(
+        supabase.rpc('bi_composicao_crescimento', { p_dias: dias, ...argsSegmento(recorte) }),
+      )) ?? [],
+  })
+}
+
+/** Ações por módulo, com consumo e compromisso separados. */
+export function useAcoesPorModulo(dias: Periodo, recorte: Recorte) {
+  return useQuery({
+    queryKey: ['bi', 'acoes-por-modulo', dias, recorte.papel, recorte.plano],
+    queryFn: async () =>
+      (await rpc(
+        supabase.rpc('bi_acoes_por_modulo', { p_dias: dias, ...argsSegmento(recorte) }),
+      )) ?? [],
+  })
+}
+
+/**
+ * Última data com registro por tipo de evento.
+ *
+ * Não recebe recorte: rastreio é instrumentação da plataforma, não
+ * comportamento de um segmento de cliente.
+ */
+export function useSaudeRastreio() {
+  return useQuery({
+    queryKey: ['bi', 'saude-rastreio'],
+    queryFn: async () => (await rpc(supabase.rpc('bi_saude_rastreio'))) ?? [],
+  })
+}
+
 export function useUltimaSincronizacao() {
   return useQuery({
     queryKey: ['bi', 'ultima-sincronizacao'],

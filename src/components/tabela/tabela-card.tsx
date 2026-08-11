@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CardCabecalho, type CardCabecalhoProps } from '@/components/ui-marca/card-cabecalho'
+import type { NivelDeAnalise } from '@/lib/escada'
 import { cn } from '@/lib/utils'
 
 type TabelaCardProps = CardCabecalhoProps & {
@@ -15,6 +16,8 @@ type TabelaCardProps = CardCabecalhoProps & {
   linhasEsqueleto?: number
   /** alvo da âncora do bloco de resumo ("ver o card que prova") */
   id?: string
+  /** degrau da escada de profundidade — vira `data-nivel` e o CI verifica */
+  nivel?: NivelDeAnalise
   className?: string
   children: ReactNode
 }
@@ -35,12 +38,13 @@ export function TabelaCard({
   onRetry,
   linhasEsqueleto = 6,
   id,
+  nivel,
   className,
   children,
   ...cabecalho
 }: TabelaCardProps) {
   return (
-    <Card id={id} className={cn('glass-card gap-3', className)}>
+    <Card id={id} data-nivel={nivel} className={cn('glass-card gap-3', className)}>
       <CardCabecalho {...cabecalho} />
 
       <CardContent className="min-w-0">

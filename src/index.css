@@ -135,6 +135,15 @@
   --data-grid: rgba(10, 31, 59, 0.08); /* grade recessiva */
   --data-axis: rgba(10, 31, 59, 0.2); /* linha de eixo */
   --data-ink: #4f596b; /* rótulo de eixo — token de texto, nunca cor de série */
+  /* De-ênfase: a série que fica de fundo quando UMA é destacada. Lê como
+     cinza de propósito (o validador da skill reprovaria como slot categórico,
+     e é exatamente isso que se quer). A separação vem da CROMA — saturado
+     contra neutro — com luminância de apoio: 2,3:1 contra o card e 2,2:1
+     contra --data-1. Não é uma terceira cor de série. */
+  --data-mute: #a3acbd;
+  /* Referência: meta, média, banda de normalidade. Neutro forte, tracejado no
+     traço — nunca uma cor de série, para não competir com o dado. */
+  --data-referencia: rgba(10, 31, 59, 0.45);
 
   /* Sidebar — off-white, navy como texto */
   --sidebar: var(--via-gray-50);
@@ -192,6 +201,8 @@
   --data-grid: rgba(255, 255, 255, 0.09);
   --data-axis: rgba(255, 255, 255, 0.22);
   --data-ink: #aeb8c6;
+  --data-mute: #4a5570;
+  --data-referencia: rgba(255, 255, 255, 0.42);
 
   --sidebar: #0f1729;
   --sidebar-foreground: #d0d5dd;
@@ -254,6 +265,8 @@
   --color-data-grid: var(--data-grid);
   --color-data-axis: var(--data-axis);
   --color-data-ink: var(--data-ink);
+  --color-data-mute: var(--data-mute);
+  --color-data-referencia: var(--data-referencia);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -395,6 +408,8 @@
     --data-grid: rgba(255, 255, 255, 0.09);
     --data-axis: rgba(255, 255, 255, 0.22);
     --data-ink: #aeb8c6;
+    --data-mute: #4a5570;
+    --data-referencia: rgba(255, 255, 255, 0.42);
 
     /* Status pelo mesmo princípio do dataviz: o verde e o coral do tema claro
        são escuros e somem sobre navy. A StatusPill vive aqui dentro desde que

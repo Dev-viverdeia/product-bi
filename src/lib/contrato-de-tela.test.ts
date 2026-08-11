@@ -72,6 +72,10 @@ const TELAS_COM_RECORTE = [
   'features/visao-geral/visao-geral-page.tsx',
 ]
 
+// Esta régua já se pagou duas vezes: pegou o defeito de 20 pontos da Fase 0 e,
+// na Fase 2, pegou dois percentuais que eu mesmo tinha acabado de escrever no
+// front da Visão Geral. Os dois foram para o banco.
+
 describe('percentual não é calculado no front', () => {
   const sobRegra = paginas.filter((p) => TELAS_COM_RECORTE.includes(p.caminho))
 

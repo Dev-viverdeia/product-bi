@@ -1,4 +1,4 @@
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, ReferenceLine, XAxis, YAxis } from 'recharts'
 
 import { ChartReveal } from '@/components/charts/chart-reveal'
 import {
@@ -10,7 +10,25 @@ import {
 import { formatCompact } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
-export type CategoryDatum = { category: string; value: number }
+export type CategoryDatum = {
+  category: string
+  value: number
+  /** recua a barra para o cinza de de-ênfase — use para destacar UMA */
+  mute?: boolean
+}
+
+/**
+ * Linha de referência: a meta, a média, o limiar.
+ *
+ * É o que transforma um gráfico de "quanto" num gráfico de "quanto comparado a
+ * quê" — o degrau mais barato da escada de profundidade. Traço tracejado em
+ * neutro forte de propósito: referência não é dado, então não pode usar cor de
+ * série nem competir com a barra.
+ */
+export type Referencia = {
+  valor: number
+  rotulo: string
+}
 
 type CategoryBarChartProps = {
   data: CategoryDatum[]
@@ -21,6 +39,8 @@ type CategoryBarChartProps = {
   valueFormatter?: (value: number) => string
   /** valor no topo/ponta de cada barra (rótulo direto) */
   showValues?: boolean
+  /** meta, média ou limiar — no máximo duas, senão vira grade */
+  referencias?: Referencia[]
   className?: string
 }
 
@@ -34,8 +54,10 @@ export function CategoryBarChart({
   layout = 'column',
   valueFormatter = formatCompact,
   showValues = true,
+  referencias = [],
   className,
 }: CategoryBarChartProps) {
+  const temMute = data.some((d) => d.mute)
   const config = {
     value: { label, color: 'var(--color-data-1)' },
   } satisfies ChartConfig
@@ -118,6 +140,24 @@ export function CategoryBarChart({
           }
         />
 
+        {/* Referência entra ANTES da barra para ficar por baixo dela: o dado é
+            o que se lê, a meta é o pano de fundo contra o qual se lê. */}
+        {referencias.slice(0, 2).map((r) => (
+          <ReferenceLine
+            key={r.rotulo}
+            {...(isColumn ? { y: r.valor } : { x: r.valor })}
+            stroke="var(--color-data-referencia)"
+            strokeDasharray="4 4"
+            strokeWidth={1.5}
+            label={{
+              value: r.rotulo,
+              position: isColumn ? 'insideTopRight' : 'insideTopRight',
+              fill: 'var(--color-data-ink)',
+              fontSize: 11,
+            }}
+          />
+        ))}
+
         <Bar
           dataKey="value"
           fill="var(--color-value)"
@@ -125,6 +165,16 @@ export function CategoryBarChart({
           radius={isColumn ? [4, 4, 0, 0] : [0, 4, 4, 0]}
           isAnimationActive={false}
         >
+          {/* Uma Cell por barra só quando há de-ênfase: sem isso o Recharts
+              pinta tudo com o fill da série, que é o comportamento normal. */}
+          {temMute
+            ? data.map((d) => (
+                <Cell
+                  key={d.category}
+                  fill={d.mute ? 'var(--color-data-mute)' : 'var(--color-value)'}
+                />
+              ))
+            : null}
           {showValues ? (
             <LabelList
               dataKey="value"

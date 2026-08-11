@@ -83,6 +83,18 @@ export type Database = {
           titulo: string
         }[]
       }
+      bi_acoes_por_modulo: {
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
+        Returns: {
+          clientes: number
+          compromisso: number
+          consumo: number
+          modulo: string
+          pct_compromisso: number
+          pct_compromisso_geral: number
+          total: number
+        }[]
+      }
       bi_aha_moment: {
         Args: { p_papel?: string; p_plano?: string }
         Returns: {
@@ -163,6 +175,15 @@ export type Database = {
           organizacao: string
           plano: string
           ultima_atividade: string
+        }[]
+      }
+      bi_composicao_crescimento: {
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
+        Returns: {
+          categoria: string
+          clientes: number
+          ordem: number
+          pct: number
         }[]
       }
       bi_consultor_modos: {
@@ -671,6 +692,17 @@ export type Database = {
           tabelas_ok: number
           ultima_sync: string
           ultimo_erro: string
+        }[]
+      }
+      bi_saude_rastreio: {
+        Args: never
+        Returns: {
+          dias_parado: number
+          eventos_total: number
+          modulo: string
+          status: string
+          tipo: string
+          ultimo_registro: string
         }[]
       }
       bi_solucoes_candidatas_remocao: {

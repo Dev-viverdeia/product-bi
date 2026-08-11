@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CardCabecalho, type CardCabecalhoProps } from '@/components/ui-marca/card-cabecalho'
+import type { NivelDeAnalise } from '@/lib/escada'
 import { cn } from '@/lib/utils'
 
 type ChartCardProps = CardCabecalhoProps & {
@@ -19,6 +20,14 @@ type ChartCardProps = CardCabecalhoProps & {
   tone?: 'glass' | 'brand'
   /** alvo da âncora do bloco de resumo ("ver o card que prova") */
   id?: string
+  /**
+   * Degrau da escada de profundidade que este card ocupa.
+   *
+   * Não desenha nada: vira `data-nivel` no DOM e é lido por um teste que
+   * reprova a tela cuja composição não bate a régua. É o que faz "profundo"
+   * deixar de ser gosto e virar condição de merge.
+   */
+  nivel?: NivelDeAnalise
   className?: string
   contentClassName?: string
   children: ReactNode
@@ -38,6 +47,7 @@ export function ChartCard({
   isRefreshing = false,
   tone = 'glass',
   id,
+  nivel,
   className,
   contentClassName,
   children,
@@ -46,6 +56,7 @@ export function ChartCard({
   return (
     <Card
       id={id}
+      data-nivel={nivel}
       className={cn(
         tone === 'brand' ? 'brand-card' : 'glass-card',
         // único desvio da primitiva: no card de gráfico o cabeçalho encosta no
