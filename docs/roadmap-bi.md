@@ -242,6 +242,7 @@ mapear **todo** o banco do produto, entendendo bem.
 | **Resumo pode não ter o que dizer** | Sem achado relevante, o bloco declara "nada fora do padrão no período". Resumo que sempre acha algo vira ruído e queima a credibilidade da tela |
 | **Saúde do projeto de código** | Módulo desejado, e é o **último** da fila. Fonte de dado é externa (repositório, CI, deploy, advisors) — não sai do banco do produto, então é integração nova, não recorte do que já existe. Não confundir com a Entrega 10 (saúde da plataforma: backend/banco/cyber) |
 | **Universo de análise** | **O cliente da plataforma** — quem está em `profiles` sob a régua `e_cliente`. O `via_hub` está sendo populado para virar o identificador único entre os produtos da casa e **não é fonte publicável enquanto isso**. Nenhuma tela passa a contar gente que não está na plataforma |
+| **Dado espelhável** | **Tudo que a plataforma e o Pulse têm, desde que sirva a uma análise registrada.** O limite é a existência da pergunta, não a natureza do dado. Contrato com as quatro disciplinas no CLAUDE.md — a que mais pesa é que **exclusão na origem propaga para o mart**, com teste |
 
 ### Levantamento concluído em 11/ago
 

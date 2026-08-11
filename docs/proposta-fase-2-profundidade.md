@@ -677,11 +677,15 @@ começa do zero no dia em que ligar. Quanto mais tarde, mais tarde ele serve.
 
 ## 9. Riscos que precisam de dono
 
-1. **Privacidade.** O plano propõe espelhar `audit_logs` (e-mail de convidado),
-   `auth.users`, `notifications` e `via_hub.shared_purchases` (nome, razão
-   social, documento). Pior: o mart guarda **318 pessoas que a plataforma
-   apagou**. Não há política de retenção, expurgo propagado, nem regra de quem
-   pode ver lista nominal. **Contrato de PII antes do primeiro espelho novo.**
+1. ~~**Privacidade.**~~ **Resolvido em 11/ago** — o Mateus autorizou espelhar
+   tudo que sirva a análise registrada, e o contrato está no CLAUDE.md com as
+   quatro disciplinas (chave no lugar do valor onde basta distinguir; conteúdo
+   livre só sob demanda de análise; exclusão propaga; lista nominal atrás de
+   `private.is_admin()`). **Duas obrigações concretas que nascem daí:** o
+   expurgo propagado precisa de teste em todo mart novo — hoje só `dim_usuario`
+   tem o mecanismo, e ele não roda desde 08/08 — e o papel de administrador
+   precisa existir antes de o time ganhar conta, porque hoje as 2 contas do BI
+   são iguais e veem tudo.
 2. **O pipeline falha em silêncio.** ~150 falhas por tabela desde 08/08 e o cron
    segue rodando. `fact_pedido_implementacao` tem **53 execuções e 0 sucessos
    desde que foi criado** — nunca sincronizou, e o levantamento tratou "0 linhas"
@@ -716,6 +720,6 @@ começa do zero no dia em que ligar. Quanto mais tarde, mais tarde ele serve.
 | 5 | Receita sobre `via_hub` | **Não agora** — hub em construção (46% dos perfis sem `id_via`). Nesta fase, só declarar a limitação e encerrar a série. Retomar pelos critérios de §4 |
 | 6 | Módulos novos | Mentoria · Comunicação & Notificação · Planos & Pacotes · Destaques executivos |
 | 7 | Encerrar 4 itens da auditoria como "sem lastro" | Sim — funil de entrega de convite, tempo por etapa do onboarding, teto de tokens e limite do Builder nunca tiveram dado |
-| 8 | Contrato de PII e decisão papel-na-época | Precisa de você — é regra de negócio, não de engenharia |
+| 8 | ~~Contrato de PII e papel-na-época~~ | **Decididos em 11/ago.** Espelhar tudo que sirva a análise registrada, com as quatro disciplinas do CLAUDE.md · recorte usa o papel atual · e entra a dimensão comprador × convidado |
 
 Aguardo OK por fase. Nada começa antes.

@@ -109,6 +109,17 @@ Consequência para a análise: o recorte que explica retenção é **comprador �
 
 **Papel é do momento, não histórico:** a dim guarda o papel atual, e a plataforma já migrou gente em lote (5.222 de `freemium` para `hands_on`). Toda leitura por papel é "de quem hoje é X" — declarar isso onde a série atravessa uma migração.
 - Enums remotos precisam de tipo local homônimo antes de `import foreign schema` (hoje só `consultor_planejamento_status`).
+
+#### Contrato de PII (autorização do Mateus, 11/ago/2026)
+
+**Está autorizado espelhar tudo que a plataforma e o Pulse têm, desde que sirva a uma análise registrada.** O limite não é a natureza do dado — é a existência da pergunta. Tabela sem pergunta não vira mart só porque cabe.
+
+Quatro disciplinas, que não custam nada em poder analítico:
+
+1. **Chave no lugar do valor quando a análise só precisa distinguir.** `count(distinct)` funciona igual sobre hash — é o padrão já adotado no espelho de CS (`wa_phone_key` em vez do telefone). Vale por padrão para telefone, documento e destinatário de disparo. **Exceção legítima:** nome, e-mail e organização entram com valor em **lista nominal de ação** (clientes em risco, power users), porque ali a análise exige identificar a pessoa para agir — o controle passa a ser de acesso, não de armazenamento.
+2. **Conteúdo livre só entra se alguma análise exigir.** Hoje nenhuma exige: texto de mensagem do Consultor, corpo de notificação, justificativa de cancelamento — todos rendem agregado. Mantém-se a decisão da Entrega 6 (mensagem do Consultor entra como agregado usuário+dia; o texto não sai da plataforma).
+3. **Exclusão propaga.** Se a plataforma apaga alguém, o mart apaga junto — vale para todo mart novo, com teste. Guardar quem a origem excluiu é o único ponto em que espelhar amplo vira risco real, independentemente de autorização.
+4. **Lista nominal exige papel.** O BI tem hoje 2 contas, ambas `member`, e nenhuma tela distingue papel. Quando o time entrar, **lista com nome/e-mail fica atrás de `private.is_admin()`**; o agregado continua para todos.
 - **Mapa das origens: `docs/mapa-dados-plataforma.md`** — 211 tabelas dos 3 bancos com volume, período, qualidade e as perguntas que cada domínio destrava. É a referência de origem; `discovery-banco-plataforma.md` e `dicionario-dados-plataforma.md` viraram material histórico.
 - **O MCP do Supabase alcança os três bancos direto** (plataforma, CS Pulse, BI). O FDW parado bloqueia a carga dos marts, não a análise do schema de origem — não esperar o pipeline para investigar dado.
 - ⚠️ **A plataforma apaga histórico por cron dominical.** `cleanup-analytics-views` (navegação com +30d) está inativo hoje, mas já rodou: os pageviews de 03–09/07/2026 **só existem no nosso mart**. As purgas de `notifications` estão ativas. O BI não é só consumidor — é arquivo.
