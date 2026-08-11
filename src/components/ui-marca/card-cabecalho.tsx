@@ -40,7 +40,10 @@ export function CardCabecalho({
   action,
 }: CardCabecalhoProps) {
   return (
-    <CardHeader className="flex flex-row items-start justify-between gap-3">
+    /* flex-wrap: com action estreita (o botão de informação, 32px) nada muda;
+       com action larga — grupo de botões, seletor de tela — ela desce para a
+       linha de baixo no mobile em vez de espremer o título até as reticências. */
+    <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
       <div className="min-w-0 space-y-1.5">
         <div className="flex items-center gap-2">
           {Icon ? (
@@ -48,7 +51,10 @@ export function CardCabecalho({
               <Icon className="size-4" />
             </span>
           ) : null}
-          <CardTitle className="truncate text-sm font-medium">{title}</CardTitle>
+          {/* line-clamp-2 e não truncate: no desktop nada muda (só age quando
+              não cabe), e no estreito o título completa em duas linhas em vez de
+              virar reticências. Título cortado é título que mente. */}
+          <CardTitle className="line-clamp-2 text-sm font-medium">{title}</CardTitle>
         </div>
 
         {headline ? (

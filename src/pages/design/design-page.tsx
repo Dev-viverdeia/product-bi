@@ -1,4 +1,14 @@
 import { useState } from 'react'
+import {
+  ChartColumnIcon,
+  CoinsIcon,
+  LayersIcon,
+  PieChartIcon,
+  RadioIcon,
+  ClockIcon,
+  TableIcon,
+  UsersIcon,
+} from 'lucide-react'
 
 import {
   CategoryBarChart,
@@ -9,16 +19,10 @@ import {
   KpiGrid,
   TimeSeriesChart,
 } from '@/components/charts'
+import { TabelaCard } from '@/components/tabela/tabela-card'
+import { TabelaLonga } from '@/components/tabela/tabela-longa'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { TableCell, TableHead, TableRow } from '@/components/ui/table'
 import {
   formatCompact,
   formatCurrency,
@@ -50,6 +54,40 @@ const demoStates: { value: DemoState; label: string }[] = [
  */
 export function DesignPage() {
   const [demoState, setDemoState] = useState<DemoState>('loading')
+
+  // Headlines derivados do próprio dado de exemplo — o showcase segue a mesma
+  // regra do produto: o número que responde o card sai do que ele desenha.
+  const melhorMes = receitaMensal.reduce((a, b) => (Number(b.receita) > Number(a.receita) ? b : a))
+  const canalLider = sessoesPorCanal.reduce((a, b) => (b.value > a.value ? b : a))
+  const totalSessoes = sessoesPorCanal.reduce((soma, c) => soma + c.value, 0)
+  const produtoLider = receitaPorProduto.reduce((a, b) => (b.value > a.value ? b : a))
+  const totalAssinaturas = assinaturasPorPlano.reduce((soma, p) => soma + p.value, 0)
+  const ultimoMes = usuariosMensal.at(-1)
+
+  // padrão determinístico: pico em dias úteis, 10h–16h
+  const dadosHeatmap = Array.from({ length: 7 }, (_, dia) =>
+    Array.from({ length: 24 }, (_, hora) => ({
+      dia,
+      hora,
+      valor:
+        dia === 0 || dia === 6
+          ? Math.max(0, 12 - Math.abs(hora - 14) * 2)
+          : Math.max(0, 80 - Math.abs(hora - 11) * 9 - (dia === 5 ? 18 : 0)),
+    })),
+  ).flat()
+  const picoHeatmap = dadosHeatmap.reduce((maior, c) => Math.max(maior, c.valor), 0)
+
+  // 19 linhas de propósito: é o tamanho em que a paginação de 12 aparece, que
+  // é o comportamento que este card existe para validar.
+  const linhasDaTabela = Array.from({ length: 19 }, (_, i) => {
+    const base = receitaPorProduto[i % receitaPorProduto.length]
+    const volta = Math.floor(i / receitaPorProduto.length)
+    return {
+      produto: volta === 0 ? base.category : `${base.category} ${volta + 1}`,
+      receita: base.value / (volta + 1),
+      assinantes: ([1180, 890, 240, 310, 12][i % 5] ?? 0) / (volta + 1),
+    }
+  })
 
   return (
     <div className="space-y-6">
@@ -93,8 +131,12 @@ export function DesignPage() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <ChartCard
+          tone="brand"
+          icon={CoinsIcon}
           title="Receita mensal"
-          description="Últimos 12 meses"
+          headline={formatCurrencyCompact(Number(melhorMes.receita))}
+          headlineLabel={`no melhor mês (${formatMonthShort(String(melhorMes.x))})`}
+          description="Últimos 12 meses · bloco navy de destaque — um por tela"
         >
           <TimeSeriesChart
             variant="area"
@@ -106,7 +148,14 @@ export function DesignPage() {
         </ChartCard>
 
         <ChartCard
+          icon={UsersIcon}
           title="Usuários por mês"
+          headline={
+            ultimoMes
+              ? formatCompact(Number(ultimoMes.recorrentes) + Number(ultimoMes.novos))
+              : '—'
+          }
+          headlineLabel="no último mês"
           description="Novos × recorrentes — 2ª série tracejada (segundo canal)"
         >
           <TimeSeriesChart
@@ -120,7 +169,13 @@ export function DesignPage() {
           />
         </ChartCard>
 
-        <ChartCard title="Sessões por canal" description="Agosto de 2026">
+        <ChartCard
+          icon={RadioIcon}
+          title="Sessões por canal"
+          headline={formatPercent(canalLider.value / totalSessoes)}
+          headlineLabel={`em ${canalLider.category}`}
+          description="Agosto de 2026"
+        >
           <CategoryBarChart
             data={sessoesPorCanal}
             label="Sessões"
@@ -129,7 +184,10 @@ export function DesignPage() {
         </ChartCard>
 
         <ChartCard
+          icon={ChartColumnIcon}
           title="Receita por produto"
+          headline={formatCurrencyCompact(produtoLider.value)}
+          headlineLabel={`no líder (${produtoLider.category})`}
           description="Barras horizontais para categorias longas"
         >
           <CategoryBarChart
@@ -141,7 +199,10 @@ export function DesignPage() {
         </ChartCard>
 
         <ChartCard
+          icon={PieChartIcon}
           title="Assinaturas por plano"
+          headline={formatInt(totalAssinaturas)}
+          headlineLabel="assinaturas no total"
           description="6 planos → 4 + “Outros” (regra de fatias do DS)"
         >
           <DonutChart
@@ -152,8 +213,9 @@ export function DesignPage() {
         </ChartCard>
 
         <ChartCard
+          icon={LayersIcon}
           title="Estados"
-          description="Todo gráfico nasce com os três"
+          description="Todo gráfico nasce com os três · o slot de ação substitui o botão de informação"
           action={
             <div className="flex gap-1">
               {demoStates.map((state) => (
@@ -178,61 +240,50 @@ export function DesignPage() {
       </div>
 
       <ChartCard
+        icon={ClockIcon}
         title="Heatmap dia × hora"
+        headline={formatInt(picoHeatmap)}
+        headlineLabel="eventos na célula de pico"
         description="Sequencial de 1 hue por alfa — funciona igual nos 2 temas"
       >
-        <HeatmapChart
-          label="eventos"
-          data={Array.from({ length: 7 }, (_, dia) =>
-            Array.from({ length: 24 }, (_, hora) => ({
-              dia,
-              hora,
-              // padrão determinístico: pico em dias úteis, 10h–16h
-              valor:
-                dia === 0 || dia === 6
-                  ? Math.max(0, 12 - Math.abs(hora - 14) * 2)
-                  : Math.max(0, 80 - Math.abs(hora - 11) * 9 - (dia === 5 ? 18 : 0)),
-            })),
-          ).flat()}
-        />
+        <HeatmapChart label="eventos" data={dadosHeatmap} />
       </ChartCard>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Tabela densa — plana, números em mono tabular</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Produto</TableHead>
-                <TableHead className="text-right">Receita</TableHead>
-                <TableHead className="text-right">Assinantes</TableHead>
-                <TableHead className="text-right">Ticket médio</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {receitaPorProduto.map((row, i) => {
-                const assinantes = [1180, 890, 240, 310, 12][i] ?? 0
-                return (
-                  <TableRow key={row.category}>
-                    <TableCell>{row.category}</TableCell>
-                    <TableCell className="num text-right">
-                      {formatCurrency(row.value)}
-                    </TableCell>
-                    <TableCell className="num text-right">
-                      {formatInt(assinantes)}
-                    </TableCell>
-                    <TableCell className="num text-right">
-                      {formatCurrency(assinantes ? row.value / assinantes : 0)}
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {/* TabelaCard: mesmo cabeçalho do card de gráfico, tabela plana (sem
+          vidro) e a TabelaLonga por dentro. Com 19 linhas os controles de busca
+          e paginação aparecem — abaixo de uma página eles ficam escondidos. */}
+      <TabelaCard
+        icon={TableIcon}
+        title="Tabela densa"
+        headline={formatCurrency(produtoLider.value)}
+        headlineLabel={`no líder (${produtoLider.category})`}
+        description="Plana, sem vidro (regra do DS) · doze linhas por página · a busca varre o nome do produto · números em mono tabular, alinhados à direita"
+      >
+        <TabelaLonga
+          linhas={linhasDaTabela}
+          chave={(l) => l.produto}
+          buscarEm={(l) => [l.produto]}
+          rotuloBusca="Buscar produto"
+          cabecalho={
+            <TableRow>
+              <TableHead>Produto</TableHead>
+              <TableHead className="text-right">Receita</TableHead>
+              <TableHead className="text-right">Assinantes</TableHead>
+              <TableHead className="text-right">Ticket médio</TableHead>
+            </TableRow>
+          }
+          renderLinha={(l) => (
+            <TableRow>
+              <TableCell>{l.produto}</TableCell>
+              <TableCell className="num text-right">{formatCurrency(l.receita)}</TableCell>
+              <TableCell className="num text-right">{formatInt(l.assinantes)}</TableCell>
+              <TableCell className="num text-right">
+                {formatCurrency(l.assinantes ? l.receita / l.assinantes : 0)}
+              </TableCell>
+            </TableRow>
+          )}
+        />
+      </TabelaCard>
     </div>
   )
 }

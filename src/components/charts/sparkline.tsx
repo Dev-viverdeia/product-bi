@@ -11,7 +11,12 @@ export function Sparkline({ data }: { data: number[] }) {
   const lastIndex = points.length - 1
 
   return (
-    <ChartReveal direction="left" className="h-9 w-full" aria-hidden>
+    // min-w-0 porque o CardContent do KpiCard é flex-col: sem isso o filho tem
+    // min-width auto e o ResponsiveContainer não encolhe junto com o card.
+    // Sem overflow-hidden de propósito — recortar esconderia o ponto do período
+    // atual, que é a única informação do sparkline. Vazamento de alguns px na
+    // hora do resize é preferível a marcador sumido.
+    <ChartReveal direction="left" className="h-9 w-full min-w-0" aria-hidden>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={points}

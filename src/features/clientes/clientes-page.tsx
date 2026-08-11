@@ -179,7 +179,6 @@ export function ClientesPage() {
 
               <BentoItem span={4}>
                 <ChartCard
-                  className="lg:col-span-2"
                   icon={LogOutIcon}
                   title="Onde a jornada termina"
                   headline={ultimoModulo ? formatPercent(ultimoModulo.parte) : '—'}
@@ -318,7 +317,6 @@ export function ClientesPage() {
 
               <BentoItem span={8}>
                 <TabelaCard
-                  className="lg:col-span-3"
                   icon={SkullIcon}
                   title="Autópsia de churn — módulos nunca usados"
                   headline={piorGap?.gap_pp != null ? `${formatDecimal(piorGap.gap_pp)} pp` : '—'}
