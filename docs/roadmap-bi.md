@@ -199,6 +199,30 @@ experiência com IA de ~15k clientes — dado subutilizado. A partir da Entrega 
   é pergunta permanente, não análise avulsa;
 - recorte por setor/objetivo entra onde fizer sentido analítico.
 
+### Contrato do recorte persona/plano (proposta 11/ago — confirmar antes de codar)
+
+| Item | Definição proposta |
+| --- | --- |
+| Papel | `hands_on` · `master_user` · `membro_club` — 99,2% dos 14.373 clientes. Os 7 papéis restantes (99 clientes) não viram opção de filtro: recorte que nasce suprimido não é oferta, e o "todos" já os inclui |
+| Plano | `starter` · `pro` · `enterprise` · sem plano (867 clientes — grupo real, não erro de dado) |
+| Fonte | `marts.dim_usuario` (`papel`, `plano`), sempre sob `e_cliente` |
+| Semântica | recorte pelo papel/plano **atual** (a dim não guarda histórico): "retenção dos hands_on" lê "de quem hoje é hands_on". Papel na época do evento exigiria snapshot histórico — fora deste contrato |
+| Unidade | o filtro restringe o **conjunto de clientes**; eventos, pageviews e progresso contam só os desses clientes |
+| Supressão | percentual, taxa e mediana só com denominador ≥ 30 na janela filtrada; abaixo disso a tela mostra a contagem absoluta e declara que a amostra não sustenta percentual. Contagem nunca é suprimida. Delta exige ≥ 30 nos dois períodos |
+| UI | filtro global ao lado do período, na URL (`?papel=` e `?plano=`), combináveis entre si. Some nas telas de grão empresa (CS); em Organizações entra só onde a métrica é de pessoa |
+| RPCs | parâmetros `p_papel`/`p_plano` (`text default null`, null = todos), aplicados no join com a dim dentro da função |
+
+Rollout por fases, cada uma com OK do Mateus: **A** componente de filtro +
+Visão Geral + Clientes & Retenção, mais uma peça nova em /clientes — retenção
+por papel lado a lado, a resposta direta de "62% no agregado pode ser 80% no
+master e 55% no hands_on" · **B** Entrada, Formações, Soluções · **C** IA,
+Jornada (fecha o item 8 da auditoria), Receita e Organizações onde couber.
+
+Amostras medidas em 11/ago (ativos nos 30 dias até 08/08, total 3.471):
+hands_on 2.552 · master_user 739 · membro_club 169 · outros 11; pro 1.945 ·
+enterprise 756 · starter 610 · sem plano 160. Papel × plano combinados podem
+cair abaixo de 30 — a supressão é parte do contrato, não enfeite.
+
 ## Pendências abertas pela auditoria de 08/ago/2026
 
 Relatório completo: `docs/auditoria-dados-2026-08.md`. As telas 1–9 estão
