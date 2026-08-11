@@ -14,6 +14,8 @@ import { deltaOuNada } from '@/lib/delta'
 import { formatCompact, formatDateShort, formatInt } from '@/lib/format'
 import { labelRota, labelTipoEvento } from '@/lib/labels-plataforma'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
+import { SegmentoFiltro } from '@/components/filters/segmento-filtro'
+import { useSegmento } from '@/components/filters/use-segmento'
 import {
   useAtividadeDiaria,
   useEventosPorTipo,
@@ -25,12 +27,14 @@ import {
 
 export function VisaoGeralPage() {
   const [periodo, setPeriodo] = useState<Periodo>(30)
+  const { papel, plano } = useSegmento()
+  const recorte = { papel, plano }
 
-  const kpis = useKpis(periodo)
-  const atividade = useAtividadeDiaria(periodo)
-  const heatmap = useHeatmapNavegacao(periodo)
-  const eventos = useEventosPorTipo(periodo)
-  const telas = useTopTelas(periodo)
+  const kpis = useKpis(periodo, recorte)
+  const atividade = useAtividadeDiaria(periodo, recorte)
+  const heatmap = useHeatmapNavegacao(periodo, recorte)
+  const eventos = useEventosPorTipo(periodo, recorte)
+  const telas = useTopTelas(periodo, recorte)
   const sync = useUltimaSincronizacao()
 
   // Cada headline responde a pergunta do próprio card e sai do dado que ele já
@@ -73,7 +77,10 @@ export function VisaoGeralPage() {
             {sincronizadoAs ? ` · dados sincronizados às ${sincronizadoAs}` : ''}
           </p>
         </div>
-        <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <SegmentoFiltro />
+          <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
+        </div>
       </BentoItem>
 
       <BentoItem span={12}>

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import type { RefObject } from 'react'
-import { Link, NavLink, useLocation } from 'react-router'
+import { Link, NavLink, useLocation, useSearchParams } from 'react-router'
 import { BarChart3Icon, ChevronDownIcon, LogOutIcon, MenuIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -20,6 +20,7 @@ import { navFerramentas, navItems } from '@/components/layout/nav-items'
 import type { NavItem } from '@/components/layout/nav-items'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
 import { useAuth } from '@/features/auth/use-auth'
+import { comSegmento } from '@/lib/segmento'
 import { cn } from '@/lib/utils'
 
 function initials(name: string) {
@@ -79,6 +80,7 @@ function AtalhoDeAbas({
 }) {
   const gatilho = useRef<HTMLButtonElement>(null)
   const [deslocamento, setDeslocamento] = useState(0)
+  const [params] = useSearchParams()
 
   /*
     O menu abre ancorado na SETA, mas precisa parecer ancorado no item inteiro —
@@ -129,7 +131,7 @@ function AtalhoDeAbas({
             // onde vai clicar
             style={{ animationDelay: `${40 + i * 35}ms`, animationDuration: '180ms' }}
           >
-            <Link to={`${item.to}?${PARAM_ABA}=${aba.valor}`}>
+            <Link to={comSegmento(`${item.to}?${PARAM_ABA}=${aba.valor}`, params)}>
               <aba.icone />
               {aba.titulo}
             </Link>
@@ -145,6 +147,7 @@ function ItemDeNavegacao({ item }: { item: NavItem }) {
   const ancora = useRef<HTMLDivElement>(null)
   const [aberto, setAberto] = useState(false)
   const { pathname } = useLocation()
+  const [params] = useSearchParams()
 
   const naRota = item.matchPrefix ? pathname.startsWith(item.to) : pathname === item.to
   const destacado = naRota || aberto
@@ -156,7 +159,7 @@ function ItemDeNavegacao({ item }: { item: NavItem }) {
     // qualquer fundo acendia.
     <div ref={ancora} className="group/nav flex items-stretch">
       <NavLink
-        to={item.to}
+        to={comSegmento(item.to, params)}
         end={!item.matchPrefix && item.to === '/'}
         className={cn(
           itemBase,
@@ -237,6 +240,7 @@ function MenuUsuario() {
 function NavMobile() {
   const [aberto, setAberto] = useState(false)
   const { pathname } = useLocation()
+  const [params] = useSearchParams()
 
   return (
     <Sheet open={aberto} onOpenChange={setAberto}>
@@ -259,7 +263,7 @@ function NavMobile() {
             return (
               <Link
                 key={item.to}
-                to={item.to}
+                to={comSegmento(item.to, params)}
                 onClick={() => setAberto(false)}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
@@ -290,6 +294,8 @@ function NavMobile() {
  * — rolagem horizontal escondida em barra escura é armadilha de descoberta.
  */
 export function AppHeader() {
+  const [params] = useSearchParams()
+
   return (
     // O respiro acima da barra precisa de fundo próprio: sendo sticky, sem ele
     // o conteúdo rola visível por trás dessa faixa. Translúcido com blur, e não
@@ -300,7 +306,7 @@ export function AppHeader() {
         <NavMobile />
 
         <Link
-          to="/"
+          to={comSegmento('/', params)}
           className="focus-visible:ring-nav-foreground/60 flex items-center gap-2 rounded-md pr-2 focus-visible:ring-2 focus-visible:outline-none"
         >
           <span className="bg-nav-foreground/12 flex size-8 shrink-0 items-center justify-center rounded-md">

@@ -2,49 +2,60 @@ import { useQuery } from '@tanstack/react-query'
 
 import type { Periodo } from '@/components/filters/periodo-filtro'
 import { rpc } from '@/lib/rpc'
+import { argsSegmento, type Recorte } from '@/lib/segmento'
 import { supabase } from '@/lib/supabase'
 
 export type { Periodo }
 
-export function useKpis(dias: Periodo) {
+export function useKpis(dias: Periodo, recorte: Recorte) {
   return useQuery({
-    queryKey: ['bi', 'kpis', dias],
+    queryKey: ['bi', 'kpis', dias, recorte.papel, recorte.plano],
     queryFn: async () => {
-      const rows = await rpc(supabase.rpc('bi_visao_geral_kpis', { p_dias: dias }))
+      const rows = await rpc(
+        supabase.rpc('bi_visao_geral_kpis', { p_dias: dias, ...argsSegmento(recorte) }),
+      )
       return rows?.[0] ?? null
     },
   })
 }
 
-export function useAtividadeDiaria(dias: Periodo) {
+export function useAtividadeDiaria(dias: Periodo, recorte: Recorte) {
   return useQuery({
-    queryKey: ['bi', 'atividade-diaria', dias],
+    queryKey: ['bi', 'atividade-diaria', dias, recorte.papel, recorte.plano],
     queryFn: async () =>
-      (await rpc(supabase.rpc('bi_atividade_diaria', { p_dias: dias }))) ?? [],
+      (await rpc(
+        supabase.rpc('bi_atividade_diaria', { p_dias: dias, ...argsSegmento(recorte) }),
+      )) ?? [],
   })
 }
 
-export function useHeatmapNavegacao(dias: Periodo) {
+export function useHeatmapNavegacao(dias: Periodo, recorte: Recorte) {
   return useQuery({
-    queryKey: ['bi', 'heatmap-navegacao', dias],
+    queryKey: ['bi', 'heatmap-navegacao', dias, recorte.papel, recorte.plano],
     queryFn: async () =>
-      (await rpc(supabase.rpc('bi_heatmap_navegacao', { p_dias: dias }))) ?? [],
+      (await rpc(
+        supabase.rpc('bi_heatmap_navegacao', { p_dias: dias, ...argsSegmento(recorte) }),
+      )) ?? [],
   })
 }
 
-export function useEventosPorTipo(dias: Periodo) {
+export function useEventosPorTipo(dias: Periodo, recorte: Recorte) {
   return useQuery({
-    queryKey: ['bi', 'eventos-por-tipo', dias],
+    queryKey: ['bi', 'eventos-por-tipo', dias, recorte.papel, recorte.plano],
     queryFn: async () =>
-      (await rpc(supabase.rpc('bi_eventos_por_tipo', { p_dias: dias }))) ?? [],
+      (await rpc(
+        supabase.rpc('bi_eventos_por_tipo', { p_dias: dias, ...argsSegmento(recorte) }),
+      )) ?? [],
   })
 }
 
-export function useTopTelas(dias: Periodo) {
+export function useTopTelas(dias: Periodo, recorte: Recorte) {
   return useQuery({
-    queryKey: ['bi', 'top-telas', dias],
+    queryKey: ['bi', 'top-telas', dias, recorte.papel, recorte.plano],
     queryFn: async () =>
-      (await rpc(supabase.rpc('bi_top_telas', { p_dias: dias, p_limite: 10 }))) ?? [],
+      (await rpc(
+        supabase.rpc('bi_top_telas', { p_dias: dias, p_limite: 10, ...argsSegmento(recorte) }),
+      )) ?? [],
   })
 }
 
@@ -56,4 +67,3 @@ export function useUltimaSincronizacao() {
     queryFn: async () => await rpc(supabase.rpc('bi_ultima_sincronizacao')),
   })
 }
-

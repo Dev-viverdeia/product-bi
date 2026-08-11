@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { animate, useReducedMotion } from 'motion/react'
 import * as motion from 'motion/react-client'
-import { AlertCircleIcon,TrendingDownIcon, TrendingUpIcon } from 'lucide-react'
+import { AlertCircleIcon, InfoIcon, TrendingDownIcon, TrendingUpIcon } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -39,7 +39,8 @@ export type KpiDelta = {
 
 type KpiCardProps = {
   label: string
-  value: number
+  /** `null` = a régua do dado suprimiu o valor — o tile mostra travessão */
+  value: number | null
   /** formatador do valor — padrão compacto pt-BR */
   format?: (value: number) => string
   delta?: KpiDelta
@@ -52,6 +53,12 @@ type KpiCardProps = {
    * executivo isso é pior que erro: é número errado com cara de certo.
    */
   isError?: boolean
+  /**
+   * Por que não há valor (ex.: `notaAmostra(n)` quando a RPC suprime percentual
+   * com denominador < 30). Não é erro: é a régua se declarando — sem o motivo,
+   * o travessão viraria mistério.
+   */
+  motivoSemValor?: string
   className?: string
 }
 
@@ -76,10 +83,14 @@ export function KpiCard({
   trend,
   isLoading = false,
   isError = false,
+  motivoSemValor,
   className,
 }: KpiCardProps) {
   const reducedMotion = useReducedMotion()
-  const displayed = useCountUp(value, !reducedMotion && !isLoading && !isError)
+  const displayed = useCountUp(
+    value ?? 0,
+    !reducedMotion && !isLoading && !isError && value != null,
+  )
 
   if (isLoading) {
     return (
@@ -107,6 +118,25 @@ export function KpiCard({
           </p>
         </CardContent>
       </Card>
+    )
+  }
+
+  if (value == null) {
+    return (
+      <motion.div variants={gridItem} className="h-full">
+        <Card className={cn('glass-card h-full', className)}>
+          <CardContent className="flex h-full flex-col gap-1">
+            <p className="text-muted-foreground text-xs">{label}</p>
+            <p className="num text-3xl leading-none font-semibold tracking-tight">—</p>
+            {motivoSemValor ? (
+              <p className="text-muted-foreground flex items-center gap-1 text-xs">
+                <InfoIcon className="size-3.5 shrink-0" />
+                {motivoSemValor}
+              </p>
+            ) : null}
+          </CardContent>
+        </Card>
+      </motion.div>
     )
   }
 

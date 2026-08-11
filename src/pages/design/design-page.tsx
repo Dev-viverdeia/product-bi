@@ -19,6 +19,7 @@ import {
   KpiGrid,
   TimeSeriesChart,
 } from '@/components/charts'
+import { SegmentoFiltro } from '@/components/filters/segmento-filtro'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 import { Button } from '@/components/ui/button'
@@ -31,6 +32,7 @@ import {
   formatMonthShort,
   formatPercent,
 } from '@/lib/format'
+import { notaAmostra } from '@/lib/segmento'
 import {
   assinaturasPorPlano,
   kpis,
@@ -40,13 +42,14 @@ import {
   usuariosMensal,
 } from '@/pages/design/sample-data'
 
-type DemoState = 'ok' | 'loading' | 'empty' | 'error'
+type DemoState = 'ok' | 'loading' | 'empty' | 'error' | 'sem-amostra'
 
 const demoStates: { value: DemoState; label: string }[] = [
   { value: 'ok', label: 'Normal' },
   { value: 'loading', label: 'Carregando' },
   { value: 'empty', label: 'Vazio' },
   { value: 'error', label: 'Erro' },
+  { value: 'sem-amostra', label: 'Sem amostra' },
 ]
 
 /**
@@ -96,49 +99,57 @@ export function DesignPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Design system</h2>
-        <p className="text-muted-foreground text-sm">
-          Showcase do kit de gráficos — dados de exemplo.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">Design system</h2>
+          <p className="text-muted-foreground text-sm">
+            Showcase do kit de gráficos — dados de exemplo · o recorte ao lado é o
+            componente real e escreve na URL
+          </p>
+        </div>
+        <SegmentoFiltro />
       </div>
 
       <KpiGrid>
         <KpiCard
           label="Receita (mês)"
-          value={kpis.receita.value}
+          value={demoState === 'sem-amostra' ? null : kpis.receita.value}
           format={formatCurrencyCompact}
           delta={{ value: kpis.receita.delta, vs: 'vs mês anterior' }}
           trend={kpis.receita.trend}
-        isLoading={demoState === 'loading'}
-        isError={demoState === 'error'}
+          motivoSemValor={notaAmostra(12)}
+          isLoading={demoState === 'loading'}
+          isError={demoState === 'error'}
         />
         <KpiCard
           label="Usuários ativos"
-          value={kpis.usuariosAtivos.value}
+          value={demoState === 'sem-amostra' ? null : kpis.usuariosAtivos.value}
           format={formatInt}
           delta={{ value: kpis.usuariosAtivos.delta, vs: 'vs mês anterior' }}
           trend={kpis.usuariosAtivos.trend}
-        isLoading={demoState === 'loading'}
-        isError={demoState === 'error'}
+          motivoSemValor={notaAmostra(12)}
+          isLoading={demoState === 'loading'}
+          isError={demoState === 'error'}
         />
         <KpiCard
           label="Conversão"
-          value={kpis.conversao.value}
+          value={demoState === 'sem-amostra' ? null : kpis.conversao.value}
           format={formatPercent}
           delta={{ value: kpis.conversao.delta, vs: 'vs mês anterior' }}
           trend={kpis.conversao.trend}
-        isLoading={demoState === 'loading'}
-        isError={demoState === 'error'}
+          motivoSemValor={notaAmostra(12)}
+          isLoading={demoState === 'loading'}
+          isError={demoState === 'error'}
         />
         <KpiCard
           label="Churn"
-          value={kpis.churn.value}
+          value={demoState === 'sem-amostra' ? null : kpis.churn.value}
           format={formatPercent}
           delta={{ value: kpis.churn.delta, vs: 'vs mês anterior', upIsGood: false }}
           trend={kpis.churn.trend}
-        isLoading={demoState === 'loading'}
-        isError={demoState === 'error'}
+          motivoSemValor={notaAmostra(12)}
+          isLoading={demoState === 'loading'}
+          isError={demoState === 'error'}
         />
       </KpiGrid>
 
@@ -228,7 +239,7 @@ export function DesignPage() {
         <ChartCard
           icon={LayersIcon}
           title="Estados"
-          description="Todo gráfico nasce com os quatro · o seletor governa também os KpiCards do topo, onde o estado de erro é o que faltava"
+          description="Todo gráfico nasce com os quatro · o seletor governa também os KpiCards do topo — erro e “sem amostra” (percentual suprimido pela régua de 30) são os estados que não podiam faltar"
           action={
             <div className="flex gap-1">
               {demoStates.map((state) => (

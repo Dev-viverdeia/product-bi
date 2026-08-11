@@ -8,6 +8,7 @@ import {
   ShieldCheckIcon,
   SkullIcon,
   StarIcon,
+  UserCheckIcon,
   UsersRoundIcon,
 } from 'lucide-react'
 import { BentoGrid, BentoItem } from '@/components/layout/bento'
@@ -17,6 +18,8 @@ import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/charts'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
+import { SegmentoFiltro } from '@/components/filters/segmento-filtro'
+import { useSegmento } from '@/components/filters/use-segmento'
 import { StatusPill } from '@/components/ui-marca/status-pill'
 import { TableCell, TableHead, TableRow } from '@/components/ui/table'
 import {
@@ -28,6 +31,7 @@ import {
 import { labelTipoEvento } from '@/lib/labels-plataforma'
 import { CohortTable } from '@/features/clientes/cohort-table'
 import { LIMITE_LISTA } from '@/lib/rpc'
+import { notaAmostra, rotuloPapel } from '@/lib/segmento'
 import {
   useAhaMoment,
   useAmplitudeModulos,
@@ -40,22 +44,26 @@ import {
   usePowerUsers,
   useRetencaoCohort,
   useRetencaoPorAmplitude,
+  useRetencaoPorPapel,
 } from '@/features/clientes/queries'
 
 export function ClientesPage() {
   const [periodo, setPeriodo] = useState<Periodo>(30)
+  const { papel, plano } = useSegmento()
+  const recorte = { papel, plano }
 
-  const engajamento = useEngajamento(periodo)
-  const risco = useClientesEmRisco()
-  const cohort = useRetencaoCohort()
-  const aha = useAhaMoment()
-  const churnResumo = useChurnResumo()
-  const churnModulos = useChurnModulos()
-  const churnUltimo = useChurnUltimoModulo()
-  const diasAtivos = useDiasAtivosDistribuicao(periodo)
-  const amplitude = useAmplitudeModulos(periodo)
-  const retencaoAmplitude = useRetencaoPorAmplitude()
-  const powerUsers = usePowerUsers(periodo)
+  const engajamento = useEngajamento(periodo, recorte)
+  const risco = useClientesEmRisco(recorte)
+  const cohort = useRetencaoCohort(recorte)
+  const retencaoPapel = useRetencaoPorPapel(plano)
+  const aha = useAhaMoment(recorte)
+  const churnResumo = useChurnResumo(recorte)
+  const churnModulos = useChurnModulos(recorte)
+  const churnUltimo = useChurnUltimoModulo(recorte)
+  const diasAtivos = useDiasAtivosDistribuicao(periodo, recorte)
+  const amplitude = useAmplitudeModulos(periodo, recorte)
+  const retencaoAmplitude = useRetencaoPorAmplitude(recorte)
+  const powerUsers = usePowerUsers(periodo, recorte)
 
   // A safra mais recente com janela de 90 dias fechada é a leitura honesta de
   // retenção: as safras mais novas ainda têm "—" e enganariam para cima.
@@ -63,6 +71,24 @@ export function ClientesPage() {
     () => (cohort.data ?? []).find((c) => c.ret_90d != null) ?? null,
     [cohort.data],
   )
+
+  // Papel suprimido (amostra < 30 no plano filtrado) sai do desenho — barra em
+  // zero seria mentira e barra fantasma seria adivinhação.
+  const papeisComTaxa = useMemo(
+    () => (retencaoPapel.data ?? []).filter((r) => r.pct_retidos != null),
+    [retencaoPapel.data],
+  )
+
+  const gapPapeis = useMemo(() => {
+    if (papeisComTaxa.length < 2) return null
+    const maior = papeisComTaxa[0]!
+    const menor = papeisComTaxa[papeisComTaxa.length - 1]!
+    return {
+      pp: (maior.pct_retidos - menor.pct_retidos) * 100,
+      maior: rotuloPapel(maior.papel),
+      menor: rotuloPapel(menor.papel),
+    }
+  }, [papeisComTaxa])
 
   const ultimoModulo = useMemo(() => {
     const ms = churnUltimo.data ?? []
@@ -122,36 +148,45 @@ export function ClientesPage() {
               Régua: cliente ativo = 1+ ação de produto no dia · eventos desde mai/2025
             </p>
           </div>
-          <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <SegmentoFiltro />
+            <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
+          </div>
         </BentoItem>
 
         <BentoItem span={12}>
           <KpiGrid>
+            {/* `?? null`, nunca `?? 0`: a RPC suprime a taxa quando a amostra
+                do recorte fica abaixo de 30, e o tile declara o porquê */}
             <KpiCard
               label="Stickiness (DAU/MAU)"
-              value={engajamento.data?.stickiness ?? 0}
+              value={engajamento.data?.stickiness ?? null}
               format={formatPercent}
+              motivoSemValor={notaAmostra(engajamento.data?.mau)}
               isLoading={engajamento.isLoading}
               isError={engajamento.isError}
             />
             <KpiCard
               label="Hábito semanal"
-              value={engajamento.data?.pct_habito_semanal ?? 0}
+              value={engajamento.data?.pct_habito_semanal ?? null}
               format={formatPercent}
+              motivoSemValor={notaAmostra(engajamento.data?.base_habito)}
               isLoading={engajamento.isLoading}
               isError={engajamento.isError}
             />
             <KpiCard
               label="Dias ativos por cliente"
-              value={engajamento.data?.dias_ativos_medio ?? 0}
+              value={engajamento.data?.dias_ativos_medio ?? null}
               format={formatDecimal}
+              motivoSemValor={notaAmostra(engajamento.data?.mau)}
               isLoading={engajamento.isLoading}
               isError={engajamento.isError}
             />
             <KpiCard
               label="Usam 2+ módulos"
-              value={engajamento.data?.pct_multimodulo ?? 0}
+              value={engajamento.data?.pct_multimodulo ?? null}
               format={formatPercent}
+              motivoSemValor={notaAmostra(engajamento.data?.mau)}
               isLoading={engajamento.isLoading}
               isError={engajamento.isError}
             />
@@ -172,13 +207,42 @@ export function ClientesPage() {
                     cohortMaduro?.ret_90d != null ? formatPercent(cohortMaduro.ret_90d) : '—'
                   }
                   headlineLabel="aos 90 dias na safra madura mais recente"
-                  description="% de clientes ativos na janela após a entrada · “—” = janela ainda não completa, por isso o número acima usa a safra mais recente com 90 dias fechados · atenção: a régua de atividade ganhou novos tipos de evento ao longo do tempo (Builder out/25, Soluções abr/26, Consultor mai/26) — parte da melhora entre cohorts distantes é instrumentação"
+                  description="% de clientes ativos na janela após a entrada · “—” = janela ainda não completa, por isso o número acima usa a safra mais recente com 90 dias fechados · safra com menos de 30 clientes no recorte mostra só a contagem (% suprimido pela régua de amostra) · atenção: a régua de atividade ganhou novos tipos de evento ao longo do tempo (Builder out/25, Soluções abr/26, Consultor mai/26) — parte da melhora entre cohorts distantes é instrumentação"
                   isLoading={cohort.isLoading}
                   isError={cohort.isError}
                   onRetry={() => void cohort.refetch()}
                 >
                   <CohortTable linhas={cohort.data ?? []} />
                 </TabelaCard>
+              </BentoItem>
+
+              <BentoItem span={12}>
+                <ChartCard
+                  icon={UserCheckIcon}
+                  title="Retenção por papel"
+                  headline={gapPapeis ? `${formatDecimal(gapPapeis.pp)} pp` : '—'}
+                  headlineLabel={
+                    gapPapeis ? `separam ${gapPapeis.maior} de ${gapPapeis.menor}` : undefined
+                  }
+                  description="Clientes com 120+ dias de casa ainda ativos nos últimos 30 dias, comparados entre os 3 papéis que cobrem 99% da base · mesma régua do card “Multi-módulo retém mais?” · papel com menos de 30 elegíveis sai do desenho · responde ao filtro de plano e ignora o de papel de propósito — a comparação é o card"
+                  isLoading={retencaoPapel.isLoading}
+                  isError={retencaoPapel.isError}
+                  onRetry={() => void retencaoPapel.refetch()}
+                  isEmpty={papeisComTaxa.length === 0}
+                  emptyMessage="Nenhum papel com 30+ clientes elegíveis no recorte."
+                  isRefreshing={retencaoPapel.isFetching && !!retencaoPapel.data}
+                >
+                  <CategoryBarChart
+                    layout="bar"
+                    label="Retidos"
+                    data={papeisComTaxa.map((r) => ({
+                      category: `${rotuloPapel(r.papel)} (${formatInt(r.clientes)})`,
+                      value: r.pct_retidos,
+                    }))}
+                    valueFormatter={formatPercent}
+                    className="h-[200px]"
+                  />
+                </ChartCard>
               </BentoItem>
 
               <BentoItem span={4}>
@@ -327,7 +391,20 @@ export function ClientesPage() {
                   headlineLabel={piorGap ? `de gap no maior (${piorGap.modulo})` : undefined}
                   description={
                     churnResumo.data
-                      ? `${formatInt(churnResumo.data.churned)} clientes em churn (60+ dias sem uso, ${formatPercent(churnResumo.data.pct_churn ?? 0)} da base histórica) · vida média de ${formatDecimal(churnResumo.data.vida_media_dias ?? 0)} dias · gap = diferença, em pontos percentuais, entre quem saiu e quem ficou`
+                      ? [
+                          `${formatInt(churnResumo.data.churned)} clientes em churn (60+ dias sem uso${
+                            churnResumo.data.pct_churn != null
+                              ? `, ${formatPercent(churnResumo.data.pct_churn)} da base histórica`
+                              : ''
+                          })`,
+                          churnResumo.data.vida_media_dias != null
+                            ? `vida média de ${formatDecimal(churnResumo.data.vida_media_dias)} dias`
+                            : null,
+                          'gap = diferença, em pontos percentuais, entre quem saiu e quem ficou',
+                          '% só com 30+ clientes no grupo (régua de amostra)',
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')
                       : 'Quem saiu vs quem ficou: % que nunca usou cada módulo'
                   }
                   isLoading={churnModulos.isLoading}
@@ -389,7 +466,7 @@ export function ClientesPage() {
                       ? `ainda ativos com ${retencaoTopo.modulos} ${retencaoTopo.modulos === 1 ? 'módulo' : 'módulos'}`
                       : undefined
                   }
-                  description="Módulos usados nos primeiros 30 dias de vida × % ainda ativos hoje (clientes com 120+ dias de casa)"
+                  description="Módulos usados nos primeiros 30 dias de vida × % ainda ativos hoje (clientes com 120+ dias de casa) · faixa com menos de 30 clientes sai do desenho (régua de amostra)"
                   isLoading={retencaoAmplitude.isLoading}
                   isError={retencaoAmplitude.isError}
                   onRetry={() => void retencaoAmplitude.refetch()}
@@ -398,10 +475,12 @@ export function ClientesPage() {
                 >
                   <CategoryBarChart
                     label="Retidos"
-                    data={(retencaoAmplitude.data ?? []).map((r) => ({
-                      category: `${r.modulos} ${r.modulos === 1 ? 'módulo' : 'módulos'}`,
-                      value: r.pct_retidos,
-                    }))}
+                    data={(retencaoAmplitude.data ?? [])
+                      .filter((r) => r.pct_retidos != null)
+                      .map((r) => ({
+                        category: `${r.modulos} ${r.modulos === 1 ? 'módulo' : 'módulos'}`,
+                        value: r.pct_retidos,
+                      }))}
                     valueFormatter={formatPercent}
                     className="h-[260px]"
                   />
@@ -419,7 +498,7 @@ export function ClientesPage() {
                   headlineLabel={
                     melhorSinal ? `no melhor sinal (${labelTipoEvento(melhorSinal.acao)})` : undefined
                   }
-                  description="Ação nos primeiros 7 dias × retenção aos 90 dias (clientes com 120+ dias de casa) · correlação, não causalidade — validar com experimento · só ações com tracking cobrindo todo o período aparecem"
+                  description="Ação nos primeiros 7 dias × retenção aos 90 dias (clientes com 120+ dias de casa) · correlação, não causalidade — validar com experimento · só ações com tracking cobrindo todo o período aparecem · régua de amostra: 50+ fizeram, e % de “não fizeram” só com 30+"
                   isLoading={aha.isLoading}
                   isError={aha.isError}
                   onRetry={() => void aha.refetch()}
@@ -429,7 +508,7 @@ export function ClientesPage() {
                     chave={(a) => a.acao}
                     buscarEm={(a) => [labelTipoEvento(a.acao), a.acao]}
                     rotuloBusca="Buscar ação"
-                    vazio="Nenhuma ação com tracking cobrindo todo o período."
+                    vazio="Nenhuma ação com tracking e amostra suficientes no recorte."
                     cabecalho={
                       <TableRow>
                         <TableHead>Ação na 1ª semana</TableHead>
