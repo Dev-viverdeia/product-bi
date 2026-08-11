@@ -146,6 +146,123 @@ export type Database = {
           usuarios: number
         }[]
       }
+      bi_cs_atendimento_cobertura: {
+        Args: { p_dias?: number }
+        Returns: {
+          atendimentos: number
+          atribuicao: string
+          pct: number
+        }[]
+      }
+      bi_cs_atendimento_ia_humano: {
+        Args: { p_dias?: number }
+        Returns: {
+          com_humano: number
+          desfecho: string
+          so_ia: number
+          total: number
+        }[]
+      }
+      bi_cs_atendimento_mensal: {
+        Args: never
+        Returns: {
+          atendimentos: number
+          contatos: number
+          conversas: number
+          mes: string
+        }[]
+      }
+      bi_cs_atendimento_por_atendente: {
+        Args: { p_dias?: number }
+        Returns: {
+          atendente: string
+          atendimentos: number
+          contatos: number
+        }[]
+      }
+      bi_cs_atendimento_por_canal: {
+        Args: { p_dias?: number }
+        Returns: {
+          atendimentos: number
+          canal: string
+        }[]
+      }
+      bi_cs_cancelamento_desfecho: {
+        Args: never
+        Returns: {
+          solicitacoes: number
+          tipo_acordo: string
+        }[]
+      }
+      bi_cs_cancelamento_mensal: {
+        Args: never
+        Returns: {
+          mes: string
+          solicitacoes: number
+        }[]
+      }
+      bi_cs_cancelamento_origem: {
+        Args: never
+        Returns: {
+          origem: string
+          solicitacoes: number
+        }[]
+      }
+      bi_cs_disparos_mensal: {
+        Args: never
+        Returns: {
+          disparos: number
+          falhas: number
+          mensagens: number
+          mes: string
+          pessoas: number
+        }[]
+      }
+      bi_cs_disparos_por_canal: {
+        Args: { p_dias?: number }
+        Returns: {
+          canal: string
+          enviados: number
+          falhas: number
+          ignorados: number
+          pct_erro: number
+        }[]
+      }
+      bi_cs_frescor: {
+        Args: never
+        Returns: {
+          carregado_em: string
+          linhas: number
+          tabela: string
+        }[]
+      }
+      bi_cs_funil: {
+        Args: { p_quadro: string }
+        Returns: {
+          cards: number
+          etapa: string
+          etapa_ordem: number
+        }[]
+      }
+      bi_cs_kpis: {
+        Args: { p_dias?: number }
+        Returns: {
+          atendimentos: number
+          contatos: number
+          em_tentativa_reversao: number
+          pessoas_impactadas: number
+          revertidos: number
+          solicitacoes_cancelamento: number
+        }[]
+      }
+      bi_cs_retencao: {
+        Args: never
+        Returns: {
+          em_tentativa_reversao: number
+          empresas: number
+          status: string
+        }[]
+      }
       bi_dias_ativos_distribuicao: {
         Args: { p_dias?: number }
         Returns: {

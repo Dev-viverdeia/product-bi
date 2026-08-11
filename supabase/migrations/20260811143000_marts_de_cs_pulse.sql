@@ -12,8 +12,10 @@
 -- fora: phone_e164, contato, recipient_email/phone/name, solicitante_* e o
 -- conteúdo das mensagens. Ver docs/discovery-banco-cs-pulse.md §7.
 --
--- RLS ligada e sem policy em tudo: marts não é exposto na API REST, o app lê
--- via RPC. Deny-all é intencional (advisors INFO esperados).
+-- RLS ligada em tudo. A policy de leitura vem na migration seguinte
+-- (20260811150000): as RPCs do projeto são SECURITY INVOKER, então sem policy
+-- elas devolveriam zero linha em silêncio. marts segue fora da API REST — o app
+-- só chega aqui através das funções em `public`.
 
 -- ============================================================
 -- DIMENSÃO — empresa vista pelo CS
