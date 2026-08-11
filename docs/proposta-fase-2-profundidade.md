@@ -273,7 +273,19 @@ vira pergunta para quem opera o hub. Se se confirmar, é assunto de diretoria.
 
 ---
 
-## 5. Fase 0 — o que está errado em produção hoje
+## 5. Fase 0 — ✅ entregue em 11/ago (commit `5add993`)
+
+Executada com OK do Mateus. O que segue é o diagnóstico original, mantido como
+registro, com o resultado de cada item. Três coisas apareceram durante a
+execução e entraram junto:
+
+| Achado durante a execução | O que era |
+| --- | --- |
+| **Dois cards em erro, em produção** | `bi_aha_moment` e `bi_churn_modulos` estouravam o timeout de 8s e devolviam 500 na tela de Clientes. Causa: CTE inline reavaliada dentro de cross join num caso, e função imutável rodando por evento (330.847) em vez de por par distinto (25.231) no outro. 4.470ms → 203ms e 4.337ms → 946ms |
+| **`?? 0` era sistêmico, não pontual** | 36 KPIs em 9 telas, não só no CS. Todos corrigidos, mais 3 headlines de CS que publicavam "0 pessoas atenderam" sem carga |
+| **A âncora barata custou caro** | `data_referencia()` num `WHERE` é avaliada por linha — 14.848 chamadas para descobrir uma data. Resolvido com `hoje as materialized`, e a armadilha está registrada no CLAUDE.md |
+
+O diagnóstico original:
 
 Não dá para construir camada de leitura sobre número errado: o resumo amplifica
 o que estiver embaixo dele. **Nenhuma destas correções depende do FDW.**
@@ -649,7 +661,7 @@ parte da entrega.
 
 | Fase | Entrega | Depende do FDW? |
 | --- | --- | :---: |
-| **0** | Correções de veracidade (§5) | não |
+| ~~**0**~~ | ~~Correções de veracidade (§5)~~ — **✅ entregue 11/ago** | não |
 | **1** | Motor de achados + anatomia, em 2 telas piloto (Clientes e Visão Geral) | não |
 | **2** | Escada aplicada + formas novas de gráfico, nas 8 telas com dado local | não |
 | **3** | Novos marts, na ordem: `notifications` → `auth.users` → mentoria → `audit_logs` → elegibilidade → IA | **sim** |

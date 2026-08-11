@@ -244,6 +244,16 @@ mapear **todo** o banco do produto, entendendo bem.
 | **Universo de análise** | **O cliente da plataforma** — quem está em `profiles` sob a régua `e_cliente`. O `via_hub` está sendo populado para virar o identificador único entre os produtos da casa e **não é fonte publicável enquanto isso**. Nenhuma tela passa a contar gente que não está na plataforma |
 | **Dado espelhável** | **Tudo que a plataforma e o Pulse têm, desde que sirva a uma análise registrada.** O limite é a existência da pergunta, não a natureza do dado. Contrato com as quatro disciplinas no CLAUDE.md — a que mais pesa é que **exclusão na origem propaga para o mart**, com teste |
 
+### Fase 0 ✅ entregue em 11/ago
+
+Correção de veracidade, com OK do Mateus. Frequência de uso publicava 37,2%
+onde a resposta é 57,8%; a duração ideal de aula media curso não publicado e o
+precipício que sustentava a recomendação editorial era artefato disso; o NPS
+era o único número de Formações fora da régua `e_cliente`; toda janela ancorava
+em `now()` com o pipeline parado. Fora do escopo previsto, apareceram e foram
+corrigidos: dois cards de Clientes devolvendo 500 por timeout, e o `?? 0` em 36
+KPIs de 9 telas. Teste de fonte impede a volta das duas classes de defeito.
+
 ### Levantamento concluído em 11/ago
 
 - **`proposta-fase-2-profundidade.md`** — documento de decisão: anatomia padrão
