@@ -254,6 +254,19 @@ em `now()` com o pipeline parado. Fora do escopo previsto, apareceram e foram
 corrigidos: dois cards de Clientes devolvendo 500 por timeout, e o `?? 0` em 36
 KPIs de 9 telas. Teste de fonte impede a volta das duas classes de defeito.
 
+### Fase 1 ✅ entregue em 11/ago
+
+Bloco "Resumo e direcionamento" no topo de Visão Geral e Clientes, fora das
+abas, como card navy da tela. Motor determinístico: catálogo de gabaritos em
+`insights.regra`, calculador lendo só as funções `bi_*` que os cards leem,
+supressão declarada, âncora para o card que prova, página `/regras`. Cache por
+`(tela, período, recorte, data do dado)` — 2,5s viraram 5ms.
+
+Três correções durante a execução: score normalizado por múltiplo do próprio
+limiar (sem isso a ordem dos achados saía do acaso da escala), o cache (sem ele
+o bloco estourava o timeout) e a policy do catálogo, que faltando fez a RPC
+devolver zero linha em silêncio — a armadilha que este documento já registrava.
+
 ### Levantamento concluído em 11/ago
 
 - **`proposta-fase-2-profundidade.md`** — documento de decisão: anatomia padrão

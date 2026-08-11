@@ -662,7 +662,7 @@ parte da entrega.
 | Fase | Entrega | Depende do FDW? |
 | --- | --- | :---: |
 | ~~**0**~~ | ~~Correções de veracidade (§5)~~ — **✅ entregue 11/ago** | não |
-| **1** | Motor de achados + anatomia, em 2 telas piloto (Clientes e Visão Geral) | não |
+| ~~**1**~~ | ~~Motor de achados + anatomia, em 2 telas piloto~~ — **✅ entregue 11/ago** (`39455f8`) | não |
 | **2** | Escada aplicada + formas novas de gráfico, nas 8 telas com dado local | não |
 | **3** | Novos marts, na ordem: `notifications` → `auth.users` → mentoria → `audit_logs` → elegibilidade → IA | **sim** |
 | **4** | Módulos novos: Mentoria → Comunicação → Planos & Pacotes | parte |
