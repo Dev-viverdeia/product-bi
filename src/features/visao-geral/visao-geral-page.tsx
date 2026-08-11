@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { ActivityIcon, ClockIcon, MonitorIcon, MousePointerClickIcon } from 'lucide-react'
 import { BentoGrid, BentoItem } from '@/components/layout/bento'
 
 import {
@@ -31,6 +32,27 @@ export function VisaoGeralPage() {
   const eventos = useEventosPorTipo(periodo)
   const telas = useTopTelas(periodo)
   const sync = useUltimaSincronizacao()
+
+  // Cada headline responde a pergunta do próprio card e sai do dado que ele já
+  // desenha. Nenhum vira percentual sobre o top-N: bi_top_telas corta em dez,
+  // e uma fatia sobre denominador cortado é número falso com cara de certo.
+  const mediaDiaria = useMemo(() => {
+    const dias = atividade.data ?? []
+    if (dias.length === 0) return null
+    return Math.round(dias.reduce((soma, d) => soma + d.ativos, 0) / dias.length)
+  }, [atividade.data])
+
+  const telaLider = telas.data?.[0] ?? null
+
+  const totalEventos = useMemo(
+    () => (eventos.data ?? []).reduce((soma, e) => soma + e.eventos, 0),
+    [eventos.data],
+  )
+
+  const picoNavegacao = useMemo(
+    () => (heatmap.data ?? []).reduce((maior, h) => Math.max(maior, h.pageviews), 0),
+    [heatmap.data],
+  )
 
   const vsPeriodo = 'vs período anterior'
   const sincronizadoAs = sync.data
@@ -105,7 +127,11 @@ export function VisaoGeralPage() {
 
       <BentoItem span={8}>
         <ChartCard
+          tone="brand"
+          icon={ActivityIcon}
           title="Usuários ativos por dia"
+          headline={mediaDiaria != null ? formatInt(mediaDiaria) : '—'}
+          headlineLabel="na média do dia"
           description={`Clientes com ao menos uma ação de produto no dia · últimos ${periodo} dias`}
           isLoading={atividade.isLoading}
           isError={atividade.isError}
@@ -126,8 +152,11 @@ export function VisaoGeralPage() {
 
       <BentoItem span={4} rows={2}>
         <ChartCard
+          icon={MonitorIcon}
           title="Telas mais acessadas"
-          description="Pageviews · rastreados desde jul/2026"
+          headline={telaLider ? formatCompact(telaLider.views) : '—'}
+          headlineLabel={telaLider ? `em ${labelRota(telaLider.path)}` : undefined}
+          description="Pageviews por tela, dez maiores · rastreados desde jul/2026"
           isLoading={telas.isLoading}
           isError={telas.isError}
           onRetry={() => void telas.refetch()}
@@ -150,8 +179,11 @@ export function VisaoGeralPage() {
 
       <BentoItem span={8}>
         <ChartCard
+          icon={MousePointerClickIcon}
           title="Ações na plataforma"
-          description={`Eventos de produto por tipo · últimos ${periodo} dias`}
+          headline={formatCompact(totalEventos)}
+          headlineLabel="ações no período"
+          description={`Eventos de produto por tipo, oito maiores no gráfico · o número acima soma todos os tipos · últimos ${periodo} dias`}
           isLoading={eventos.isLoading}
           isError={eventos.isError}
           onRetry={() => void eventos.refetch()}
@@ -173,7 +205,10 @@ export function VisaoGeralPage() {
 
       <BentoItem span={12}>
         <ChartCard
+          icon={ClockIcon}
           title="Picos de navegação"
+          headline={formatInt(picoNavegacao)}
+          headlineLabel="pageviews na hora de pico"
           description={`Pageviews por dia da semana × hora (Brasília) · últimos ${periodo} dias`}
           isLoading={heatmap.isLoading}
           isError={heatmap.isError}

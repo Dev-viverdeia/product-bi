@@ -1,0 +1,84 @@
+import type { ReactNode } from 'react'
+import { InfoIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
+import { CardHeader, CardTitle } from '@/components/ui/card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+
+export type CardCabecalhoProps = {
+  title: string
+  /** definição da métrica — vira o conteúdo do botão de informação */
+  description?: string
+  /** ícone do assunto, em quadrado tintado à esquerda do título */
+  icon?: LucideIcon
+  /** número que responde o card antes do conteúdo — o olho pousa aqui primeiro */
+  headline?: string
+  /** unidade/recorte do headline, em texto pequeno ao lado dele */
+  headlineLabel?: string
+  /** slot à direita (filtro local, seletor…) — substitui o botão de informação */
+  action?: ReactNode
+}
+
+/**
+ * Cabeçalho único dos cards de conteúdo — gráfico e tabela usam este mesmo.
+ *
+ * **Identidade à esquerda, afordância à direita.** Assunto numa linha (ícone +
+ * rótulo curto), headline responde, e a definição da métrica mora no botão de
+ * informação: sai do caminho sem sair da tela.
+ *
+ * Existe como peça separada porque card de gráfico e card de tabela dividiam o
+ * mesmo mosaico com cabeçalhos diferentes — título grande com parágrafo de um
+ * lado, título curto com número do outro. Duas gramáticas na mesma tela leem
+ * como dois produtos.
+ */
+export function CardCabecalho({
+  title,
+  description,
+  icon: Icon,
+  headline,
+  headlineLabel,
+  action,
+}: CardCabecalhoProps) {
+  return (
+    <CardHeader className="flex flex-row items-start justify-between gap-3">
+      <div className="min-w-0 space-y-1.5">
+        <div className="flex items-center gap-2">
+          {Icon ? (
+            <span className="bg-foreground/6 text-muted-foreground flex size-7 shrink-0 items-center justify-center rounded-md">
+              <Icon className="size-4" />
+            </span>
+          ) : null}
+          <CardTitle className="truncate text-sm font-medium">{title}</CardTitle>
+        </div>
+
+        {headline ? (
+          <p className="flex items-baseline gap-1.5 pt-0.5">
+            <span className="num text-3xl leading-none font-semibold tracking-tight">
+              {headline}
+            </span>
+            {headlineLabel ? (
+              <span className="text-muted-foreground text-xs">{headlineLabel}</span>
+            ) : null}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="shrink-0">
+        {action ??
+          (description ? (
+            <Tooltip>
+              <TooltipTrigger
+                aria-label={`Como este número é calculado: ${title}`}
+                className="border-foreground/8 text-muted-foreground hover:bg-foreground/6 hover:text-foreground focus-visible:ring-ring flex size-8 items-center justify-center rounded-full border transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <InfoIcon className="size-4" />
+              </TooltipTrigger>
+              <TooltipContent side="left" className="max-w-72 text-xs leading-relaxed">
+                {description}
+              </TooltipContent>
+            </Tooltip>
+          ) : null)}
+      </div>
+    </CardHeader>
+  )
+}
