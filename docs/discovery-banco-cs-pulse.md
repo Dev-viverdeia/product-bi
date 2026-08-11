@@ -152,8 +152,33 @@ mostra os mesmos 38.
 | Atendimentos | `count(distinct ticket_id)` na view de ciclos | usar `wa_messages` infla ~25× (62.954 vs 2.476) |
 | Mensagens enviadas | `status = 'sent'` | incluir `skipped_dedup` infla ~14% |
 | Pessoas impactadas | `count(distinct destinatário)` | `count(*)` conta envios, não pessoas |
-| Atendimento por empresa | join por `wa_phone_key(telefone)` | `client_id` só tem 33% preenchido |
+| Atendimento por empresa | join por `wa_phone_key(telefone)`, **só chave não ambígua** | ver §6.1 — o caminho ingênuo superestima em 14 pontos |
 | Solicitações históricas | ativas + `pipeline_cancelamento_ciclos` | contar só as ativas subestima quem pediu mais de uma vez |
+
+### 6.1 Atendimento por empresa cobre 70%, não 100%
+
+O relatório recomenda ligar atendimento a empresa por `wa_phone_key` em vez de
+`client_id` (33% preenchido). Está certo — mas o ganho é menor do que parece,
+e medir errado aqui produz exatamente o tipo de número que este projeto não
+aceita. Medido em 11/08/2026, sobre os 2.476 ciclos:
+
+| Classe | Ciclos | % |
+| --- | --- | --- |
+| Chave resolve **uma** empresa — atribuível | 1.744 | **70,4%** |
+| Chave **ambígua**: aponta 2+ empresas (pior caso: 9) | 316 | 12,8% |
+| Sem empresa correspondente | 416 | 16,8% |
+
+**A medição ingênua dá 84,5%** — ela pergunta "a chave existe no universo de
+empresas?" e conta chave ambígua como acerto. A pergunta certa é "a chave
+resolve uma empresa só?", e aí são 70,4%.
+
+Consequência para a tela: o card de atendimento por empresa **atribui apenas os
+1.744 não ambíguos e declara a cobertura**. Ambíguo não vira palpite, e "sem
+empresa" não vira zero.
+
+Causa provável da ambiguidade: telefone de sócio, contador ou consultor que
+aparece em mais de um cadastro. Não é erro de normalização — é a realidade do
+dado.
 
 ## 7. PII — o que espelhar
 
