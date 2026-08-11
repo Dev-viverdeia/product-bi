@@ -95,24 +95,28 @@ export function EntradaPage() {
               value={kpis.data?.convites ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Conversão convite → cadastro"
               value={kpis.data?.conversao ?? 0}
               format={formatPercent}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Onboarding concluído (dos cadastrados)"
               value={kpis.data?.onboarding_pct ?? 0}
               format={formatPercent}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Erros de login"
               value={kpis.data?.erros_login ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
           </KpiGrid>
         </BentoItem>

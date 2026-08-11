@@ -88,6 +88,7 @@ export function VisaoGeralPage() {
                 : undefined
             }
             isLoading={kpis.isLoading}
+            isError={kpis.isError}
           />
           <KpiCard
             label="Novos clientes"
@@ -99,6 +100,7 @@ export function VisaoGeralPage() {
                 : undefined
             }
             isLoading={kpis.isLoading}
+            isError={kpis.isError}
           />
           <KpiCard
             label="Aulas concluídas"
@@ -110,6 +112,7 @@ export function VisaoGeralPage() {
                 : undefined
             }
             isLoading={kpis.isLoading}
+            isError={kpis.isError}
           />
           <KpiCard
             label="Pageviews"
@@ -121,6 +124,7 @@ export function VisaoGeralPage() {
                 : undefined
             }
             isLoading={kpis.isLoading}
+            isError={kpis.isError}
           />
         </KpiGrid>
       </BentoItem>

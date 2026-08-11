@@ -97,24 +97,28 @@ export function FormacoesPage() {
               value={kpis.data?.alunos_ativos ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Aulas concluídas"
               value={kpis.data?.aulas_concluidas ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Certificados emitidos"
               value={kpis.data?.certificados ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="NPS médio das aulas"
               value={kpis.data?.nps_medio ?? 0}
               format={formatDecimal}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
           </KpiGrid>
         </BentoItem>

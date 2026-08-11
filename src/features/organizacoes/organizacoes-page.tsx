@@ -75,24 +75,28 @@ export function OrganizacoesPage() {
             value={kpis.data?.orgs_ativas ?? 0}
             format={formatInt}
             isLoading={kpis.isLoading}
+            isError={kpis.isError}
           />
           <KpiCard
             label="Membros em organizações"
             value={kpis.data?.membros_total ?? 0}
             format={formatInt}
             isLoading={kpis.isLoading}
+            isError={kpis.isError}
           />
           <KpiCard
             label="Time ativo (média)"
             value={kpis.data?.pct_time_ativo_medio ?? 0}
             format={formatPercent}
             isLoading={kpis.isLoading}
+            isError={kpis.isError}
           />
           <KpiCard
             label="Orgs com master ativo"
             value={kpis.data?.orgs_master_ativo ?? 0}
             format={formatPercent}
             isLoading={kpis.isLoading}
+            isError={kpis.isError}
           />
         </KpiGrid>
       </BentoItem>

@@ -90,24 +90,28 @@ export function JornadaPage() {
               value={kpis.data?.sessoes ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Telas por sessão"
               value={kpis.data?.telas_por_sessao ?? 0}
               format={formatDecimal}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Duração mediana (min)"
               value={kpis.data?.minutos_medianos ?? 0}
               format={formatDecimal}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Sessões de tela única"
               value={kpis.data?.pct_uma_tela ?? 0}
               format={formatPercent}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
           </KpiGrid>
         </BentoItem>

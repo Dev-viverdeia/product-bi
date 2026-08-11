@@ -132,24 +132,28 @@ export function ClientesPage() {
               value={engajamento.data?.stickiness ?? 0}
               format={formatPercent}
               isLoading={engajamento.isLoading}
+              isError={engajamento.isError}
             />
             <KpiCard
               label="Hábito semanal"
               value={engajamento.data?.pct_habito_semanal ?? 0}
               format={formatPercent}
               isLoading={engajamento.isLoading}
+              isError={engajamento.isError}
             />
             <KpiCard
               label="Dias ativos por cliente"
               value={engajamento.data?.dias_ativos_medio ?? 0}
               format={formatDecimal}
               isLoading={engajamento.isLoading}
+              isError={engajamento.isError}
             />
             <KpiCard
               label="Usam 2+ módulos"
               value={engajamento.data?.pct_multimodulo ?? 0}
               format={formatPercent}
               isLoading={engajamento.isLoading}
+              isError={engajamento.isError}
             />
           </KpiGrid>
         </BentoItem>

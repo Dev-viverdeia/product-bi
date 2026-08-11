@@ -40,9 +40,10 @@ import {
   usuariosMensal,
 } from '@/pages/design/sample-data'
 
-type DemoState = 'loading' | 'empty' | 'error'
+type DemoState = 'ok' | 'loading' | 'empty' | 'error'
 
 const demoStates: { value: DemoState; label: string }[] = [
+  { value: 'ok', label: 'Normal' },
   { value: 'loading', label: 'Carregando' },
   { value: 'empty', label: 'Vazio' },
   { value: 'error', label: 'Erro' },
@@ -53,7 +54,11 @@ const demoStates: { value: DemoState; label: string }[] = [
  * dark, mobile) antes de entrar em módulo de produto.
  */
 export function DesignPage() {
-  const [demoState, setDemoState] = useState<DemoState>('loading')
+  // O seletor governa também os KpiCards do topo: o estado de erro do stat tile
+  // é justamente o que não existia antes, e sem demonstrá-lo aqui ele voltaria a
+  // passar despercebido. KPI que mostra 0 quando a consulta falhou é número
+  // errado com cara de certo.
+  const [demoState, setDemoState] = useState<DemoState>('ok')
 
   // Headlines derivados do próprio dado de exemplo — o showcase segue a mesma
   // regra do produto: o número que responde o card sai do que ele desenha.
@@ -105,6 +110,8 @@ export function DesignPage() {
           format={formatCurrencyCompact}
           delta={{ value: kpis.receita.delta, vs: 'vs mês anterior' }}
           trend={kpis.receita.trend}
+        isLoading={demoState === 'loading'}
+        isError={demoState === 'error'}
         />
         <KpiCard
           label="Usuários ativos"
@@ -112,6 +119,8 @@ export function DesignPage() {
           format={formatInt}
           delta={{ value: kpis.usuariosAtivos.delta, vs: 'vs mês anterior' }}
           trend={kpis.usuariosAtivos.trend}
+        isLoading={demoState === 'loading'}
+        isError={demoState === 'error'}
         />
         <KpiCard
           label="Conversão"
@@ -119,6 +128,8 @@ export function DesignPage() {
           format={formatPercent}
           delta={{ value: kpis.conversao.delta, vs: 'vs mês anterior' }}
           trend={kpis.conversao.trend}
+        isLoading={demoState === 'loading'}
+        isError={demoState === 'error'}
         />
         <KpiCard
           label="Churn"
@@ -126,6 +137,8 @@ export function DesignPage() {
           format={formatPercent}
           delta={{ value: kpis.churn.delta, vs: 'vs mês anterior', upIsGood: false }}
           trend={kpis.churn.trend}
+        isLoading={demoState === 'loading'}
+        isError={demoState === 'error'}
         />
       </KpiGrid>
 
@@ -215,7 +228,7 @@ export function DesignPage() {
         <ChartCard
           icon={LayersIcon}
           title="Estados"
-          description="Todo gráfico nasce com os três · o slot de ação substitui o botão de informação"
+          description="Todo gráfico nasce com os quatro · o seletor governa também os KpiCards do topo, onde o estado de erro é o que faltava"
           action={
             <div className="flex gap-1">
               {demoStates.map((state) => (

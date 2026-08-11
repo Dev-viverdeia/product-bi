@@ -111,24 +111,28 @@ export function ReceitaPage() {
               value={kpis.data?.receita_brl ?? 0}
               format={formatCurrencyCompact}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Faturas pagas"
               value={kpis.data?.faturas ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Compradores"
               value={kpis.data?.compradores ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Ticket mediano"
               value={kpis.data?.ticket_mediano ?? 0}
               format={formatCurrency}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
           </KpiGrid>
         </BentoItem>

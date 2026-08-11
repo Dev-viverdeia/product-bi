@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { animate, useReducedMotion } from 'motion/react'
 import * as motion from 'motion/react-client'
-import { TrendingDownIcon, TrendingUpIcon } from 'lucide-react'
+import { AlertCircleIcon,TrendingDownIcon, TrendingUpIcon } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -46,6 +46,12 @@ type KpiCardProps = {
   /** série curta (~12 pontos) para o sparkline de tendência */
   trend?: number[]
   isLoading?: boolean
+  /**
+   * Sem isto o tile mostra o valor de fallback — quase sempre `?? 0` — quando a
+   * consulta falha, e zero é indistinguível de "não carregou". Num painel
+   * executivo isso é pior que erro: é número errado com cara de certo.
+   */
+  isError?: boolean
   className?: string
 }
 
@@ -69,10 +75,11 @@ export function KpiCard({
   delta,
   trend,
   isLoading = false,
+  isError = false,
   className,
 }: KpiCardProps) {
   const reducedMotion = useReducedMotion()
-  const displayed = useCountUp(value, !reducedMotion && !isLoading)
+  const displayed = useCountUp(value, !reducedMotion && !isLoading && !isError)
 
   if (isLoading) {
     return (
@@ -81,6 +88,23 @@ export function KpiCard({
           <Skeleton className="h-3.5 w-24 rounded-md" />
           <Skeleton className="h-8 w-32 rounded-md" />
           <Skeleton className="h-3.5 w-36 rounded-md" />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (isError) {
+    return (
+      <Card className={cn('glass-card h-full', className)}>
+        <CardContent className="flex h-full flex-col gap-1">
+          <p className="text-muted-foreground text-xs">{label}</p>
+          {/* travessão, não zero: a mesma convenção que o resto do produto usa
+              para "não há valor" */}
+          <p className="num text-3xl leading-none font-semibold tracking-tight">—</p>
+          <p className="text-muted-foreground flex items-center gap-1 text-xs">
+            <AlertCircleIcon className="size-3.5" />
+            não foi possível carregar
+          </p>
         </CardContent>
       </Card>
     )

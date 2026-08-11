@@ -82,24 +82,28 @@ export function SolucoesPage() {
               value={kpis.data?.publicadas ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Iniciadas no período"
               value={kpis.data?.iniciadas_periodo ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Concluídas no período"
               value={kpis.data?.concluidas_periodo ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Conclusão (histórica)"
               value={kpis.data?.taxa_conclusao_historica ?? 0}
               format={formatPercent}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
           </KpiGrid>
         </BentoItem>

@@ -94,24 +94,28 @@ export function IaPage() {
               value={kpis.data?.usuarios_consultor ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Mensagens enviadas"
               value={kpis.data?.mensagens_consultor ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Usuários do Builder"
               value={kpis.data?.usuarios_builder ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
             <KpiCard
               label="Soluções geradas"
               value={kpis.data?.solucoes_builder ?? 0}
               format={formatInt}
               isLoading={kpis.isLoading}
+              isError={kpis.isError}
             />
           </KpiGrid>
         </BentoItem>

@@ -1,11 +1,14 @@
 import {
   BanknoteIcon,
   BookOpenIcon,
+  BotIcon,
   Building2Icon,
   CheckCheckIcon,
   CompassIcon,
   DoorOpenIcon,
   GraduationCapIcon,
+  HeadphonesIcon,
+  HeartCrackIcon,
   LayersIcon,
   LayoutDashboardIcon,
   LayoutGridIcon,
@@ -19,6 +22,7 @@ import {
   ReceiptIcon,
   RouteIcon,
   ScissorsIcon,
+  SendIcon,
   StarIcon,
   TargetIcon,
   TrendingUpIcon,
@@ -136,6 +140,18 @@ export const navItems: NavItem[] = [
     abas: [
       { valor: 'receita', titulo: 'Receita', icone: BanknoteIcon },
       { valor: 'safra', titulo: 'Safra & uso', icone: LayersIcon },
+    ],
+  },
+  {
+    title: 'Sucesso do cliente',
+    shortTitle: 'CS',
+    to: '/cs',
+    icon: HeadphonesIcon,
+    abas: [
+      { valor: 'atendimento', titulo: 'Atendimento', icone: BotIcon },
+      { valor: 'comunicacao', titulo: 'Comunicação', icone: SendIcon },
+      { valor: 'retencao', titulo: 'Cancelamento & reversão', icone: HeartCrackIcon },
+      { valor: 'funis', titulo: 'Kickoff & funis', icone: ListChecksIcon },
     ],
   },
 ]
