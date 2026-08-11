@@ -185,7 +185,46 @@ peça mais nova seria a única que nenhum dos três comandos cobre).
 
 ---
 
-## 4. A descoberta que refaz o módulo de Receita
+## 4. O que o `via_hub` revela — e por que ele ainda não é fonte
+
+> **Decisão do Mateus (11/08/2026):** o universo de análise do BI continua sendo
+> **o cliente da plataforma** — quem está em `profiles` sob a régua `e_cliente`.
+> O `via_hub` está **em construção**, sendo populado para virar o identificador
+> único de cliente entre os produtos da casa. **Não é fonte publicável hoje**, e
+> a Entrega 9 não será reconstruída sobre ele agora.
+>
+> A régua não muda para nenhum dos outros módulos: eles já contam clientes da
+> plataforma, e continuam assim.
+
+Por que a decisão está certa, em número **[conferido]**: dos 15.002 perfis da
+plataforma, **apenas 6.956 (46,4%) têm `id_via`**. Do lado do hub, 1.235 dos
+1.613 identificadores (76,6%) encontram um perfil, e 1.465 das 1.856 compras
+pagas (78,9%) têm cliente correspondente.
+
+Construir LTV por safra sobre isso seria construir sobre fundação em movimento:
+**cada número histórico mudaria sozinho conforme o hub é populado** — a mesma
+armadilha do `e_cliente` calculado sobre o papel atual (§9.3), que faz as safras
+se reescreverem a cada migração administrativa. Repetir o erro numa tela de
+receita seria pior, porque é o número que o CEO leva para fora.
+
+### Critério objetivo de quando o hub vira fonte
+
+Para não virar decisão de sensação, proponho três condições verificáveis, todas
+mensuráveis por consulta:
+
+1. Cobertura de `id_via` em `profiles` estável acima de um piso que você definir
+   (hoje 46,4%) — o piso é decisão sua, porque depende de até onde o hub
+   pretende chegar.
+2. Casamento compra → perfil acima de 90% (hoje 78,9%), ou a lacuna explicada
+   (compras de quem nunca entrou na plataforma são um grupo legítimo, não erro).
+3. Propagação de exclusão resolvida: o pipeline do hub registra hoje que
+   **exclusões na origem não são propagadas**, o que infla receita em qualquer
+   espelho.
+
+Enquanto isso não fecha, o hub entra no BI como **dependência registrada com
+data de checagem**, não como fonte.
+
+## 4-bis. O que o levantamento mediu no hub (contexto, não número de tela)
 
 **[conferido]** Existe no banco da plataforma um schema `via_hub` que ninguém
 tinha aberto. `via_hub.shared_purchases` guarda **1.958 compras, R$ 32,48
@@ -209,13 +248,15 @@ responde por **R$ 32,2 milhões** dos R$ 32,48 mi. É a nossa plataforma.
 | jul/26 | 235 | 3.321.093 | **1.146.624** |
 | ago/26 (11 dias) | 53 | 1.013.453 | — |
 
-Três consequências:
+Três leituras, nenhuma delas para publicar em tela ainda:
 
-**4.1 — O módulo de Receita mede uma fração.** Nossa tela mostra R$ 626.535 no
-período ago/25→abr/26. Na janela em que as duas fontes se sobrepõem
-(dez/25→abr/26), o `via_hub` registra **R$ 23,5 milhões**. A tela está
-publicando cerca de 2,7% da receita do produto. Não é bug de conta — é fonte
-errada: `hubla_webhooks` era um gateway entre seis.
+**4.1 — A tela de Receita não pode continuar como está.** Ela mostra R$ 626.535
+e chama de receita. Sabemos agora que isso é **um gateway entre seis, e um
+gateway morto** — na janela em que as fontes se sobrepõem, o hub registra outra
+ordem de grandeza. Não dá para trocar o número (o hub não está pronto), mas
+também não dá para deixar como está: a tela precisa **declarar a limitação**,
+no mesmo padrão que /cs já usa. É a régua da casa — onde o dado não sustenta, a
+tela declara.
 
 **4.2 — O webhook não "quebrou": a empresa trocou de gateway.** **[conferido]**
 hubla vai até 01/07/2026 (R$ 16,2 mi em 800 compras) e para; appmax segue vivo
@@ -223,15 +264,12 @@ até 10/08 (R$ 10,9 mi) e hotmart até 11/08 (R$ 1,9 mi). O `docs/reporte-
 rastreamentos-quebrados.md` classificou isso como rastreamento morto. Era
 migração comercial, e a série continua — em outro lugar.
 
-**4.3 — O maior sinal isolado do levantamento.** **[conferido]** Das compras de
-julho, **R$ 1,15 milhão foi reembolsado — 34,5% do mês**, contra 2,5% em junho.
-Nenhuma tela do BI mostra isso, e a leitura precisa de cuidado (o corte é por
-mês da compra, não por mês do estorno). Seja qual for a causa, é a primeira
-pergunta que o CEO vai querer responder.
-
-**Ressalva que precisa ser tratada antes de espelhar:** o próprio pipeline do
-hub registra que **exclusões na origem não são propagadas**. Espelhar sem
-tratar isso produz receita inflada. Verificar antes de publicar qualquer número.
+**4.3 — Um sinal que vale uma pergunta, não um card.** **[conferido]** Das
+compras de julho, **R$ 1,15 milhão consta como reembolsado — 34,5% do mês**,
+contra 2,5% em junho. Duas ressalvas antes de qualquer conclusão: o corte é por
+mês da compra, não do estorno; e com o hub em construção, comparação entre meses
+pode refletir grau de preenchimento, não comportamento. **Não vira card** —
+vira pergunta para quem opera o hub. Se se confirmar, é assunto de diretoria.
 
 ---
 
@@ -482,17 +520,30 @@ indistinguíveis) · rotina por perfil.
 `/learning` aparecem com 91–97% de abandono porque a rota morreu). Sem filtrar,
 a tela acusa a página errada.
 
-### 6.9 Receita & Renovação — refeita sobre `via_hub` (§4)
+### 6.9 Receita & Renovação — congelada e declarada, aguardando o hub
 
-Deixa de ser prioridade baixa. **Sai** todo o encanamento sobre `hubla_webhooks`
-e as views `bi_receita_hubla`/`bi_ltv_cohort`, que ficam aposentadas em vez de
-corrigidas. **Entra** a série real de R$ 32,2 mi, LTV por safra com cobertura de
-join declarada, receita por gateway com a migração marcada na série, e o
-reembolso de julho como primeiro achado do resumo.
+**Continua em prioridade baixa, e agora por um motivo escrito** (§4): a fonte
+consolidada está em construção e o BI não constrói tela sobre fundação em
+movimento.
+
+O trabalho desta fase é pequeno e é de honestidade, não de análise:
+
+- **Declarar a limitação na própria tela** — que a série cobre um gateway que
+  parou em jul/2026, que não é a receita do produto, e que a consolidação está
+  sendo construída. Bloco no padrão de /cs, acima dos cards.
+- **Encerrar a série em 02/04/2026** (último pagamento aprovado na fonte atual),
+  no mesmo padrão já usado para os pageviews — em vez de deixar a curva morrer
+  sozinha e parecer queda de vendas.
+- **Não construir LTV por safra agora.** Com 46% dos perfis sem `id_via`, cada
+  safra mudaria conforme o hub é populado.
 
 **Fechar com "não dá" fundamentado:** engajamento pré-renovação exige data de
 renovação, que existe para 6% das empresas. Não sustenta — encerrar em vez de
 esperar o FDW.
+
+**Gatilho de retomada:** os três critérios de §4. Quando fecharem, a Entrega 9 é
+refeita inteira sobre o hub — e aí ela vira prioridade alta, porque destrava
+LTV, funil pagamento→entrada e margem por cliente de uma vez.
 
 ### 6.10 CS (Pulse) — bloqueado, com uma correção que não depende da carga
 
@@ -643,7 +694,7 @@ começa do zero no dia em que ligar. Quanto mais tarde, mais tarde ele serve.
 | 2 | Posição do bloco | Topo, largura total, fora das abas — e ele passa a ser o `.brand-card` da tela |
 | 3 | Régua de composição da escada | ≥2 comparativos, ≥2 diagnósticos, ≥1 prescritivo, ≤3 descritivos, verificado no CI |
 | 4 | Fase 0 antes de tudo | Sim — corrigir os números errados antes de construir a camada que os amplifica |
-| 5 | Receita refeita sobre `via_hub` | Sim, e aposentar as views antigas em vez de corrigi-las |
+| 5 | Receita sobre `via_hub` | **Não agora** — hub em construção (46% dos perfis sem `id_via`). Nesta fase, só declarar a limitação e encerrar a série. Retomar pelos critérios de §4 |
 | 6 | Módulos novos | Mentoria · Comunicação & Notificação · Planos & Pacotes · Destaques executivos |
 | 7 | Encerrar 4 itens da auditoria como "sem lastro" | Sim — funil de entrega de convite, tempo por etapa do onboarding, teto de tokens e limite do Builder nunca tiveram dado |
 | 8 | Contrato de PII e decisão papel-na-época | Precisa de você — é regra de negócio, não de engenharia |

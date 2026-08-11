@@ -240,6 +240,7 @@ mapear **todo** o banco do produto, entendendo bem.
 | **O achado é calculado, não redigido** | A detecção roda determinística, com a mesma régua de supressão das RPCs. Texto sem número calculado por trás não entra na tela — a regra "nunca mostrar número errado" vale para a frase como vale para o gráfico |
 | **Resumo pode não ter o que dizer** | Sem achado relevante, o bloco declara "nada fora do padrão no período". Resumo que sempre acha algo vira ruído e queima a credibilidade da tela |
 | **Saúde do projeto de código** | Módulo desejado, e é o **último** da fila. Fonte de dado é externa (repositório, CI, deploy, advisors) — não sai do banco do produto, então é integração nova, não recorte do que já existe. Não confundir com a Entrega 10 (saúde da plataforma: backend/banco/cyber) |
+| **Universo de análise** | **O cliente da plataforma** — quem está em `profiles` sob a régua `e_cliente`. O `via_hub` está sendo populado para virar o identificador único entre os produtos da casa e **não é fonte publicável enquanto isso**. Nenhuma tela passa a contar gente que não está na plataforma |
 
 ### Levantamento concluído em 11/ago
 
@@ -252,11 +253,13 @@ mapear **todo** o banco do produto, entendendo bem.
 
 Três resultados que mudam o plano, todos reconferidos no banco:
 
-1. **A receita real do produto está no schema `via_hub`**, que ninguém tinha
-   aberto: R$ 32,2 milhões desde dez/2025, vivo até hoje, em 6 gateways. A
-   Entrega 9 mede ~2,7% disso porque `hubla_webhooks` era um gateway entre seis
-   — o webhook não quebrou, a empresa trocou de gateway. E R$ 1,15 milhão das
-   compras de julho foi reembolsado (34,5% do mês), o que nenhuma tela mostra.
+1. **A Entrega 9 mede um gateway morto.** O schema `via_hub` (R$ 32,2 milhões
+   desde dez/2025, 6 gateways, vivo) mostra que `hubla_webhooks` era um gateway
+   entre seis — o webhook não quebrou, a empresa trocou de gateway. **Mas o hub
+   está em construção** (decisão do Mateus, 11/ago: 46% dos perfis ainda sem
+   `id_via`), então a Entrega 9 **não** será refeita sobre ele agora: nesta fase
+   ela só declara a limitação e encerra a série. Critérios de retomada em
+   `proposta-fase-2-profundidade.md` §4.
 2. **Nove das dez telas reprovam na escada de profundidade** — o parque tem 78
    cards descritivos contra 4 diagnósticos.
 3. **O BI virou arquivo sem saber.** A purga dominical da plataforma já apagou
