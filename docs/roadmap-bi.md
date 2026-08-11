@@ -35,6 +35,36 @@ coleção de gráficos.
 | 8. Jornada & Telas (profundidade) | ✅ Entregue |
 | 9. Receita & Renovação | ✅ Entregue |
 | 10. Saúde da plataforma (backend/banco/cyber) | ⏸️ Adiada por decisão do Mateus — só depois do BI |
+| CS — dashboard executivo (2ª fonte: Pulse) | 🚧 Tela, marts e RPCs prontos; aguarda o user mapping do FDW (`docs/discovery-banco-cs-pulse.md`) |
+
+### Auditoria roadmap × tela (11/ago/2026)
+
+O ✅ acima significa "módulo no ar" — não "toda pergunta respondida". A
+auditoria de 11/ago conferiu cada uma das 35 análises das entregas 2–9, mais o
+recorte transversal, contra o código e o banco: **9 não têm resposta em tela
+nenhuma**. Ficam registradas aqui até cada linha virar entrega.
+
+| # | Onde | Pergunta do roadmap | Realidade na tela | Trava |
+| --- | --- | --- | --- | --- |
+| 1 | Transversal | recorte por persona/plano nas métricas centrais (obrigatório) | o único filtro do app é o de período | nenhuma — `papel` e `plano` já estão em `marts.dim_usuario` |
+| 2 | E3 | funil de entrada com "entregue" e "aberto" | funil no ar tem 4 etapas; faltam as 2 de e-mail | rastreio de entrega parou na plataforma em abr/2026 |
+| 3 | E3 | onboarding: `time_per_step` e pontos de abandono | só a etapa atual de cada cliente | FDW parado |
+| 4 | E4 | NPS × retenção/conclusão | só o ranking de NPS por aula | FDW parado |
+| 5 | E5 | pedidos de implementação paga | mart criado e nunca sincronizado | FDW parado |
+| 6 | E6 | Consultor: tokens vs limite | não existe | FDW parado |
+| 7 | E6 | Builder: limite mensal atingido | não existe | FDW parado |
+| 8 | E8 | rotina de uso por perfil | heatmap é global, sem recorte | nenhuma |
+| 9 | E9 | engajamento pré-renovação | não existe — `renewal_logs` nem é foreign table | FDW parado |
+
+Os itens 5 e 9 são as pendências 3 e 4 da auditoria de 08/ago, vistas do lado
+do roadmap. Os itens 1 e 8 não têm trava — são os únicos executáveis com o
+pipeline parado, e o 1 é o próximo passo acordado com o Mateus.
+
+Matéria-prima já mapeada que nenhuma tela consome: `invite_deliveries` e
+`invite_delivery_events` (item 2), `onboarding_final` (item 3 e o
+enriquecimento de setor/objetivo do recorte transversal),
+`consultor_ia_token_usage` (item 6), `builder_v2_step_generations` e
+`builder_v3_task_progress` (item 7).
 
 ## Entrega 2 — Clientes & Retenção ⭐ espinha dorsal
 
@@ -178,15 +208,19 @@ entregues; estes são os pontos que a auditoria abriu e ainda não fecharam.
 | --- | --- | --- | --- |
 | 1 | Pageviews por solução via `slug` (a origem não preenche `analytics.solution_id`) | 5 | ✅ resolvida |
 | 2 | `dim_usuario` não removia quem foi deletado na plataforma | — | ✅ resolvida |
-| 3 | Espelhar `implementation_requests` (114) — "pedidos de implementação paga" ficou sem cobertura | 5 | aberta |
-| 4 | Engajamento pré-renovação — sem RPC; depende de inventariar `renewal_logs` | 9 | aberta |
+| 3 | Espelhar `implementation_requests` (114) — "pedidos de implementação paga" ficou sem cobertura | 5 | aberta — item 5 da auditoria de 11/ago |
+| 4 | Engajamento pré-renovação — sem RPC; depende de inventariar `renewal_logs` | 9 | aberta — item 9 da auditoria de 11/ago |
 | 5 | "Onde a implementação trava" não é monotônico — lido como funil, confunde | 5 | passada visual |
 
-**Nota de infraestrutura**: o pipeline ficou 19h parado porque a restrição de
-rede do projeto da plataforma liberava só `72.60.154.220/32`, e o BI sai por
-`54.232.250.105`. Resolvido. O IP de saída do BI não é dedicado e pode mudar em
-manutenção do Supabase — se isso acontecer, o sintoma é o mesmo
-(`EADDRNOTALLOWED`) e o alerta no topo do app avisa em até 30 min.
+**Nota de infraestrutura**: a restrição de rede do projeto da plataforma já
+parou o pipeline duas vezes. A primeira (19h) foi porque o allow list só tinha
+`72.60.154.220/32` e o BI sai por `54.232.250.105` — resolvida. Em 08/ago o
+`54.232.250.105/32` saiu de novo do allow list: pipeline parado desde então
+("could not connect to server plataforma_srv"; 240 falhas até 11/ago), números
+da plataforma congelados em 08/ago e o alerta no topo do app declarando a
+parada. Reinclusão pedida ao time da plataforma em 11/ago. O IP de saída do BI
+não é dedicado e pode mudar em manutenção do Supabase — o sintoma se repete e o
+alerta avisa em até 30 min.
 
 ## Notas de régua (valem para tudo)
 
