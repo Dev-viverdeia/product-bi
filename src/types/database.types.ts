@@ -156,14 +156,6 @@ export type Database = {
           vida_media_dias: number
         }[]
       }
-      bi_churn_ultimo_modulo: {
-        Args: { p_papel?: string; p_plano?: string }
-        Returns: {
-          clientes: number
-          modulo: string
-          pct: number
-        }[]
-      }
       bi_clientes_em_risco: {
         Args: { p_limite?: number; p_papel?: string; p_plano?: string }
         Returns: {
@@ -506,6 +498,15 @@ export type Database = {
           usados: number
         }[]
       }
+      bi_mortalidade_modulo: {
+        Args: { p_papel?: string; p_plano?: string }
+        Returns: {
+          modulo: string
+          pararam_ali: number
+          taxa: number
+          usaram: number
+        }[]
+      }
       bi_nps_cursos: {
         Args: { p_min_respostas?: number }
         Returns: {
@@ -665,6 +666,14 @@ export type Database = {
           ret_30d: number
           ret_7d: number
           ret_90d: number
+        }[]
+      }
+      bi_retencao_comprador: {
+        Args: { p_papel?: string; p_plano?: string }
+        Returns: {
+          clientes: number
+          grupo: string
+          pct_retidos: number
         }[]
       }
       bi_retencao_por_amplitude: {

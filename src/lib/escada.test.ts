@@ -28,7 +28,10 @@ const paginas = Object.entries(
   uma promessa. As demais aparecem no relatório abaixo com o placar atual, para
   que a dívida fique visível em vez de esquecida.
 */
-const TELAS_NA_REGUA = ['features/visao-geral/visao-geral-page.tsx']
+const TELAS_NA_REGUA = [
+  'features/visao-geral/visao-geral-page.tsx',
+  'features/clientes/clientes-page.tsx',
+]
 
 function composicaoDe(fonte: string): Composicao {
   const zero = Object.fromEntries(NIVEIS.map((n) => [n, 0])) as Composicao

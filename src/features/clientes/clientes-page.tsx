@@ -4,10 +4,10 @@ import {
   CalendarCheckIcon,
   LayersIcon,
   LightbulbIcon,
+  HandCoinsIcon,
   LogOutIcon,
   ShieldCheckIcon,
   SkullIcon,
-  StarIcon,
   UserCheckIcon,
   UsersRoundIcon,
 } from 'lucide-react'
@@ -38,12 +38,12 @@ import {
   useAmplitudeModulos,
   useChurnModulos,
   useChurnResumo,
-  useChurnUltimoModulo,
   useClientesEmRisco,
   useDiasAtivosDistribuicao,
   useEngajamento,
-  usePowerUsers,
+  useMortalidadeModulo,
   useRetencaoCohort,
+  useRetencaoComprador,
   useRetencaoPorAmplitude,
   useRetencaoPorPapel,
 } from '@/features/clientes/queries'
@@ -60,11 +60,11 @@ export function ClientesPage() {
   const aha = useAhaMoment(recorte)
   const churnResumo = useChurnResumo(recorte)
   const churnModulos = useChurnModulos(recorte)
-  const churnUltimo = useChurnUltimoModulo(recorte)
+  const mortalidade = useMortalidadeModulo(recorte)
+  const comprador = useRetencaoComprador(recorte)
   const diasAtivos = useDiasAtivosDistribuicao(periodo, recorte)
   const amplitude = useAmplitudeModulos(periodo, recorte)
   const retencaoAmplitude = useRetencaoPorAmplitude(recorte)
-  const powerUsers = usePowerUsers(periodo, recorte)
 
   // A safra mais recente com janela de 90 dias fechada é a leitura honesta de
   // retenção: as safras mais novas ainda têm "—" e enganariam para cima.
@@ -91,9 +91,19 @@ export function ClientesPage() {
     }
   }, [papeisComTaxa])
 
-  // A fatia vem calculada e suprimida do banco. A RPC ordena por clientes, então
-  // a primeira linha é a maior — não somar aqui: total no front escapa da régua.
-  const ultimoModulo = churnUltimo.data?.[0] ?? null
+  // Taxa calculada e suprimida no banco; a RPC ordena por taxa, então a
+  // primeira linha é a maior — não somar aqui, que escaparia da régua.
+  const moduloMaisMortal = (mortalidade.data ?? []).find((m) => m.taxa != null) ?? null
+
+  const compradorComTaxa = useMemo(
+    () => (comprador.data ?? []).filter((g) => g.pct_retidos != null),
+    [comprador.data],
+  )
+
+  const gapComprador = useMemo(() => {
+    if (compradorComTaxa.length < 2) return null
+    return (compradorComTaxa[0]!.pct_retidos - compradorComTaxa[1]!.pct_retidos) * 100
+  }, [compradorComTaxa])
 
   // Frequência e amplitude respondem "quantos usam de verdade": em ambos, o
   // sinal é quem passou do mínimo, não a faixa mais cheia.
@@ -197,6 +207,7 @@ export function ClientesPage() {
             <BentoGrid>
               <BentoItem span={12}>
                 <TabelaCard
+                  nivel="comparativo"
                   icon={CalendarCheckIcon}
                   title="Retenção por cohort de entrada"
                   headline={
@@ -214,6 +225,37 @@ export function ClientesPage() {
 
               <BentoItem span={12}>
                 <ChartCard
+                  nivel="comparativo"
+                  id="card-comprador"
+                  icon={HandCoinsIcon}
+                  title="Quem compra retém; quem foi convidado, não"
+                  headline={gapComprador != null ? `${formatDecimal(gapComprador)} pp` : '—'}
+                  headlineLabel="separam o comprador de quem ele trouxe"
+                  description="O master user é quem comprou o Viver de IA e é dono da organização; os demais entram pelo convite dele. Este é o corte estrutural do produto, e não se confunde com o papel do contrato — 445 membros do Club também são donos de organização. Mesma régua do card ao lado: 120+ dias de casa, ativo nos últimos 30. Como 91% dos clientes estão dentro de alguma organização, esta é a leitura central, não um recorte lateral."
+                  isLoading={comprador.isLoading}
+                  isError={comprador.isError}
+                  onRetry={() => void comprador.refetch()}
+                  isEmpty={compradorComTaxa.length === 0}
+                  emptyMessage="Nenhum dos dois grupos tem 30+ clientes elegíveis no recorte."
+                  isRefreshing={comprador.isFetching && !!comprador.data}
+                >
+                  <CategoryBarChart
+                    layout="bar"
+                    label="Retidos"
+                    data={compradorComTaxa.map((g) => ({
+                      category: `${g.grupo} (${formatInt(g.clientes)})`,
+                      value: g.pct_retidos,
+                      mute: g.grupo === 'Convidado',
+                    }))}
+                    valueFormatter={formatPercent}
+                    className="h-[160px]"
+                  />
+                </ChartCard>
+              </BentoItem>
+
+              <BentoItem span={12}>
+                <ChartCard
+                  nivel="comparativo"
                   id="card-retencao-papel"
                   icon={UserCheckIcon}
                   title="Retenção por papel"
@@ -244,26 +286,32 @@ export function ClientesPage() {
 
               <BentoItem span={4}>
                 <ChartCard
+                  nivel="diagnostico"
+                  id="card-mortalidade"
                   icon={LogOutIcon}
                   title="Onde a jornada termina"
                   headline={
-                    ultimoModulo?.pct != null ? formatPercent(ultimoModulo.pct) : '—'
+                    moduloMaisMortal?.taxa != null ? formatPercent(moduloMaisMortal.taxa) : '—'
                   }
-                  headlineLabel={ultimoModulo ? `param em ${ultimoModulo.modulo}` : undefined}
-                  description="Último módulo usado antes do churn · a fatia mede popularidade do módulo tanto quanto mortalidade: o módulo mais usado tende a ser o último de qualquer jornada"
-                  isLoading={churnUltimo.isLoading}
-                  isError={churnUltimo.isError}
-                  onRetry={() => void churnUltimo.refetch()}
-                  isEmpty={churnUltimo.data?.length === 0}
+                  headlineLabel={
+                    moduloMaisMortal ? `de quem usou ${moduloMaisMortal.modulo} parou ali` : undefined
+                  }
+                  description="De quem passou por cada módulo, que fatia teve ali a última ação antes de sumir. A versão anterior deste card contava clientes e publicava “59% param em Formações” — o que mede popularidade do módulo, porque o mais usado tende a ser o último de qualquer jornada. Dividido pela audiência de cada um, a ordem muda: módulo com muita gente e pouca mortalidade é o que segura."
+                  isLoading={mortalidade.isLoading}
+                  isError={mortalidade.isError}
+                  onRetry={() => void mortalidade.refetch()}
+                  isEmpty={mortalidade.data?.length === 0}
                 >
                   <CategoryBarChart
                     layout="bar"
-                    label="Clientes"
-                    data={(churnUltimo.data ?? []).map((c) => ({
-                      category: c.modulo,
-                      value: c.clientes,
-                    }))}
-                    valueFormatter={formatInt}
+                    label="Pararam ali"
+                    data={(mortalidade.data ?? [])
+                      .filter((m) => m.taxa != null)
+                      .map((m) => ({
+                        category: `${m.modulo} (${formatInt(m.usaram)})`,
+                        value: m.taxa,
+                      }))}
+                    valueFormatter={formatPercent}
                     className="h-[300px]"
                   />
                 </ChartCard>
@@ -271,6 +319,7 @@ export function ClientesPage() {
 
               <BentoItem span={4}>
                 <ChartCard
+                  nivel="descritivo"
                   id="card-frequencia"
                   icon={UsersRoundIcon}
                   title="Frequência de uso"
@@ -298,6 +347,7 @@ export function ClientesPage() {
 
               <BentoItem span={4}>
                 <ChartCard
+                  nivel="descritivo"
                   icon={LayersIcon}
                   title="Amplitude de uso"
                   headline={multiModulo != null ? formatPercent(multiModulo) : '—'}
@@ -326,6 +376,7 @@ export function ClientesPage() {
             <BentoGrid>
               <BentoItem span={12}>
                 <TabelaCard
+                  nivel="prescritivo"
                   icon={AlertTriangleIcon}
                   title="Clientes em risco — lista para ação"
                   headline={formatInt((risco.data ?? []).length)}
@@ -384,6 +435,7 @@ export function ClientesPage() {
 
               <BentoItem span={8}>
                 <TabelaCard
+                  nivel="diagnostico"
                   id="card-churn-modulos"
                   icon={SkullIcon}
                   title="Autópsia de churn — módulos nunca usados"
@@ -456,6 +508,7 @@ export function ClientesPage() {
 
               <BentoItem span={4}>
                 <ChartCard
+                  nivel="diagnostico"
                   id="card-retencao-amplitude"
                   icon={ShieldCheckIcon}
                   title="Multi-módulo retém mais?"
@@ -493,6 +546,7 @@ export function ClientesPage() {
             <BentoGrid>
               <BentoItem span={12}>
                 <TabelaCard
+                  nivel="diagnostico"
                   id="card-aha"
                   icon={LightbulbIcon}
                   title="Momento “aha” — o que a 1ª semana prevê"
@@ -541,49 +595,6 @@ export function ClientesPage() {
                 </TabelaCard>
               </BentoItem>
 
-              <BentoItem span={12}>
-                <TabelaCard
-                  icon={StarIcon}
-                  title="Power users"
-                  headline={formatInt((powerUsers.data ?? []).length)}
-                  headlineLabel="clientes na lista"
-                  description={`Top clientes por engajamento · últimos ${periodo} dias · fonte de cases, depoimentos e beta testers`}
-                  isLoading={powerUsers.isLoading}
-                  isError={powerUsers.isError}
-                  onRetry={() => void powerUsers.refetch()}
-                >
-                  <TabelaLonga
-                    linhas={powerUsers.data ?? []}
-                    limiteDaFonte={LIMITE_LISTA}
-                    chave={(u) => String(u.email)}
-                    buscarEm={(u) => [u.nome, u.email, u.organizacao]}
-                    rotuloBusca="Buscar por nome, e-mail ou organização"
-                    cabecalho={
-                      <TableRow>
-                        <TableHead>Cliente</TableHead>
-                        <TableHead>Organização</TableHead>
-                        <TableHead>Plano</TableHead>
-                        <TableHead className="text-right">Dias ativos</TableHead>
-                        <TableHead className="text-right">Ações</TableHead>
-                        <TableHead className="text-right">Módulos</TableHead>
-                      </TableRow>
-                    }
-                    renderLinha={(u) => (
-                      <TableRow>
-                        <TableCell>
-                          <div className="font-medium">{u.nome ?? '—'}</div>
-                          <div className="text-muted-foreground text-xs">{u.email}</div>
-                        </TableCell>
-                        <TableCell>{u.organizacao ?? '—'}</TableCell>
-                        <TableCell>{u.plano ?? '—'}</TableCell>
-                        <TableCell className="num text-right">{formatInt(u.dias_ativos)}</TableCell>
-                        <TableCell className="num text-right">{formatInt(u.eventos)}</TableCell>
-                        <TableCell className="num text-right">{formatInt(u.modulos)}</TableCell>
-                      </TableRow>
-                    )}
-                  />
-                </TabelaCard>
-              </BentoItem>
             </BentoGrid>
           ),
         }}
