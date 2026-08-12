@@ -62,38 +62,62 @@ se a tela violar a composição — "profundo" vira condição de merge, não op
 
 ## 2. Anatomia padrão da tela
 
-Ordem de leitura de cima para baixo, deliberadamente inversa à profundidade:
-quem tem 15 segundos lê o topo, quem tem 15 minutos desce.
+> **Revisada em 12/ago, depois de ver no ar.** A primeira versão punha a leitura
+> numa faixa navy no topo — e o Mateus reprovou: parede de texto entre o
+> cabeçalho e os gráficos, três achados que pareciam alertas, contabilidade em
+> mono no rodapé. Lia como saída de sistema. **A leitura escrita agora tem aba
+> própria.** O texto abaixo já reflete a versão corrigida.
 
 ```
-FAIXA 0 · Cabeçalho          título · período · persona/plano      já existe
-FAIXA 1 · Limitação do dado  só quando há limitação real           já existe
-FAIXA 2 · RESUMO E DIRECIONAMENTO                                  NOVO
-FAIXA 3 · KPIs               4 tiles com delta e supressão         já existe
-FAIXA 4 · Abas com gráficos  onde a prova mora                     já existe
+FAIXA 0 · Cabeçalho          título · período · persona/plano
+FAIXA 1 · Limitação do dado  só quando há limitação real
+FAIXA 2 · KPIs               4 tiles com delta e supressão — contexto das duas abas
+FAIXA 3 · ABAS               [ Análise ] [ gráficos: 1 ou N abas temáticas ]
 ```
 
-**O resumo mora no topo, largura total, fora das abas.** É o elemento mais lido
-e fala da tela inteira; um resumo por aba multiplicaria o catálogo de regras por
-quatro e produziria três blocos disputando a mesma atenção. Carrega em consulta
-própria, com esqueleto próprio: **nunca atrasa um gráfico**.
+**A aba `Análise` é sempre a primeira, e é a padrão.** O produto existe para
+dizer o que os números significam; o painel é a prova. Nas telas que já tinham
+abas temáticas (Clientes, Entrada, Formações, Soluções, IA, Jornada, Receita), a
+Análise entra na frente delas. Nas que não tinham (Visão Geral, Organizações),
+as abas viram `Análise | Gráficos`.
 
-### Cada achado tem quatro partes
+**Os KPIs ficam acima das abas**, não dentro: trocar de formato não pode custar
+o número de referência.
+
+**A aba de Análise é um documento, não um painel.** Duas colunas a partir de
+`lg`: os achados à esquerda, em medida de leitura de 68 caracteres, e o aparato
+à direita — "o que não dá para afirmar" e "como isto foi apurado". Conteúdo e
+prestação de contas param de disputar a mesma coluna, e o leitor deixa de
+atravessar régua para chegar ao próximo achado. Abaixo de `lg` empilha, com o
+aparato no fim.
+
+### Cada achado tem três degraus, não dois
+
+| Degrau | O que é |
+| --- | --- |
+| **Fato** | o número com a régua junto |
+| **Leitura** | o que o número significa — e o que ele **não** significa |
+| **Ação** | a alavanca, com destino nomeado |
+
+A primeira versão tinha só fato e ação: dava o número e mandava fazer, deixando
+o salto por conta de quem lê. A leitura é o que um analista escreveria entre os
+dois, e é ela que separa análise de alerta.
+
+### O que acompanha cada achado
 
 | Parte | Regra |
 | --- | --- |
-| Selo de severidade | `StatusPill`, com ícone e rótulo — nunca só cor. O limiar vive em migration, com justificativa |
-| Frase executiva | número + régua + denominador, sem jargão. **Percentual sem denominador não sai da fábrica** |
-| Linha de ação | separada em `acao_agora` (o que já é válido fazer) e `acao_para_provar` (o experimento, quando o achado é correlacional) |
-| Âncora | "ver o card que prova" → rola até o card e aplica o mesmo recorte. **Achado cujo card está em erro não é renderizado** |
+| Selo de severidade | `StatusPill`, com ícone e rótulo — nunca só cor. A banda sai do score, e o score é **múltiplo do próprio limiar da regra**: sem isso, regras de unidades diferentes competem numa escala que não existe e a ordem sai do acaso |
+| Âncora | "ver o gráfico que sustenta" → troca para a aba do card e rola até ele. Card apontado precisa de `id` |
 
-Fecham o bloco: a seção **"não dá para afirmar"** (o que foi suprimido e por
-quê), o **rodapé de contabilidade** ("11 regras avaliadas · 3 achados · 4
-suprimidas") e o **carimbo do dado** ("dados de 8 de ago, 15:30"). Com o
-pipeline parado, o carimbo não é enfeite.
+Fecham o documento, na coluna do aparato: **"o que não dá para afirmar"** (cada
+pergunta suprimida com o motivo) e **"como isto foi apurado"** (a procedência —
+gabarito versionado, piso de amostra, margem de dois erros padrão, e a
+contabilidade da carga). O escopo — período, recorte e data do dado — fica no
+subtítulo, e com o pipeline parado isso não é enfeite.
 
-A procedência — regra, versão, limiar, margem, função de origem — não entra na
-frase: vai para o disclosure "como isso foi apurado", mesma gramática do botão
+A procedência não entra na frase do achado: vai para a seção própria, mesma
+gramática do botão
 de informação do `CardCabecalho`.
 
 ### Os dois públicos, um texto
@@ -355,6 +379,23 @@ esse histórico está sendo perdido agora, o que torna o espelho de `notificatio
 urgente e não desejável.
 
 ---
+
+### Regras propostas e recusadas (12/ago)
+
+Das 31 regras escritas para as oito telas restantes, quatro não entraram. O
+motivo importa mais que a lista:
+
+| Regra | Tela | Por que não entrou |
+| --- | --- | --- |
+| `cli_gap_papel` | Clientes | **Aposentada**, não recusada. `cli_comprador` ocupa a mesma família e mede o corte certo — a própria leitura da antiga confessava medir pelo proxy errado (papel do contrato em vez de quem comprou) |
+| `sol_aba_pulada` | Soluções | Lê uma coluna que a RPC não devolve. Apressar DDL num card para servir uma regra inverte a ordem: o card existe primeiro |
+| `sol_catalogo_sem_morto` | Soluções | O score andava ao contrário — catálogo mais saudável dava score maior, e uma regra cuja mensagem é "está tudo bem" sairia rotulada como "atenção" |
+| `org_time_morto` | Organizações | Chamava a RPC com limite de 100 mil enquanto o card chama com 25, e publicava números que não existem em card nenhum. É exatamente o que o contrato do motor existe para impedir |
+
+**A recusa de `org_time_morto` deixa uma pergunta boa órfã** — 271 organizações
+inteiras sem nenhuma ação, contra as 25 que a lista mostra. O caminho certo não
+é afrouxar a regra: é a tela passar a declarar o total (KPI ou headline), e aí a
+regra lê o número que o card mostra. Fica como item de Organizações.
 
 ## 6. Plano por módulo
 
