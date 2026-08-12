@@ -22,11 +22,34 @@ export function useFunilEntrada(dias: Periodo) {
   })
 }
 
-export function useTempoPrimeiroValor() {
+/**
+ * Tempo até a 1ª ação, separado por quem comprou e quem foi convidado.
+ *
+ * Substituiu `bi_tempo_primeiro_valor` no card: a distribuição sozinha contava
+ * quanto e escondia o corte que importa. O convidado não demora mais que o
+ * comprador — ele não aparece.
+ */
+export function usePrimeiraAcaoPorOrigem() {
   return useQuery({
-    queryKey: ['entrada', 'tempo-primeiro-valor'],
+    queryKey: ['entrada', 'primeira-acao-origem'],
     queryFn: async () =>
-      (await rpc(supabase.rpc('bi_tempo_primeiro_valor'))) ?? [],
+      (await rpc(supabase.rpc('bi_entrada_primeira_acao_por_origem'))) ?? [],
+  })
+}
+
+export function useEfeitoOnboarding() {
+  return useQuery({
+    queryKey: ['entrada', 'efeito-onboarding'],
+    queryFn: async () =>
+      (await rpc(supabase.rpc('bi_entrada_efeito_onboarding'))) ?? [],
+  })
+}
+
+export function useAceiteConvite() {
+  return useQuery({
+    queryKey: ['entrada', 'aceite-convite'],
+    queryFn: async () =>
+      (await rpc(supabase.rpc('bi_entrada_aceite_convite'))) ?? [],
   })
 }
 

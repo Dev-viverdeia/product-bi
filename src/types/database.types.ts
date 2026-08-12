@@ -477,6 +477,27 @@ export type Database = {
           stickiness: number
         }[]
       }
+      bi_entrada_aceite_convite: {
+        Args: never
+        Returns: {
+          convites: number
+          faixa: string
+          mediana_horas: number
+          nunca: number
+          ordem: number
+          pct: number
+          total: number
+        }[]
+      }
+      bi_entrada_efeito_onboarding: {
+        Args: never
+        Returns: {
+          ativos: number
+          clientes: number
+          grupo: string
+          pct_ativo: number
+        }[]
+      }
       bi_entrada_kpis: {
         Args: { p_dias?: number }
         Returns: {
@@ -484,6 +505,19 @@ export type Database = {
           convites: number
           erros_login: number
           onboarding_pct: number
+        }[]
+      }
+      bi_entrada_primeira_acao_por_origem: {
+        Args: never
+        Returns: {
+          base_comprador: number
+          base_convidado: number
+          compradores: number
+          convidados: number
+          faixa: string
+          ordem: number
+          pct_comprador: number
+          pct_convidado: number
         }[]
       }
       bi_erros_login: {

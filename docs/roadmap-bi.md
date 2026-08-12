@@ -310,7 +310,29 @@ a tela mostra:
   não têm esses controles e o cabeçalho afirmava um escopo que a tela não
   oferece.
 
-**Falta:** a escada de profundidade nas telas novas — a aba de análise entrou,
+**Entrada subiu a escada (12/ago).** Tinha quatro cards descritivos, um
+diagnóstico e nenhum comparativo. Saíram duas perguntas rasas e entraram três
+que o dado sustenta:
+
+- **Quem comprou age; quem foi convidado, não.** Na porta, 34,9% dos convidados
+  nunca fizeram nada, contra 10,7% dos compradores — safra fechada, todos com a
+  mesma janela. É a mesma fratura que Clientes mede na retenção, agora visível
+  onde ela nasce.
+- **Quem não termina o onboarding não volta:** 0,9% de atividade recente contra
+  17,1% de quem terminou. Três pessoas em 343. O card declara que a ordem causal
+  não sai dali — quem já ia sumir também não terminou.
+- **O convite é aceito na hora ou não é aceito:** mediana de 1,9 hora entre criar
+  e aceitar, e 41,7% nunca aceitos. O card declara o que não consegue separar —
+  convite nunca aceito pode nunca ter sido enviado, porque o rastreamento de
+  envio da plataforma parou em 19/abr/2026.
+
+Duas hipóteses foram medidas e **reprovadas**, e ficam registradas na migration
+para ninguém tentar de novo: conversão por canal do convite (a diferença
+agregada entre email e "both" é efeito de mistura — mês a mês as taxas se
+cruzam) e "o convite de quem está ativo converte mais" (dá o contrário, e por
+pouco).
+
+**Falta:** a escada nas seis telas restantes — a aba de análise entrou em todas,
 mas os cards ainda não declaram `nivel`. Cada uma entra em `TELAS_NA_REGUA`
 quando a composição passar; até lá o placar fica visível em vez de esquecido.
 
@@ -320,7 +342,7 @@ Placar da escada:
 | --- | --- | --- |
 | Visão Geral | ✅ 3 regras | ✅ na régua |
 | Clientes & Retenção | ✅ 6 regras | ✅ na régua |
-| Entrada | ✅ 5 regras | pendente |
+| Entrada | ✅ 5 regras | ✅ na régua |
 | Formações | ✅ 4 regras | pendente |
 | Soluções | ✅ 2 regras | pendente |
 | Consultor & Builder | ✅ 4 regras | pendente |
@@ -391,6 +413,26 @@ Três resultados que mudam o plano, todos reconferidos no banco:
 **Descoberta que destravou o mapeamento:** o MCP alcança os três bancos direto,
 sem depender do `postgres_fdw`. O pipeline parado bloqueia a carga dos marts,
 não a análise do schema de origem.
+
+## Pendências abertas pela leva de 12/ago (análise em aba)
+
+Registro corrido: o que ficou para corrigir ou alinhar depois. Ordem de
+gravidade, não de esforço.
+
+| # | Pendência | Onde | Precisa de |
+| --- | --- | --- | --- |
+| A | **112 dias sem pagamento registrado.** A Receita descreve um rastreamento parado, não um negócio parado. A tela declara, mas o dado não volta sozinho | Receita | decisão do Mateus: reconectar a fonte, apontar para o `via_hub` quando ele estiver populado, ou congelar a tela de vez |
+| B | **Escada de profundidade não subiu nas oito telas novas.** A aba de análise entrou, mas os cards não declaram `nivel` — elas seguem fora de `TELAS_NA_REGUA` | 8 telas | trabalho de gráfico, uma tela por vez (é a fase seguinte) |
+| C | **`org_time_morto` ficou órfã.** A pergunta é boa — quantas contas estão zeradas — e a regra foi recusada porque leria a RPC com limite diferente do card. Com a view corrigida o número existe: 960 de 2.101 | Organizações | a tela mostrar o total de contas zeradas; aí a regra lê o número do card |
+| D | **Duas réguas de "% saída" na mesma tela.** `bi_pontos_saida.pct_da_tela` (29,6% para `/team-management`) e `bi_raio_x_telas.pct_saida` (36,5% para a mesma tela) medem coisas diferentes. Hoje cada card declara a sua | Jornada | alinhar nomes, ou aceitar as duas e manter a declaração explícita |
+| E | **Severidade oscila no corte.** Muita regra cai entre 1,2 e 1,6, e o corte de `atenção` está em 1,5 — variação mínima de dado troca o rótulo entre "atenção" e "observação" | motor | decidir se a régua de severidade muda ou se o rótulo deixa de ser gradiente |
+| F | **Piso de rastreamento chumbado em `VALUES`.** `bi_churn_modulos` carrega a lista de quando cada módulo passou a ser medido; módulo novo fica invisível para `cli_mortalidade` até alguém lembrar de atualizar | Clientes | virar tabela, ou ganhar teste que reprove módulo ausente da lista |
+| G | **Janela de `cli_comprador` duplicada.** O 120/30 vive no calculador e em `bi_retencao_comprador`; mudar num e não no outro faz a frase mentir sem erro nenhum | Clientes | a RPC devolver a própria régua como coluna |
+| H | **NPS de aula parou em 29/07.** Nenhuma regra de Formações lê NPS, de propósito | Formações | conferir se a coleta na origem parou ou se é o pipeline |
+| I | **As seis RPCs de Jornada ainda ancoram em `now()`.** Dívida declarada; nenhuma das quatro regras compara períodos, então pipeline atrasado encurta a janela sem inverter sinal | Jornada | entra no lote geral das ~43 funções com `now()` |
+| J | **`card-retencao-papel` ficou sem regra.** É o card que `cli_gap_papel` apontava antes de ser aposentada. O card segue correto e útil | Clientes | nada urgente — anotado para não parecer esquecimento |
+| K | **Os três cards novos de Entrada não têm regra no motor.** A aba de análise ainda fala das cinco perguntas antigas; o corte comprador × convidado na porta e o efeito do onboarding não aparecem no texto | Entrada | reescrever o catálogo da tela depois que todas subirem a escada, para não mexer duas vezes |
+| L | **Tabela comparativa pede rolagem lateral em 375px.** É o comportamento correto do DS (rola dentro do próprio container, a página não rola), e o headline já carrega o número principal — mas a coluna "Convidado" só aparece rolando | Entrada | avaliar esconder uma coluna no mobile quando o padrão se repetir nas outras telas |
 
 ## Pendências abertas pela auditoria de 08/ago/2026
 
