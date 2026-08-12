@@ -35,7 +35,7 @@ coleção de gráficos.
 | 8. Jornada & Telas (profundidade) | ✅ Entregue |
 | 9. Receita & Renovação | ✅ Entregue |
 | 10. Saúde da plataforma (backend/banco/cyber) | ⏸️ Adiada por decisão do Mateus — só depois do BI |
-| CS — dashboard executivo (2ª fonte: Pulse) | 🚧 Tela, marts e RPCs prontos; aguarda o user mapping do FDW (`docs/discovery-banco-cs-pulse.md`) |
+| CS — dashboard executivo (2ª fonte: Pulse) | 🚧 **Conectado em 12/ago**: user mapping criado pelo Mateus, host do pooler corrigido (`aws-0`→`aws-1`), 8 foreign tables lendo 72.271 linhas. Marts e sync em aplicação |
 
 ### Auditoria roadmap × tela (11/ago/2026)
 
