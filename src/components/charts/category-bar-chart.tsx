@@ -15,6 +15,18 @@ export type CategoryDatum = {
   value: number
   /** recua a barra para o cinza de de-ênfase — use para destacar UMA */
   mute?: boolean
+  /**
+   * Segunda medida da mesma barra, só no tooltip.
+   *
+   * Existe para o caso em que a barra responde "quanto" e a análise escrita
+   * afirma "que proporção" — ou o contrário. Sem este canal, o texto publica um
+   * número que o gráfico ancorado não mostra, e o leitor que clicou para
+   * conferir não encontra o que veio conferir.
+   *
+   * Não vira segunda série nem segundo eixo: é anotação. Chega já formatada,
+   * com a unidade escrita — o gráfico não sabe se é percentual, real ou minuto.
+   */
+  nota?: string
 }
 
 /**
@@ -122,20 +134,30 @@ export function CategoryBarChart({
           cursor={{ fill: 'var(--color-data-grid)' }}
           content={
             <ChartTooltipContent
-              formatter={(value, _name, item) => (
-                <>
-                  <div
-                    className="w-1 shrink-0 self-stretch rounded-[2px]"
-                    style={{ background: item.color ?? 'var(--color-value)' }}
-                  />
-                  <div className="flex flex-1 items-center justify-between gap-4 leading-none">
-                    <span className="text-muted-foreground">{label}</span>
-                    <span className="text-foreground font-mono font-medium tabular-nums">
-                      {valueFormatter(Number(value))}
-                    </span>
-                  </div>
-                </>
-              )}
+              formatter={(value, _name, item) => {
+                const nota = (item.payload as CategoryDatum | undefined)?.nota
+                return (
+                  <>
+                    <div
+                      className="w-1 shrink-0 self-stretch rounded-[2px]"
+                      style={{ background: item.color ?? 'var(--color-value)' }}
+                    />
+                    <div className="flex flex-1 flex-col gap-1">
+                      <div className="flex items-center justify-between gap-4 leading-none">
+                        <span className="text-muted-foreground">{label}</span>
+                        <span className="text-foreground font-mono font-medium tabular-nums">
+                          {valueFormatter(Number(value))}
+                        </span>
+                      </div>
+                      {nota ? (
+                        <span className="text-muted-foreground text-xs leading-none">
+                          {nota}
+                        </span>
+                      ) : null}
+                    </div>
+                  </>
+                )
+              }}
             />
           }
         />

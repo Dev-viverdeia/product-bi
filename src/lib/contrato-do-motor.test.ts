@@ -30,11 +30,29 @@ function corposDoMotor(): { nome: string; corpo: string }[] {
     const fim = sqlCompleto.indexOf('$$;', m.index)
     encontrados.push({
       nome: m[1]!,
-      corpo: sqlCompleto.slice(m.index, fim === -1 ? undefined : fim),
+      // Sem comentário: o que se verifica aqui é o que a função LÊ. As
+      // migrations comentam de propósito de onde vem cada régua — "trinta
+      // minutos é o interval de etl.sync_fact_navegacao" é documentação, não
+      // uma segunda conta. Contar o comentário como leitura reprovaria
+      // justamente a migration mais bem explicada.
+      corpo: sqlCompleto
+        .slice(m.index, fim === -1 ? undefined : fim)
+        .replace(/--[^\n]*/g, ''),
     })
   }
   return encontrados
 }
+
+/**
+ * SQL sem comentário de linha.
+ *
+ * Comentário precisa sair ANTES de procurar gabarito. A migration comenta as
+ * próprias armadilhas e escreve marcadores no meio da prosa — `{mult:mult}` é
+ * um deles. Com o comentário no bolo, a aspa de fechamento de um gabarito
+ * emparelha com a aspa de abertura do seguinte e o "gabarito" extraído vira um
+ * trecho de SQL com o comentário no meio. Foi exatamente o que quebrou aqui.
+ */
+const sqlSemComentario = sqlCompleto.replace(/--[^\n]*/g, '')
 
 /**
  * Gabaritos do catálogo: literais entre aspas simples que carregam marcador.
@@ -43,7 +61,7 @@ function corposDoMotor(): { nome: string; corpo: string }[] {
  * aparecer, o casamento quebra em vez de passar despercebido.
  */
 function gabaritos(): string[] {
-  return (sqlCompleto.match(/'[^']*\{[a-z_]+(?::[a-z]+)?\}[^']*'/g) ?? []).map((s) =>
+  return (sqlSemComentario.match(/'[^']*\{[a-z_]+(?::[a-z]+)?\}[^']*'/g) ?? []).map((s) =>
     s.slice(1, -1),
   )
 }
@@ -83,5 +101,17 @@ describe('gabarito não carrega número', () => {
   it.each(gabaritos())('%s', (gabarito) => {
     const semMarcadores = gabarito.replace(/\{[a-z_]+(?::[a-z]+)?\}/g, '')
     expect(semMarcadores).not.toMatch(/\d/)
+  })
+})
+
+describe('a extração de gabarito não pegou SQL por engano', () => {
+  /*
+    O teste acima só vale se o que ele leu forem mesmo as frases do catálogo.
+    Uma aspa perdida faz o casamento atravessar código e devolver um pedaço de
+    consulta — que passa no teste do dígito por acidente e dá a impressão de
+    cobertura onde não há nenhuma. Aqui a falsa extração falha alto.
+  */
+  it.each(gabaritos())('%s', (gabarito) => {
+    expect(gabarito).not.toMatch(/\b(select|from|where|jsonb_build_object)\b/)
   })
 })

@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
+import { AnaliseDaTela } from '@/features/resumo/analise-tela'
 import {
   useBuilderSteps,
   useConsultorModos,
@@ -124,10 +125,12 @@ export function IaPage() {
       <ModuloTabs
         rota="/ia"
         conteudos={{
+          analise: <AnaliseDaTela tela="ia" periodo={periodo} />,
           adocao: (
             <BentoGrid>
               <BentoItem span={6}>
                 <ChartCard
+                  id="card-adocao-ia"
                   icon={BotIcon}
                   title="Adoção entre clientes ativos"
                   headline={ferramentaLider ? formatInt(ferramentaLider.usuarios) : '—'}
@@ -154,6 +157,7 @@ export function IaPage() {
 
               <BentoItem span={6}>
                 <ChartCard
+                  id="card-recorrencia-consultor"
                   icon={RepeatIcon}
                   title="Recorrência do Consultor"
                   headline={voltamOutroDia != null ? formatPercent(voltamOutroDia) : '—'}
@@ -207,6 +211,7 @@ export function IaPage() {
 
               <BentoItem span={4}>
                 <TabelaCard
+                  id="card-builder-etapas"
                   icon={WrenchIcon}
                   title="Builder — confiabilidade por etapa"
                   headline={
@@ -257,6 +262,7 @@ export function IaPage() {
             <BentoGrid>
               <BentoItem span={12}>
                 <TabelaCard
+                  id="card-impacto-ia"
                   icon={ShieldCheckIcon}
                   title="Usar IA na 1ª semana muda a retenção?"
                   headline={lift ? `${formatDecimal(lift)}×` : '—'}

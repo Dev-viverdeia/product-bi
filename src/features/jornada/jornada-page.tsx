@@ -23,6 +23,7 @@ import {
 import { TableCell, TableHead, TableRow } from '@/components/ui/table'
 import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import { LIMITE_LISTA } from '@/lib/rpc'
+import { AnaliseDaTela } from '@/features/resumo/analise-tela'
 import {
   useFluxoDaTela,
   useJornadaKpis,
@@ -56,7 +57,17 @@ export function JornadaPage() {
   const telaMaisVista = raioX.data?.[0] ?? null
   const destinoLider = fluxo.data?.[0] ?? null
   const portaLider = entradas.data?.[0] ?? null
-  const saidaLider = saidas.data?.[0] ?? null
+  // O card responde "onde a sessão termina com frequência anormal", não "onde
+  // termina em volume" — volume segue o tráfego da tela e não distingue a tela
+  // que resolve da tela que trava. Por isso a ordem é pela taxa, e é a mesma
+  // que o motor de achados usa: as duas leituras vêm das MESMAS dez linhas da
+  // RPC (p_limite 10 aqui e no calculador), então o número da análise escrita
+  // está sempre desenhado neste gráfico.
+  const saidasPorTaxa = useMemo(
+    () => [...(saidas.data ?? [])].sort((a, b) => (b.pct_da_tela ?? 0) - (a.pct_da_tela ?? 0)),
+    [saidas.data],
+  )
+  const saidaLider = saidasPorTaxa[0] ?? null
 
   // Exploração: sessões que passaram de uma tela só.
   const exploram = useMemo(() => {
@@ -120,10 +131,12 @@ export function JornadaPage() {
       <ModuloTabs
         rota="/jornada"
         conteudos={{
+          analise: <AnaliseDaTela tela="jornada" periodo={periodo} />,
           telas: (
             <BentoGrid>
               <BentoItem span={12}>
                 <TabelaCard
+                  id="card-raio-x"
                   icon={ScanSearchIcon}
                   title="Raio-x das telas"
                   headline={telaMaisVista ? formatInt(telaMaisVista.pageviews) : '—'}
@@ -228,6 +241,7 @@ export function JornadaPage() {
             <BentoGrid>
               <BentoItem span={6}>
                 <ChartCard
+                  id="card-portas-entrada"
                   icon={DoorOpenIcon}
                   title="Portas de entrada"
                   headline={portaLider ? formatInt(portaLider.sessoes) : '—'}
@@ -254,11 +268,16 @@ export function JornadaPage() {
 
               <BentoItem span={6}>
                 <ChartCard
+                  id="card-pontos-saida"
                   icon={LogOutIcon}
                   title="Onde a sessão morre"
-                  headline={saidaLider ? formatInt(saidaLider.saidas) : '—'}
-                  headlineLabel={saidaLider ? `saídas em ${saidaLider.tela}` : undefined}
-                  description="Última tela em sessões com 2+ telas — visita de tela única não conta"
+                  headline={
+                    saidaLider?.pct_da_tela != null ? formatPercent(saidaLider.pct_da_tela) : '—'
+                  }
+                  headlineLabel={
+                    saidaLider ? `das visitas a ${saidaLider.tela} terminam ali` : undefined
+                  }
+                  description="Taxa de encerramento da própria tela · sessões com 2+ telas, telas com 100+ encerramentos — régua diferente da coluna % saída do raio-x, que conta todas as sessões"
                   isLoading={saidas.isLoading}
                   isError={saidas.isError}
                   onRetry={() => void saidas.refetch()}
@@ -266,12 +285,13 @@ export function JornadaPage() {
                 >
                   <CategoryBarChart
                     layout="bar"
-                    label="Saídas"
-                    data={(saidas.data ?? []).map((s) => ({
+                    label="Encerram a sessão"
+                    data={saidasPorTaxa.map((s) => ({
                       category: s.tela,
-                      value: s.saidas,
+                      value: s.pct_da_tela ?? 0,
+                      nota: `${formatInt(s.saidas)} sessões terminadas`,
                     }))}
-                    valueFormatter={formatInt}
+                    valueFormatter={formatPercent}
                     className="h-[320px]"
                   />
                 </ChartCard>

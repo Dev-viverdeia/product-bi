@@ -67,6 +67,132 @@ export type Database = {
           titulo: string
         }[]
       }
+      bi_achados_entrada: {
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
+        Returns: {
+          ancora_aba: string
+          ancora_id: string
+          familia: string
+          gabarito: string
+          gabarito_acao: string
+          gabarito_leitura: string
+          motivo: string
+          parametros: Json
+          regra: string
+          score: number
+          severidade: string
+          suprimida: boolean
+          titulo: string
+        }[]
+      }
+      bi_achados_formacoes: {
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
+        Returns: {
+          ancora_aba: string
+          ancora_id: string
+          familia: string
+          gabarito: string
+          gabarito_acao: string
+          gabarito_leitura: string
+          motivo: string
+          parametros: Json
+          regra: string
+          score: number
+          severidade: string
+          suprimida: boolean
+          titulo: string
+        }[]
+      }
+      bi_achados_ia: {
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
+        Returns: {
+          ancora_aba: string
+          ancora_id: string
+          familia: string
+          gabarito: string
+          gabarito_acao: string
+          gabarito_leitura: string
+          motivo: string
+          parametros: Json
+          regra: string
+          score: number
+          severidade: string
+          suprimida: boolean
+          titulo: string
+        }[]
+      }
+      bi_achados_jornada: {
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
+        Returns: {
+          ancora_aba: string
+          ancora_id: string
+          familia: string
+          gabarito: string
+          gabarito_acao: string
+          gabarito_leitura: string
+          motivo: string
+          parametros: Json
+          regra: string
+          score: number
+          severidade: string
+          suprimida: boolean
+          titulo: string
+        }[]
+      }
+      bi_achados_organizacoes: {
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
+        Returns: {
+          ancora_aba: string
+          ancora_id: string
+          familia: string
+          gabarito: string
+          gabarito_acao: string
+          gabarito_leitura: string
+          motivo: string
+          parametros: Json
+          regra: string
+          score: number
+          severidade: string
+          suprimida: boolean
+          titulo: string
+        }[]
+      }
+      bi_achados_receita: {
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
+        Returns: {
+          ancora_aba: string
+          ancora_id: string
+          familia: string
+          gabarito: string
+          gabarito_acao: string
+          gabarito_leitura: string
+          motivo: string
+          parametros: Json
+          regra: string
+          score: number
+          severidade: string
+          suprimida: boolean
+          titulo: string
+        }[]
+      }
+      bi_achados_solucoes: {
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
+        Returns: {
+          ancora_aba: string
+          ancora_id: string
+          familia: string
+          gabarito: string
+          gabarito_acao: string
+          gabarito_leitura: string
+          motivo: string
+          parametros: Json
+          regra: string
+          score: number
+          severidade: string
+          suprimida: boolean
+          titulo: string
+        }[]
+      }
       bi_achados_visao_geral: {
         Args: { p_dias?: number; p_papel?: string; p_plano?: string }
         Returns: {

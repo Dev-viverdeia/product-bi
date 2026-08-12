@@ -97,13 +97,13 @@ export function VisaoGeralPage() {
           não pode custar o número de referência nem o recorte. */}
       <BentoGrid>
         <BentoCabecalho>
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Visão geral</h2>
-          <p className="text-muted-foreground text-sm">
-            Uso da plataforma pelos clientes
-            {sincronizadoAs ? ` · dados sincronizados às ${sincronizadoAs}` : ''}
-          </p>
-        </div>
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight">Visão geral</h2>
+            <p className="text-muted-foreground text-sm">
+              Uso da plataforma pelos clientes
+              {sincronizadoAs ? ` · dados sincronizados às ${sincronizadoAs}` : ''}
+            </p>
+          </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <SegmentoFiltro />
             <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
@@ -111,7 +111,7 @@ export function VisaoGeralPage() {
         </BentoCabecalho>
 
         <BentoItem span={12} id="card-kpis">
-            <KpiGrid>
+          <KpiGrid>
             <KpiCard
               label="Usuários ativos"
               value={kpis.data?.ativos ?? null}
@@ -170,233 +170,232 @@ export function VisaoGeralPage() {
           analise: <AnaliseDaTela tela="visao-geral" periodo={periodo} recorte={recorte} />,
           graficos: (
             <BentoGrid>
+              <BentoItem span={8}>
+                <ChartCard
+                  nivel="descritivo"
+                  id="card-atividade"
+                  icon={ActivityIcon}
+                  title="Usuários ativos por dia"
+                  headline={mediaDiaria != null ? formatInt(mediaDiaria) : '—'}
+                  headlineLabel="na média do dia"
+                  description={`Clientes com ao menos uma ação de produto no dia · últimos ${periodo} dias`}
+                  isLoading={atividade.isLoading}
+                  isError={atividade.isError}
+                  onRetry={() => void atividade.refetch()}
+                  isEmpty={atividade.data?.length === 0}
+                  isRefreshing={atividade.isFetching && !!atividade.data}
+                >
+                  <TimeSeriesChart
+                    variant="area"
+                    data={(atividade.data ?? []).map((d) => ({ x: d.data, ativos: d.ativos }))}
+                    series={[{ dataKey: 'ativos', label: 'Usuários ativos' }]}
+                    xTickFormatter={formatDateShort}
+                    valueFormatter={formatInt}
+                    className="h-[280px]"
+                  />
+                </ChartCard>
+              </BentoItem>
 
-      <BentoItem span={8}>
-        <ChartCard
-          nivel="descritivo"
-          id="card-atividade"
-          icon={ActivityIcon}
-          title="Usuários ativos por dia"
-          headline={mediaDiaria != null ? formatInt(mediaDiaria) : '—'}
-          headlineLabel="na média do dia"
-          description={`Clientes com ao menos uma ação de produto no dia · últimos ${periodo} dias`}
-          isLoading={atividade.isLoading}
-          isError={atividade.isError}
-          onRetry={() => void atividade.refetch()}
-          isEmpty={atividade.data?.length === 0}
-          isRefreshing={atividade.isFetching && !!atividade.data}
-        >
-          <TimeSeriesChart
-            variant="area"
-            data={(atividade.data ?? []).map((d) => ({ x: d.data, ativos: d.ativos }))}
-            series={[{ dataKey: 'ativos', label: 'Usuários ativos' }]}
-            xTickFormatter={formatDateShort}
-            valueFormatter={formatInt}
-            className="h-[280px]"
-          />
-        </ChartCard>
-      </BentoItem>
-
-      <BentoItem span={4}>
-        <ChartCard
-          nivel="comparativo"
-          icon={UsersIcon}
-          title="Quem apareceu, e quem não"
-          headline={penetracao != null ? formatPercent(penetracao) : '—'}
-          headlineLabel="da base pagante teve alguma ação"
-          description={`Clientes com ao menos uma ação no período, contra a base pagante inteira · últimos ${periodo} dias`}
-          isLoading={kpis.isLoading}
-          isError={kpis.isError}
-          isEmpty={kpis.data == null}
-        >
-          <CategoryBarChart
-            layout="bar"
-            label="Clientes"
-            data={
-              kpis.data
-                ? [
-                    { category: 'Apareceram', value: kpis.data.ativos },
-                    { category: 'Não apareceram', value: kpis.data.base - kpis.data.ativos, mute: true },
-                  ]
-                : []
-            }
-            valueFormatter={formatInt}
-            className="h-[200px]"
-          />
-        </ChartCard>
-      </BentoItem>
-
-      <BentoItem span={4}>
-        <ChartCard
-          nivel="diagnostico"
-          id="card-composicao"
-          icon={SproutIcon}
-          title="De onde veio o número de ativos"
-          headline={parteNovos != null ? formatPercent(parteNovos) : '—'}
-          headlineLabel="dos ativos entraram no próprio período"
-          description={`Cada cliente ativo entra em uma origem só: retido (ativo também na janela anterior), reativado (voltou depois de sumir) ou novo (primeira ação no período) · últimos ${periodo} dias`}
-          isLoading={composicao.isLoading}
-          isError={composicao.isError}
-          onRetry={() => void composicao.refetch()}
-          isEmpty={composicao.data?.length === 0}
-          isRefreshing={composicao.isFetching && !!composicao.data}
-        >
-          <CategoryBarChart
-            layout="bar"
-            label="Clientes"
-            data={(composicao.data ?? []).map((c) => ({
-              category: c.categoria,
-              value: c.clientes,
-              mute: c.categoria !== 'Novo',
-            }))}
-            valueFormatter={formatInt}
-            className="h-[200px]"
-          />
-        </ChartCard>
-      </BentoItem>
-
-      <BentoItem span={4}>
-        <ChartCard
-          nivel="comparativo"
-          id="card-eventos"
-          icon={MousePointerClickIcon}
-          title="Ações por módulo"
-          headline={moduloLider ? formatCompact(moduloLider.total) : '—'}
-          headlineLabel={moduloLider ? `em ${moduloLider.modulo}` : undefined}
-          description={`Todas as ações de produto do período, agrupadas por módulo · últimos ${periodo} dias`}
-          isLoading={porModulo.isLoading}
-          isError={porModulo.isError}
-          onRetry={() => void porModulo.refetch()}
-          isEmpty={porModulo.data?.length === 0}
-          isRefreshing={porModulo.isFetching && !!porModulo.data}
-        >
-          <CategoryBarChart
-            layout="bar"
-            label="Ações"
-            data={(porModulo.data ?? []).map((m) => ({
-              category: m.modulo,
-              value: m.total,
-            }))}
-            valueFormatter={formatCompact}
-            className="h-[200px]"
-          />
-        </ChartCard>
-      </BentoItem>
-
-      <BentoItem span={6}>
-        <ChartCard
-          nivel="diagnostico"
-          id="card-compromisso"
-          icon={HandshakeIcon}
-          title="O uso é raso ou profundo?"
-          headline={parteCompromisso != null ? formatPercent(parteCompromisso) : '—'}
-          headlineLabel="das ações são compromisso, não consumo"
-          description="Consumo é olhar; compromisso é produzir, concluir ou agendar · atenção: a plataforma emite hoje um único evento de consumo (visualizar solução), então módulo em 100% quer dizer que o olhar não é rastreado ali, não que todo uso seja profundo"
-          isLoading={porModulo.isLoading}
-          isError={porModulo.isError}
-          onRetry={() => void porModulo.refetch()}
-          isEmpty={porModulo.data?.length === 0}
-          isRefreshing={porModulo.isFetching && !!porModulo.data}
-        >
-          <CategoryBarChart
-            layout="bar"
-            label="Compromisso"
-            data={(porModulo.data ?? [])
-              .filter((m) => m.pct_compromisso != null)
-              .map((m) => ({
-                category: m.modulo,
-                value: m.pct_compromisso,
-              }))}
-            valueFormatter={formatPercent}
-            referencias={
-              parteCompromisso != null
-                ? [{ valor: parteCompromisso, rotulo: 'média da plataforma' }]
-                : []
-            }
-            className="h-[240px]"
-          />
-        </ChartCard>
-      </BentoItem>
-
-      <BentoItem span={6}>
-        <TabelaCard
-          nivel="prescritivo"
-          id="card-rastreio"
-          icon={RadarIcon}
-          title="Saúde do rastreio"
-          headline={formatInt(rastreiosParados)}
-          headlineLabel="rastreios parados há mais de 30 dias"
-          description="Última data com registro por tipo de evento, contada a partir do dia do dado e não de hoje · série que atravessa a data de óbito de um evento lê queda de comportamento onde houve queda de instrumentação"
-          isLoading={rastreio.isLoading}
-          isError={rastreio.isError}
-          onRetry={() => void rastreio.refetch()}
-          linhasEsqueleto={5}
-        >
-          <TabelaLonga
-            linhas={rastreio.data ?? []}
-            chave={(r) => r.tipo}
-            buscarEm={(r) => [labelTipoEvento(r.tipo), r.modulo]}
-            rotuloBusca="Buscar evento ou módulo"
-            cabecalho={
-              <TableRow>
-                <TableHead>Evento</TableHead>
-                <TableHead>Módulo</TableHead>
-                <TableHead className="text-right">Último registro</TableHead>
-                <TableHead className="text-right">Dias parado</TableHead>
-                <TableHead>Estado</TableHead>
-              </TableRow>
-            }
-            renderLinha={(r) => (
-              <TableRow>
-                <TableCell className="font-medium">{labelTipoEvento(r.tipo)}</TableCell>
-                <TableCell className="text-muted-foreground">{r.modulo}</TableCell>
-                <TableCell className="num text-right">{formatDateShort(r.ultimo_registro)}</TableCell>
-                <TableCell className="num text-right">{formatInt(r.dias_parado)}</TableCell>
-                <TableCell>
-                  <StatusPill
-                    tom={
-                      r.status === 'parado' ? 'critico' : r.status === 'atrasado' ? 'atencao' : 'bom'
+              <BentoItem span={4}>
+                <ChartCard
+                  nivel="comparativo"
+                  icon={UsersIcon}
+                  title="Quem apareceu, e quem não"
+                  headline={penetracao != null ? formatPercent(penetracao) : '—'}
+                  headlineLabel="da base pagante teve alguma ação"
+                  description={`Clientes com ao menos uma ação no período, contra a base pagante inteira · últimos ${periodo} dias`}
+                  isLoading={kpis.isLoading}
+                  isError={kpis.isError}
+                  isEmpty={kpis.data == null}
+                >
+                  <CategoryBarChart
+                    layout="bar"
+                    label="Clientes"
+                    data={
+                      kpis.data
+                        ? [
+                            { category: 'Apareceram', value: kpis.data.ativos },
+                            { category: 'Não apareceram', value: kpis.data.base - kpis.data.ativos, mute: true },
+                          ]
+                        : []
                     }
-                  >
-                    {r.status === 'parado'
-                      ? 'parado'
-                      : r.status === 'atrasado'
-                        ? 'atrasado'
-                        : 'em dia'}
-                  </StatusPill>
-                </TableCell>
-              </TableRow>
-            )}
-          />
-        </TabelaCard>
-      </BentoItem>
+                    valueFormatter={formatInt}
+                    className="h-[200px]"
+                  />
+                </ChartCard>
+              </BentoItem>
 
-      <BentoItem span={12}>
-        <ChartCard
-          nivel="descritivo"
-          icon={ClockIcon}
-          title="Picos de navegação"
-          headline={formatInt(picoNavegacao)}
-          headlineLabel="pageviews na hora de pico"
-          description={`Pageviews por dia da semana × hora (Brasília) · últimos ${periodo} dias`}
-          isLoading={heatmap.isLoading}
-          isError={heatmap.isError}
-          onRetry={() => void heatmap.refetch()}
-          isEmpty={heatmap.data?.length === 0}
-          isRefreshing={heatmap.isFetching && !!heatmap.data}
-          contentClassName="min-h-0"
-        >
-          <HeatmapChart
-            label="pageviews"
-            data={(heatmap.data ?? []).map((h) => ({
-              dia: h.dia_semana,
-              hora: h.hora,
-              valor: h.pageviews,
-            }))}
-            valueFormatter={formatInt}
-          />
-        </ChartCard>
-      </BentoItem>
+              <BentoItem span={4}>
+                <ChartCard
+                  nivel="diagnostico"
+                  id="card-composicao"
+                  icon={SproutIcon}
+                  title="De onde veio o número de ativos"
+                  headline={parteNovos != null ? formatPercent(parteNovos) : '—'}
+                  headlineLabel="dos ativos entraram no próprio período"
+                  description={`Cada cliente ativo entra em uma origem só: retido (ativo também na janela anterior), reativado (voltou depois de sumir) ou novo (primeira ação no período) · últimos ${periodo} dias`}
+                  isLoading={composicao.isLoading}
+                  isError={composicao.isError}
+                  onRetry={() => void composicao.refetch()}
+                  isEmpty={composicao.data?.length === 0}
+                  isRefreshing={composicao.isFetching && !!composicao.data}
+                >
+                  <CategoryBarChart
+                    layout="bar"
+                    label="Clientes"
+                    data={(composicao.data ?? []).map((c) => ({
+                      category: c.categoria,
+                      value: c.clientes,
+                      mute: c.categoria !== 'Novo',
+                    }))}
+                    valueFormatter={formatInt}
+                    className="h-[200px]"
+                  />
+                </ChartCard>
+              </BentoItem>
+
+              <BentoItem span={4}>
+                <ChartCard
+                  nivel="comparativo"
+                  id="card-eventos"
+                  icon={MousePointerClickIcon}
+                  title="Ações por módulo"
+                  headline={moduloLider ? formatCompact(moduloLider.total) : '—'}
+                  headlineLabel={moduloLider ? `em ${moduloLider.modulo}` : undefined}
+                  description={`Todas as ações de produto do período, agrupadas por módulo · últimos ${periodo} dias`}
+                  isLoading={porModulo.isLoading}
+                  isError={porModulo.isError}
+                  onRetry={() => void porModulo.refetch()}
+                  isEmpty={porModulo.data?.length === 0}
+                  isRefreshing={porModulo.isFetching && !!porModulo.data}
+                >
+                  <CategoryBarChart
+                    layout="bar"
+                    label="Ações"
+                    data={(porModulo.data ?? []).map((m) => ({
+                      category: m.modulo,
+                      value: m.total,
+                    }))}
+                    valueFormatter={formatCompact}
+                    className="h-[200px]"
+                  />
+                </ChartCard>
+              </BentoItem>
+
+              <BentoItem span={6}>
+                <ChartCard
+                  nivel="diagnostico"
+                  id="card-compromisso"
+                  icon={HandshakeIcon}
+                  title="O uso é raso ou profundo?"
+                  headline={parteCompromisso != null ? formatPercent(parteCompromisso) : '—'}
+                  headlineLabel="das ações são compromisso, não consumo"
+                  description="Consumo é olhar; compromisso é produzir, concluir ou agendar · atenção: a plataforma emite hoje um único evento de consumo (visualizar solução), então módulo em 100% quer dizer que o olhar não é rastreado ali, não que todo uso seja profundo"
+                  isLoading={porModulo.isLoading}
+                  isError={porModulo.isError}
+                  onRetry={() => void porModulo.refetch()}
+                  isEmpty={porModulo.data?.length === 0}
+                  isRefreshing={porModulo.isFetching && !!porModulo.data}
+                >
+                  <CategoryBarChart
+                    layout="bar"
+                    label="Compromisso"
+                    data={(porModulo.data ?? [])
+                      .filter((m) => m.pct_compromisso != null)
+                      .map((m) => ({
+                        category: m.modulo,
+                        value: m.pct_compromisso,
+                      }))}
+                    valueFormatter={formatPercent}
+                    referencias={
+                      parteCompromisso != null
+                        ? [{ valor: parteCompromisso, rotulo: 'média da plataforma' }]
+                        : []
+                    }
+                    className="h-[240px]"
+                  />
+                </ChartCard>
+              </BentoItem>
+
+              <BentoItem span={6}>
+                <TabelaCard
+                  nivel="prescritivo"
+                  id="card-rastreio"
+                  icon={RadarIcon}
+                  title="Saúde do rastreio"
+                  headline={formatInt(rastreiosParados)}
+                  headlineLabel="rastreios parados há mais de 30 dias"
+                  description="Última data com registro por tipo de evento, contada a partir do dia do dado e não de hoje · série que atravessa a data de óbito de um evento lê queda de comportamento onde houve queda de instrumentação"
+                  isLoading={rastreio.isLoading}
+                  isError={rastreio.isError}
+                  onRetry={() => void rastreio.refetch()}
+                  linhasEsqueleto={5}
+                >
+                  <TabelaLonga
+                    linhas={rastreio.data ?? []}
+                    chave={(r) => r.tipo}
+                    buscarEm={(r) => [labelTipoEvento(r.tipo), r.modulo]}
+                    rotuloBusca="Buscar evento ou módulo"
+                    cabecalho={
+                      <TableRow>
+                        <TableHead>Evento</TableHead>
+                        <TableHead>Módulo</TableHead>
+                        <TableHead className="text-right">Último registro</TableHead>
+                        <TableHead className="text-right">Dias parado</TableHead>
+                        <TableHead>Estado</TableHead>
+                      </TableRow>
+                    }
+                    renderLinha={(r) => (
+                      <TableRow>
+                        <TableCell className="font-medium">{labelTipoEvento(r.tipo)}</TableCell>
+                        <TableCell className="text-muted-foreground">{r.modulo}</TableCell>
+                        <TableCell className="num text-right">{formatDateShort(r.ultimo_registro)}</TableCell>
+                        <TableCell className="num text-right">{formatInt(r.dias_parado)}</TableCell>
+                        <TableCell>
+                          <StatusPill
+                            tom={
+                              r.status === 'parado' ? 'critico' : r.status === 'atrasado' ? 'atencao' : 'bom'
+                            }
+                          >
+                            {r.status === 'parado'
+                              ? 'parado'
+                              : r.status === 'atrasado'
+                                ? 'atrasado'
+                                : 'em dia'}
+                          </StatusPill>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  />
+                </TabelaCard>
+              </BentoItem>
+
+              <BentoItem span={12}>
+                <ChartCard
+                  nivel="descritivo"
+                  icon={ClockIcon}
+                  title="Picos de navegação"
+                  headline={formatInt(picoNavegacao)}
+                  headlineLabel="pageviews na hora de pico"
+                  description={`Pageviews por dia da semana × hora (Brasília) · últimos ${periodo} dias`}
+                  isLoading={heatmap.isLoading}
+                  isError={heatmap.isError}
+                  onRetry={() => void heatmap.refetch()}
+                  isEmpty={heatmap.data?.length === 0}
+                  isRefreshing={heatmap.isFetching && !!heatmap.data}
+                  contentClassName="min-h-0"
+                >
+                  <HeatmapChart
+                    label="pageviews"
+                    data={(heatmap.data ?? []).map((h) => ({
+                      dia: h.dia_semana,
+                      hora: h.hora,
+                      valor: h.pageviews,
+                    }))}
+                    valueFormatter={formatInt}
+                  />
+                </ChartCard>
+              </BentoItem>
             </BentoGrid>
           ),
         }}

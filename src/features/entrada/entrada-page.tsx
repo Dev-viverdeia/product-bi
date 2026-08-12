@@ -18,6 +18,7 @@ import {
 import { formatInt, formatPercent } from '@/lib/format'
 import { fundoIntensidade } from '@/lib/intensidade'
 import { LIMITE_LISTA } from '@/lib/rpc'
+import { AnaliseDaTela } from '@/features/resumo/analise-tela'
 import {
   useEntradaKpis,
   useErrosLogin,
@@ -125,10 +126,12 @@ export function EntradaPage() {
       <ModuloTabs
         rota="/entrada"
         conteudos={{
+          analise: <AnaliseDaTela tela="entrada" periodo={periodo} />,
           funil: (
             <BentoGrid>
               <BentoItem span={8}>
                 <TabelaCard
+                  id="card-funil-entrada"
                   icon={SlidersHorizontalIcon}
                   title="Funil de entrada"
                   headline={
@@ -170,6 +173,7 @@ export function EntradaPage() {
               <BentoItem span={4}>
                 <ChartCard
                   tone="brand"
+                  id="card-tempo-primeira-acao"
                   icon={TimerIcon}
                   title="Tempo até a 1ª ação"
                   headline={faixaModal ? formatPercent(faixaModal.parte) : '—'}
@@ -195,6 +199,7 @@ export function EntradaPage() {
             <BentoGrid>
               <BentoItem span={6}>
                 <ChartCard
+                  id="card-onboarding-abandono"
                   icon={ListChecksIcon}
                   title="Onde os incompletos param"
                   headline={formatInt(incompletos)}
@@ -219,6 +224,7 @@ export function EntradaPage() {
 
               <BentoItem span={6}>
                 <TabelaCard
+                  id="card-masters-convites"
                   icon={UserPlusIcon}
                   title="Masters × convites"
                   headline={
@@ -274,6 +280,7 @@ export function EntradaPage() {
             <BentoGrid>
               <BentoItem span={6}>
                 <ChartCard
+                  id="card-erros-login"
                   icon={LogInIcon}
                   title="Erros de login por categoria"
                   headline={erroDominante ? formatPercent(erroDominante.parte) : '—'}

@@ -20,6 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
+import { AnaliseDaTela } from '@/features/resumo/analise-tela'
 import {
   useAssuntos,
   useDropoffPosicao,
@@ -127,10 +128,12 @@ export function FormacoesPage() {
       <ModuloTabs
         rota="/formacoes"
         conteudos={{
+          analise: <AnaliseDaTela tela="formacoes" periodo={periodo} />,
           uso: (
             <BentoGrid>
               <BentoItem span={6}>
                 <TabelaCard
+                  id="card-uso-formacoes"
                   icon={GraduationCapIcon}
                   title="Uso por formação"
                   headline={formatInt((uso.data ?? []).length)}
@@ -204,6 +207,7 @@ export function FormacoesPage() {
               <BentoItem span={8}>
                 <ChartCard
                   tone="brand"
+                  id="card-duracao"
                   icon={TimerIcon}
                   title="Duração de aula que maximiza conclusão"
                   headline={
@@ -232,6 +236,7 @@ export function FormacoesPage() {
 
               <BentoItem span={4}>
                 <ChartCard
+                  id="card-dropoff"
                   icon={TrendingDownIcon}
                   title="Onde o aluno para no curso"
                   headline={chegamAoFim != null ? formatPercent(chegamAoFim) : '—'}
@@ -260,6 +265,7 @@ export function FormacoesPage() {
             <BentoGrid>
               <BentoItem span={6}>
                 <TabelaCard
+                  id="card-jornada"
                   icon={AwardIcon}
                   title="Tempo até o certificado"
                   headline={cursoMediano != null ? formatDecimal(cursoMediano) : '—'}

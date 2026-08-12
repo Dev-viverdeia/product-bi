@@ -24,6 +24,7 @@ import {
   formatMesAno,
   formatPercent,
 } from '@/lib/format'
+import { AnaliseDaTela } from '@/features/resumo/analise-tela'
 import {
   useLtvCohort,
   useReceitaKpis,
@@ -141,10 +142,12 @@ export function ReceitaPage() {
       <ModuloTabs
         rota="/receita"
         conteudos={{
+          analise: <AnaliseDaTela tela="receita" />,
           receita: (
             <BentoGrid>
               <BentoItem span={8}>
                 <ChartCard
+                  id="card-receita-mensal"
                   tone="brand"
                   icon={LineChartIcon}
                   title="Receita por mês"
@@ -173,6 +176,7 @@ export function ReceitaPage() {
 
               <BentoItem span={4}>
                 <TabelaCard
+                  id="card-saude-cobranca"
                   icon={CreditCardIcon}
                   title="Saúde da cobrança"
                   headline={
@@ -218,6 +222,7 @@ export function ReceitaPage() {
 
               <BentoItem span={12}>
                 <ChartCard
+                  id="card-compradores-mes"
                   title="Compradores por mês"
                   description="Pessoas distintas com fatura paga no mês"
                   isLoading={mensal.isLoading}

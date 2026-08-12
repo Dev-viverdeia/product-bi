@@ -136,8 +136,10 @@ export function AnaliseDaTela({
   recorte,
 }: {
   tela: TelaComResumo
-  periodo: Periodo
-  recorte: Recorte
+  /** omitir nas telas sem seletor de período — cada achado declara a própria janela */
+  periodo?: Periodo
+  /** omitir nas telas sem o recorte por persona e plano */
+  recorte?: Recorte
 }) {
   const achados = useAchados(tela, periodo, recorte)
   const referencia = useDataReferencia()
@@ -147,10 +149,17 @@ export function AnaliseDaTela({
     [achados.data],
   )
 
+  // O escopo só afirma o que a tela de fato controla. Anunciar "todos os papéis"
+  // onde não existe filtro de papel descreve um recorte que o leitor não pode
+  // mudar — e sugere que os outros existem em algum lugar.
   const escopo = [
-    `últimos ${formatInt(periodo)} dias`,
-    recorte.papel ? rotuloPapel(recorte.papel) : 'todos os papéis',
-    recorte.plano ? (PLANO[recorte.plano] ?? recorte.plano) : 'todos os planos',
+    periodo === undefined ? null : `últimos ${formatInt(periodo)} dias`,
+    recorte === undefined ? null : (recorte.papel ? rotuloPapel(recorte.papel) : 'todos os papéis'),
+    recorte === undefined
+      ? null
+      : recorte.plano
+        ? (PLANO[recorte.plano] ?? recorte.plano)
+        : 'todos os planos',
     referencia.data ? `dados até ${formatDateShort(referencia.data)}` : null,
   ]
     .filter(Boolean)

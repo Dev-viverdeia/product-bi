@@ -20,7 +20,7 @@ import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/char
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
 import { SegmentoFiltro } from '@/components/filters/segmento-filtro'
 import { useSegmento } from '@/components/filters/use-segmento'
-import { ResumoCard } from '@/features/resumo/resumo-card'
+import { AnaliseDaTela } from '@/features/resumo/analise-tela'
 import { StatusPill } from '@/components/ui-marca/status-pill'
 import { TableCell, TableHead, TableRow } from '@/components/ui/table'
 import {
@@ -154,12 +154,6 @@ export function ClientesPage() {
           </div>
         </BentoCabecalho>
 
-        {/* Faixa 2 da anatomia: o resumo é o card de destaque da tela — o lugar
-            mais nobre pertence ao que direciona, não ao gráfico mais bonito. */}
-        <BentoItem span={12}>
-          <ResumoCard tela="clientes" periodo={periodo} recorte={recorte} />
-        </BentoItem>
-
         <BentoItem span={12}>
           <KpiGrid>
             {/* `?? null`, nunca `?? 0`: a RPC suprime a taxa quando a amostra
@@ -203,6 +197,7 @@ export function ClientesPage() {
       <ModuloTabs
         rota="/clientes"
         conteudos={{
+          analise: <AnaliseDaTela tela="clientes" periodo={periodo} recorte={recorte} />,
           retencao: (
             <BentoGrid>
               <BentoItem span={12}>

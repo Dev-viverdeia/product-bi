@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/table'
 import { formatDateShort, formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import { fundoIntensidade } from '@/lib/intensidade'
+import { AnaliseDaTela } from '@/features/resumo/analise-tela'
 import {
   useCandidatasRemocao,
   useConclusaoPorAba,
@@ -112,10 +113,12 @@ export function SolucoesPage() {
       <ModuloTabs
         rota="/solucoes"
         conteudos={{
+          analise: <AnaliseDaTela tela="solucoes" periodo={periodo} />,
           catalogo: (
             <BentoGrid>
               <BentoItem span={6}>
                 <TabelaCard
+                  id="card-ranking-solucoes"
                   icon={TrophyIcon}
                   title="Ranking de soluções"
                   headline={solucaoLider ? formatInt(solucaoLider.iniciadas) : '—'}
@@ -195,6 +198,7 @@ export function SolucoesPage() {
             <BentoGrid>
               <BentoItem span={6}>
                 <TabelaCard
+                  id="card-funil-tela"
                   icon={SlidersHorizontalIcon}
                   title="A tela de Soluções está boa?"
                   headline={

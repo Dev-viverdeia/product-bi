@@ -52,20 +52,23 @@ export type NavItem = {
   /** rota é ativa por prefixo (útil para páginas de detalhe) */
   matchPrefix?: boolean
   /**
-   * Abas de contexto do módulo, quando ele tem.
+   * Abas de contexto do módulo.
    *
    * Declaradas AQUI e não na página porque dois consumidores precisam da mesma
    * lista: a página, que renderiza as abas, e a barra do topo, que oferece o
    * atalho para cada uma. Declarar nos dois lugares seria garantir que um dia
    * divergem.
    *
-   * Duas naturezas de aba convivem. Nos módulos, elas separam PERGUNTAS
-   * distintas (retenção, risco, o que funciona) — e se pagam a partir de três.
-   * Na Visão Geral, separam FORMATOS da mesma leitura: a análise escrita e os
-   * gráficos que a sustentam. Sem essa separação a página vira um documento
-   * espremido entre painéis, que foi como ela nasceu.
+   * Toda tela abre em `analise` — o documento escrito. As abas seguintes são os
+   * gráficos que o sustentam, fatiados por PERGUNTA quando o módulo tem mais de
+   * uma (retenção, risco, o que funciona) e num painel só quando não tem. Sem
+   * essa separação a página vira um documento espremido entre gráficos, que foi
+   * como a Visão Geral nasceu e o motivo de ter sido refeita.
    *
-   * Organizações segue sem: panorama fatiado deixa de ser panorama.
+   * O `valor` de cada aba é o mesmo texto que as regras gravam em `ancora_aba`:
+   * é por ele que o link "Ver o gráfico que sustenta" atravessa da análise para
+   * o gráfico. Renomear uma aba aqui sem renomear no catálogo quebra o link em
+   * silêncio — ele troca de aba e não rola para lugar nenhum.
    */
   abas?: AbaDoModulo[]
 }
@@ -88,6 +91,7 @@ export const navItems: NavItem[] = [
     to: '/clientes',
     icon: UsersIcon,
     abas: [
+      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
       { valor: 'retencao', titulo: 'Retenção & hábito', icone: LineChartIcon },
       { valor: 'risco', titulo: 'Risco & churn', icone: TriangleAlertIcon },
       { valor: 'funciona', titulo: 'O que funciona', icone: TargetIcon },
@@ -99,6 +103,7 @@ export const navItems: NavItem[] = [
     to: '/entrada',
     icon: UserPlusIcon,
     abas: [
+      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
       { valor: 'funil', titulo: 'Funil', icone: DoorOpenIcon },
       { valor: 'onboarding', titulo: 'Onboarding & convites', icone: ListChecksIcon },
       { valor: 'porta', titulo: 'Problemas na porta', icone: TriangleAlertIcon },
@@ -110,6 +115,7 @@ export const navItems: NavItem[] = [
     to: '/formacoes',
     icon: GraduationCapIcon,
     abas: [
+      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
       { valor: 'uso', titulo: 'Uso & assuntos', icone: BookOpenIcon },
       { valor: 'conclusao', titulo: 'Conclusão', icone: CheckCheckIcon },
       { valor: 'qualidade', titulo: 'Jornada & NPS', icone: StarIcon },
@@ -121,6 +127,7 @@ export const navItems: NavItem[] = [
     to: '/solucoes',
     icon: PuzzleIcon,
     abas: [
+      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
       { valor: 'catalogo', titulo: 'Catálogo', icone: LayoutGridIcon },
       { valor: 'implementacao', titulo: 'Implementação', icone: WrenchIcon },
       { valor: 'curadoria', titulo: 'Curadoria', icone: ScissorsIcon },
@@ -132,18 +139,31 @@ export const navItems: NavItem[] = [
     to: '/ia',
     icon: CompassIcon,
     abas: [
+      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
       { valor: 'adocao', titulo: 'Adoção', icone: UsersIcon },
       { valor: 'uso', titulo: 'Uso', icone: MessageSquareIcon },
       { valor: 'impacto', titulo: 'Impacto na retenção', icone: TrendingUpIcon },
     ],
   },
-  { title: 'Organizações', shortTitle: 'Orgs', to: '/organizacoes', icon: Building2Icon },
+  {
+    title: 'Organizações',
+    shortTitle: 'Orgs',
+    to: '/organizacoes',
+    icon: Building2Icon,
+    // As duas abas separam formato, não assunto: o panorama continua inteiro num
+    // painel só. Fatiar o panorama por pergunta é que deixaria de ser panorama.
+    abas: [
+      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
+      { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
+    ],
+  },
   {
     title: 'Jornada & Telas',
     shortTitle: 'Jornada',
     to: '/jornada',
     icon: MapIcon,
     abas: [
+      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
       { valor: 'telas', titulo: 'Raio-x de tela', icone: MonitorIcon },
       { valor: 'fluxos', titulo: 'Fluxos & sessão', icone: RouteIcon },
     ],
@@ -154,6 +174,7 @@ export const navItems: NavItem[] = [
     to: '/receita',
     icon: ReceiptIcon,
     abas: [
+      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
       { valor: 'receita', titulo: 'Receita', icone: BanknoteIcon },
       { valor: 'safra', titulo: 'Safra & uso', icone: LayersIcon },
     ],
