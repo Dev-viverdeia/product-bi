@@ -322,14 +322,6 @@ export type Database = {
           usuarios: number
         }[]
       }
-      bi_cs_atendimento_cobertura: {
-        Args: { p_dias?: number }
-        Returns: {
-          atendimentos: number
-          atribuicao: string
-          pct: number
-        }[]
-      }
       bi_cs_atendimento_ia_humano: {
         Args: { p_dias?: number }
         Returns: {
@@ -361,6 +353,23 @@ export type Database = {
         Returns: {
           atendimentos: number
           canal: string
+        }[]
+      }
+      bi_cs_atendimento_situacao: {
+        Args: { p_dias?: number }
+        Returns: {
+          atendimentos: number
+          pct: number
+          situacao: string
+        }[]
+      }
+      bi_cs_avulsos_mensal: {
+        Args: never
+        Returns: {
+          envios: number
+          falhas: number
+          mes: string
+          pessoas: number
         }[]
       }
       bi_cs_cancelamento_desfecho: {
@@ -407,9 +416,16 @@ export type Database = {
       bi_cs_frescor: {
         Args: never
         Returns: {
+          carga_defasada: boolean
           carregado_em: string
+          dias_sem_evento: number
+          fonte_parada: boolean
+          limite_dias: number
           linhas: number
           tabela: string
+          ultima_leitura: string
+          ultimo_evento: string
+          ultimo_evento_brt: string
         }[]
       }
       bi_cs_funil: {
@@ -425,18 +441,21 @@ export type Database = {
         Returns: {
           atendimentos: number
           contatos: number
-          em_tentativa_reversao: number
+          em_aberto: number
+          perdidos: number
+          perdidos_com_base_ativa: number
           pessoas_impactadas: number
-          revertidos: number
+          retidos: number
           solicitacoes_cancelamento: number
         }[]
       }
       bi_cs_retencao: {
         Args: never
         Returns: {
-          em_tentativa_reversao: number
-          empresas: number
-          status: string
+          clientes: number
+          com_base_ativa: number
+          conflita_base: number
+          desfecho: string
         }[]
       }
       bi_data_referencia: { Args: never; Returns: string }

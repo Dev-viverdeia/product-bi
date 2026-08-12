@@ -59,14 +59,11 @@ export function useAtendimentoPorCanal(dias: Periodo) {
   })
 }
 
-/** Cobertura do cruzamento atendimento ↔ empresa. A tela declara, não esconde. */
-export function useAtendimentoCobertura(dias: Periodo) {
-  return useQuery({
-    queryKey: ['cs', 'cobertura', dias],
-    queryFn: async () =>
-      (await rpc(supabase.rpc('bi_cs_atendimento_cobertura', { p_dias: dias }))) ?? [],
-  })
-}
+// A cobertura da atribuição atendimento ↔ empresa saiu: o contrato `bi_pulse`
+// não entrega empresa no ticket, e a RPC que existia lia um espelho que não
+// existe mais. O time do Pulse vai expor `organization_id` na view (match por
+// telefone, ~81%, só o unívoco) — quando chegar, o hook volta lendo o contrato
+// em vez de uma derivação nossa.
 
 export function useDisparosMensal() {
   return useQuery({

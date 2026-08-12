@@ -22,7 +22,6 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { TableCell, TableHead, TableRow } from '@/components/ui/table'
 import { formatCompact, formatDateShort, formatInt, formatMesAno, formatPercent } from '@/lib/format'
 import {
-  useAtendimentoCobertura,
   useAtendimentoIaHumano,
   useAtendimentoMensal,
   useAtendimentoPorAtendente,
@@ -53,7 +52,6 @@ export function CsPage() {
   const iaHumano = useAtendimentoIaHumano(periodo)
   const atendentes = useAtendimentoPorAtendente(periodo)
   const canais = useAtendimentoPorCanal(periodo)
-  const cobertura = useAtendimentoCobertura(periodo)
   const disparosMensal = useDisparosMensal()
   const disparosCanal = useDisparosPorCanal(periodo)
   const cancelMensal = useCancelamentoMensal()
@@ -63,16 +61,35 @@ export function CsPage() {
   const kickoff = useFunilCs(QUADRO_KICKOFF)
   const reversao = useFunilCs(QUADRO_REVERSAO)
 
-  // Data do dado. Enquanto a carga do Pulse for manual, é ela que impede a tela
-  // de apresentar uma foto antiga como se fosse o estado de agora.
-  const carregadoEm = useMemo(() => {
+  // A data do DADO, não a da carga.
+  //
+  // Antes isto lia `carregado_em`, o que funcionava enquanto a carga era manual.
+  // Com o sync a cada 30 min, `carregado_em` é sempre "agora" — carimbaria a tela
+  // de fresca mesmo se a origem tivesse parado semanas atrás. `ultimo_evento_brt`
+  // é o último fato que existe no dado, que é o que o leitor precisa saber.
+  const dadosAte = useMemo(() => {
     const datas = (frescor.data ?? [])
-      .map((f) => f.carregado_em)
+      .map((f) => f.ultimo_evento_brt)
       .filter((d): d is string => d != null)
     return datas.length > 0 ? datas.sort().at(-1)! : null
   }, [frescor.data])
 
-  const semCarga = !frescor.isLoading && carregadoEm == null
+  // Sem carga = as tabelas estão vazias, não "a consulta falhou". Os dois estados
+  // são diferentes e a tela precisa distinguir: erro tem retry, vazio não.
+  const semCarga = useMemo(
+    () =>
+      !frescor.isLoading &&
+      !frescor.isError &&
+      (frescor.data ?? []).every((f) => Number(f.linhas) === 0),
+    [frescor.data, frescor.isLoading, frescor.isError],
+  )
+
+  // Fontes que pararam de receber evento novo, cada uma com o próprio limite —
+  // a tela declara sozinha, sem texto fixo que envelhece.
+  const fontesParadas = useMemo(
+    () => (frescor.data ?? []).filter((f) => f.fonte_parada),
+    [frescor.data],
+  )
 
   const atendimentoLider = useMemo(() => {
     const meses = mensal.data ?? []
@@ -86,13 +103,15 @@ export function CsPage() {
     return linhas.reduce((soma, l) => soma + Number(l.so_ia), 0) / total
   }, [iaHumano.data])
 
-  const atribuiveis = useMemo(
-    () => (cobertura.data ?? []).find((c) => c.atribuicao === 'unica')?.pct ?? null,
-    [cobertura.data],
-  )
-
-  const revertidos = retencao.data?.find((r) => r.status === 'REVERTIDO')?.empresas ?? null
-  const cancelados = retencao.data?.find((r) => r.status === 'CANCELADO')?.empresas ?? null
+  // Vocabulário da origem: RETIDO / PERDIDO / EM_ABERTO, no grão de cliente
+  // deduplicado. A régua anterior (REVERTIDO/CANCELADO por empresa) era nossa e
+  // não existia do lado do Pulse — media outra coisa com nome parecido.
+  const perdidos = retencao.data?.find((r) => r.desfecho === 'PERDIDO')?.clientes ?? null
+  // O número que a tela NÃO pode esconder: perdido que ainda tem acesso ativo.
+  // Publicar só "perdidos" escolheria um lado de uma divergência real entre a
+  // verdade do CS e a da plataforma.
+  const perdidosComAcesso =
+    retencao.data?.find((r) => r.desfecho === 'PERDIDO')?.conflita_base ?? null
 
   return (
     <div className="space-y-4">
@@ -103,7 +122,7 @@ export function CsPage() {
             <h2 className="text-2xl font-semibold tracking-tight">Sucesso do cliente</h2>
             <p className="text-muted-foreground text-sm">
               Atendimento, comunicação e retenção · origem: plataforma Pulse
-              {carregadoEm ? ` · dados de ${formatDateShort(carregadoEm)}` : ''}
+              {dadosAte ? ` · dados até ${formatDateShort(dadosAte)}` : ''}
             </p>
           </div>
           <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
@@ -117,16 +136,39 @@ export function CsPage() {
               <CardDescription className="space-y-1.5">
                 {semCarga ? (
                   <span className="block">
-                    <strong>Ainda não há carga.</strong> A ligação automática com o Pulse depende
-                    de credencial de leitura e liberação de IP; até lá as tabelas estão vazias e
-                    todo número desta tela aparece zerado — não é queda, é ausência de dado.
+                    <strong>Ainda não há carga.</strong> As tabelas estão vazias, então todo
+                    número desta tela aparece como “—” — não é queda, é ausência de dado.
                   </span>
                 ) : (
                   <span className="block">
-                    <strong>A carga ainda é manual.</strong> Os números são a foto de{' '}
-                    {carregadoEm ? formatDateShort(carregadoEm) : '—'}, não o estado de agora.
+                    <strong>Carga automática a cada 30 minutos</strong>, do banco do Pulse. Os
+                    números vão até {dadosAte ? formatDateShort(dadosAte) : '—'} — que é a data do
+                    último fato registrado, não a da última leitura.
                   </span>
                 )}
+                {fontesParadas.length > 0 ? (
+                  <span className="block">
+                    <strong>
+                      {fontesParadas.length === 1
+                        ? 'Uma fonte parou de receber evento novo:'
+                        : `${formatInt(fontesParadas.length)} fontes pararam de receber evento novo:`}
+                    </strong>{' '}
+                    {fontesParadas
+                      .map(
+                        (f) =>
+                          `${f.tabela} (último em ${f.ultimo_evento_brt ? formatDateShort(f.ultimo_evento_brt) : '—'})`,
+                      )
+                      .join(' · ')}
+                    . O que essa fonte alimenta está congelado nessa data — o resto da tela não.
+                  </span>
+                ) : null}
+                <span className="block">
+                  <strong>Atendimento não tem empresa.</strong> O contrato que recebemos do Pulse
+                  não liga ticket a cliente — os números de atendimento são volume, e não dá para
+                  cruzá-los com uso do produto, receita ou retenção. O time do Pulse vai expor a
+                  ligação por telefone (cobertura de ~81%, só quando o número identifica uma
+                  empresa só); até lá, esta parte da tela não responde “de quem”.
+                </span>
                 <span className="block">
                   <strong>Motivo de cancelamento não aparece.</strong> O campo é texto livre e
                   quase metade das solicitações está sem preenchimento, então não existe
@@ -175,8 +217,8 @@ export function CsPage() {
             />
             {/* Estado da carteira, não evento do período — por isso não muda com o filtro */}
             <KpiCard
-              label="Clientes revertidos (total)"
-              value={semCarga || kpis.data == null ? null : Number(kpis.data.revertidos)}
+              label="Clientes retidos (total)"
+              value={semCarga || kpis.data == null ? null : Number(kpis.data.retidos)}
               format={formatInt}
               motivoSemValor={SEM_CARGA}
               isLoading={kpis.isLoading}
@@ -308,39 +350,11 @@ export function CsPage() {
                 </ChartCard>
               </BentoItem>
 
-              {/* Este card existe para declarar um limite, não para exibir um número
-                  bonito: sem ele, "atendimento por empresa" apresentaria 70% da base
-                  como se fosse o total. */}
-              <BentoItem span={12}>
-                <ChartCard
-                  icon={ShieldQuestionIcon}
-                  title="Quanto do atendimento dá para ligar a uma empresa"
-                  headline={atribuiveis != null ? formatPercent(atribuiveis) : '—'}
-                  headlineLabel="tem empresa identificada"
-                  description="A ligação é por telefone normalizado. Um mesmo número pode aparecer em mais de um cadastro (sócio, contador, consultor) — nesses casos a atribuição seria palpite, e o ciclo fica de fora em vez de ser chutado para uma empresa."
-                  isLoading={cobertura.isLoading}
-                  isError={cobertura.isError}
-                  onRetry={() => void cobertura.refetch()}
-                  isEmpty={cobertura.data?.length === 0}
-                  contentClassName="min-h-0"
-                >
-                  <CategoryBarChart
-                    layout="bar"
-                    label="Ciclos"
-                    data={(cobertura.data ?? []).map((c) => ({
-                      category:
-                        c.atribuicao === 'unica'
-                          ? 'Empresa identificada'
-                          : c.atribuicao === 'ambigua'
-                            ? 'Telefone em mais de uma empresa'
-                            : 'Sem empresa correspondente',
-                      value: Number(c.atendimentos),
-                    }))}
-                    valueFormatter={formatInt}
-                    className="h-[200px]"
-                  />
-                </ChartCard>
-              </BentoItem>
+              {/* O card de cobertura da atribuição saiu junto com a RPC que o
+                  alimentava: o contrato bi_pulse não entrega empresa no ticket, e a
+                  régua anterior era derivada de um espelho que não existe mais. O
+                  limite não sumiu da tela — subiu para o bloco de limitações, que é
+                  onde ele pertence enquanto não houver número para desenhar. */}
             </BentoGrid>
           ),
 
@@ -462,23 +476,35 @@ export function CsPage() {
               <BentoItem span={4}>
                 <ChartCard
                   icon={RotateCcwIcon}
-                  title="Cancelados e revertidos"
-                  headline={revertidos != null ? formatInt(revertidos) : '—'}
+                  title="Desfecho da retenção"
+                  headline={perdidos != null ? formatInt(perdidos) : '—'}
                   headlineLabel={
-                    cancelados != null ? `revertidos · ${formatInt(cancelados)} cancelados` : undefined
+                    perdidosComAcesso != null
+                      ? `perdidos · ${formatInt(perdidosComAcesso)} ainda com acesso ativo`
+                      : 'clientes perdidos'
                   }
-                  description="Revertido é acordo de reversão registrado ou chegada à etapa Revertido do funil. Empresa que só tem card no quadro Reversão está em tentativa e não entra nesta conta."
+                  description="Vocabulário do Pulse, no grão de cliente deduplicado — o mesmo cliente com cadastro repetido conta uma vez. “Perdido ainda com acesso” não é erro de um dos lados: é a divergência entre o desfecho que o CS registrou e a base que a plataforma ainda mantém, e a tela mostra as duas em vez de escolher uma."
                   isLoading={retencao.isLoading}
                   isError={retencao.isError}
                   onRetry={() => void retencao.refetch()}
                   isEmpty={retencao.data?.length === 0}
                 >
                   <CategoryBarChart
-                    label="Empresas"
+                    label="Clientes"
                     data={(retencao.data ?? []).map((r) => ({
                       category:
-                        r.status === 'LEVANTOU_A_MAO' ? 'Levantou a mão' : r.status.toLowerCase(),
-                      value: Number(r.empresas),
+                        r.desfecho === 'EM_ABERTO'
+                          ? 'Em aberto'
+                          : r.desfecho === 'PERDIDO'
+                            ? 'Perdido'
+                            : 'Retido',
+                      value: Number(r.clientes),
+                      // O segundo canal carrega a divergência sem virar barra
+                      // própria: ela é um recorte do PERDIDO, não um desfecho.
+                      nota:
+                        Number(r.conflita_base) > 0
+                          ? `${formatInt(Number(r.conflita_base))} ainda com acesso ativo`
+                          : undefined,
                     }))}
                     valueFormatter={formatInt}
                     className="h-[260px]"
