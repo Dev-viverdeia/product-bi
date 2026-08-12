@@ -929,6 +929,16 @@ export type Database = {
           usuarios: number
         }[]
       }
+      bi_solucoes_efeito_conclusao: {
+        Args: never
+        Returns: {
+          ativos: number
+          clientes: number
+          grupo: string
+          margem_pp: number
+          pct_ativo: number
+        }[]
+      }
       bi_solucoes_kpis: {
         Args: { p_dias?: number }
         Returns: {
@@ -936,6 +946,17 @@ export type Database = {
           iniciadas_periodo: number
           publicadas: number
           taxa_conclusao_historica: number
+        }[]
+      }
+      bi_solucoes_ordem_da_tentativa: {
+        Args: never
+        Returns: {
+          clientes: number
+          concluidas: number
+          grupo: string
+          margem_pp: number
+          pct: number
+          tentativas: number
         }[]
       }
       bi_solucoes_por_categoria: {

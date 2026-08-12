@@ -52,3 +52,28 @@ export function useSolucoesPorCategoria() {
       (await rpc(supabase.rpc('bi_solucoes_por_categoria'))) ?? [],
   })
 }
+
+/**
+ * Os dois comparativos da tela, cada um com a própria margem em pontos
+ * percentuais.
+ *
+ * `useOrdemDaTentativa` é o mais defensável dos dois: os dois grupos saem das
+ * MESMAS pessoas (só entra quem tentou 2+ soluções), então a diferença entre
+ * clientes — o confundidor que estraga toda comparação de engajamento — sai de
+ * cena por construção.
+ */
+export function useEfeitoConclusao() {
+  return useQuery({
+    queryKey: ['solucoes', 'efeito-conclusao'],
+    queryFn: async () =>
+      (await rpc(supabase.rpc('bi_solucoes_efeito_conclusao'))) ?? [],
+  })
+}
+
+export function useOrdemDaTentativa() {
+  return useQuery({
+    queryKey: ['solucoes', 'ordem-da-tentativa'],
+    queryFn: async () =>
+      (await rpc(supabase.rpc('bi_solucoes_ordem_da_tentativa'))) ?? [],
+  })
+}

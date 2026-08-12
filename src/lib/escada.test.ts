@@ -33,6 +33,7 @@ const TELAS_NA_REGUA = [
   'features/clientes/clientes-page.tsx',
   'features/entrada/entrada-page.tsx',
   'features/formacoes/formacoes-page.tsx',
+  'features/solucoes/solucoes-page.tsx',
 ]
 
 function composicaoDe(fonte: string): Composicao {

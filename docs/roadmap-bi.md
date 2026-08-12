@@ -358,9 +358,32 @@ Duas hipóteses medidas e **reprovadas**, registradas na migration:
 no período"** enquanto a consulta estava no ar. É o `?? 0` do KPI com outra
 roupa — o esqueleto do card cobre o corpo, não o headline. Virou trava de CI.
 
-**Falta:** a escada nas cinco telas restantes — Soluções, IA, Organizações,
-Jornada e Receita. A aba de análise entrou em todas; os cards ainda não declaram
-`nivel`. Cada uma entra em `TELAS_NA_REGUA` quando a composição passar.
+**Soluções subiu a escada (12/ago).** A tela mostra 4,9% de conclusão; antes de
+tratar isso como problema era preciso saber se concluir importa. Importa:
+
+- **Concluir solução importa?** 42,8% de quem concluiu alguma segue ativo, contra
+  25,4% de quem só iniciou. Margem de 4,5 pp. Os dois lados já iniciaram, de
+  propósito.
+- **A primeira tentativa é a que mais termina:** 8,3% na primeira solução contra
+  6,0% da segunda em diante — e os dois grupos são **as mesmas 3.168 pessoas**,
+  o que tira de cena a diferença entre clientes. Contraria a hipótese da curva de
+  aprendizado: iniciar solução virou hábito barato, e fechar não acompanhou.
+
+Quatro hipóteses medidas e **reprovadas**, todas na migration:
+
+- *Dificuldade explica a conclusão.* Não: `medium` 7,0%, `easy` 6,3%, `advanced`
+  5,2%. A distância entre as pontas é de 1,0 pp contra margem de 1,1 — e o topo é
+  "medium", então nem a direção se sustenta.
+- *Favoritar prediz concluir* (10,9% × 6,2%). Passa raspando, mas favoritar é
+  ação de 1,1% da base: recomendação sobre quase ninguém.
+- *Nota alta entrega conclusão.* Vem invertida **e sobre unidade errada** — 13
+  soluções contra 22, tratadas como 18 mil tentativas independentes. Mesmo erro
+  da "grade longa" em Formações.
+- *Concluir aba prediz concluir solução.* Circular por construção: só 0,15% das
+  soluções são concluídas sem passar pela aba `tools`. A aba não prediz o
+  desfecho — ela faz parte dele.
+
+**Falta:** a escada em quatro telas — IA, Organizações, Jornada e Receita.
 
 Placar da escada:
 
@@ -370,7 +393,7 @@ Placar da escada:
 | Clientes & Retenção | ✅ 6 regras | ✅ na régua |
 | Entrada | ✅ 5 regras | ✅ na régua |
 | Formações | ✅ 4 regras | ✅ na régua |
-| Soluções | ✅ 2 regras | pendente |
+| Soluções | ✅ 2 regras | ✅ na régua |
 | Consultor & Builder | ✅ 4 regras | pendente |
 | Organizações | ✅ 3 regras | pendente |
 | Jornada & Telas | ✅ 4 regras | pendente |
@@ -471,7 +494,7 @@ entregues; estes são os pontos que a auditoria abriu e ainda não fecharam.
 | --- | --- | --- | --- |
 | 1 | Pageviews por solução via `slug` (a origem não preenche `analytics.solution_id`) | 5 | ✅ resolvida |
 | 2 | `dim_usuario` não removia quem foi deletado na plataforma | — | ✅ resolvida |
-| 3 | Espelhar `implementation_requests` (114) — "pedidos de implementação paga" ficou sem cobertura | 5 | aberta — item 5 da auditoria de 11/ago |
+| 3 | Espelhar `implementation_requests` (114) — "pedidos de implementação paga" ficou sem cobertura | 5 | **agravada (12/ago)**: `marts.fact_pedido_implementacao` existe e está **vazia**. Tabela vazia é pior que ausente — um join devolve nada em silêncio e parece resposta |
 | 4 | Engajamento pré-renovação — sem RPC; depende de inventariar `renewal_logs` | 9 | aberta — item 9 da auditoria de 11/ago |
 | 5 | "Onde a implementação trava" não é monotônico — lido como funil, confunde | 5 | passada visual |
 
