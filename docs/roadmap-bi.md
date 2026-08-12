@@ -411,7 +411,40 @@ recentes" numa lista de 269. O corte agora só é declarado quando de fato morde
 anunciar limitação inexistente ensina o leitor a desconfiar de número que está
 inteiro.
 
-**Falta:** a escada em três telas — Organizações, Jornada e Receita.
+**Organizações subiu a escada (12/ago).** Tinha um descritivo, um comparativo e
+dois prescritivos — e **nenhum diagnóstico**: a tela dizia quem está mal e para
+quem ligar, nunca onde nem por quê.
+
+- **Onde estão as contas, e onde está a gente.** 38,6% das contas ativas não têm
+  ninguém aparecendo — mas elas são só 16% das pessoas. A maior parte das
+  **pessoas** (46,6%, 6.111) está nas 223 contas com menos de 25% do time ativo,
+  que são 11,7% das contas. Contar organização e contar gente aponta para lugares
+  diferentes, e qual olhar depende de a decisão ser sobre cobrança ou sobre uso.
+  Este card **destrava a regra `org_time_morto`**, recusada em 12/ago por
+  publicar um total que não existia em card nenhum.
+- **Quanto maior o time, menor a fatia que aparece:** 34,7% até 5 pessoas, 27,2%
+  de 6 a 20, 20,4% acima de 20. Margem de 2,0 pp entre as pontas. O card mostra a
+  taxa por pessoa **e** a média das organizações lado a lado: quando as duas
+  concordam, o gradiente não é efeito de misturar conta de uma pessoa com conta
+  de cem.
+- **Quando a conta esfria, quem parou primeiro?** Em 69,7% das vezes o master,
+  contra 11,6% do time — 6× mais frequente. É o degrau seguinte ao card do efeito
+  do master: sai da correlação e lê a ordem no tempo. Declara as 581 contas que
+  ficam de fora por não ter histórico dos dois lados (essas não esfriaram, nunca
+  esquentaram) e que master que delegou aparece como parado sem ter abandonado.
+
+Reprovada: *"comprar mais assento do que precisa prediz time parado"*. Contas com
+sobra de assento têm 39,4% de zeradas contra 8,9% das quase cheias — mas isso é
+**tamanho disfarçado de sobra**: as contas com folga têm 1,5 membro em média, e
+conta de uma pessoa só é 0% ou 100% ativa. A média de time ativo até inverte o
+sinal. O tamanho virou card próprio, medido direito.
+
+**Defeito de desempenho corrigido:** `bi_orgs_quem_parou_primeiro` levava 6,8 s e
+estourava o timeout da API na primeira chamada (HTTP 500 no navegador). Era
+desenho, não volume — duas subconsultas correlacionadas rodando uma vez por
+organização. Viraram agregados de conjunto: **6.798 ms → 107 ms**.
+
+**Falta:** a escada em duas telas — Jornada e Receita.
 
 Placar da escada:
 
@@ -423,7 +456,7 @@ Placar da escada:
 | Formações | ✅ 4 regras | ✅ na régua |
 | Soluções | ✅ 2 regras | ✅ na régua |
 | Consultor & Builder | ✅ 4 regras | ✅ na régua |
-| Organizações | ✅ 3 regras | pendente |
+| Organizações | ✅ 3 regras | ✅ na régua |
 | Jornada & Telas | ✅ 4 regras | pendente |
 | Receita | ✅ 4 regras | congelada (§6.9) |
 | CS | fora desta leva (pendência do Mateus) | bloqueada (sem carga) |
@@ -500,7 +533,7 @@ gravidade, não de esforço.
 | --- | --- | --- | --- |
 | A | **112 dias sem pagamento registrado.** A Receita descreve um rastreamento parado, não um negócio parado. A tela declara, mas o dado não volta sozinho | Receita | decisão do Mateus: reconectar a fonte, apontar para o `via_hub` quando ele estiver populado, ou congelar a tela de vez |
 | B | **Escada de profundidade não subiu nas oito telas novas.** A aba de análise entrou, mas os cards não declaram `nivel` — elas seguem fora de `TELAS_NA_REGUA` | 8 telas | trabalho de gráfico, uma tela por vez (é a fase seguinte) |
-| C | **`org_time_morto` ficou órfã.** A pergunta é boa — quantas contas estão zeradas — e a regra foi recusada porque leria a RPC com limite diferente do card. Com a view corrigida o número existe: 960 de 2.101 | Organizações | a tela mostrar o total de contas zeradas; aí a regra lê o número do card |
+| C | ~~**`org_time_morto` ficou órfã.**~~ **Destravada em 12/ago**: o card "Onde estão as contas, e onde está a gente" publica o total — 738 de 1.911 contas ativas sem ninguém aparecendo (38,6%). A regra pode voltar lendo `bi_orgs_distribuicao_engajamento` | Organizações | entra no lote de reescrita do catálogo (itens K e M) |
 | D | **Duas réguas de "% saída" na mesma tela.** `bi_pontos_saida.pct_da_tela` (29,6% para `/team-management`) e `bi_raio_x_telas.pct_saida` (36,5% para a mesma tela) medem coisas diferentes. Hoje cada card declara a sua | Jornada | alinhar nomes, ou aceitar as duas e manter a declaração explícita |
 | E | **Severidade oscila no corte.** Muita regra cai entre 1,2 e 1,6, e o corte de `atenção` está em 1,5 — variação mínima de dado troca o rótulo entre "atenção" e "observação" | motor | decidir se a régua de severidade muda ou se o rótulo deixa de ser gradiente |
 | F | **Piso de rastreamento chumbado em `VALUES`.** `bi_churn_modulos` carrega a lista de quando cada módulo passou a ser medido; módulo novo fica invisível para `cli_mortalidade` até alguém lembrar de atualizar | Clientes | virar tabela, ou ganhar teste que reprove módulo ausente da lista |

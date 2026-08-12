@@ -738,6 +738,19 @@ export type Database = {
           step_atual: number
         }[]
       }
+      bi_orgs_distribuicao_engajamento: {
+        Args: never
+        Returns: {
+          faixa: string
+          ordem: number
+          orgs: number
+          pct_orgs: number
+          pct_pessoas: number
+          pessoas: number
+          total_orgs: number
+          total_pessoas: number
+        }[]
+      }
       bi_orgs_efeito_master: {
         Args: never
         Returns: {
@@ -762,6 +775,30 @@ export type Database = {
           faixa: string
           ordem: number
           orgs: number
+        }[]
+      }
+      bi_orgs_por_tamanho: {
+        Args: never
+        Returns: {
+          ativos: number
+          faixa: string
+          margem_pp: number
+          media_das_orgs: number
+          ordem: number
+          orgs: number
+          pessoas: number
+          taxa: number
+        }[]
+      }
+      bi_orgs_quem_parou_primeiro: {
+        Args: never
+        Returns: {
+          base_com_historico: number
+          fora_sem_historico: number
+          ordem: number
+          orgs: number
+          pct: number
+          quem: string
         }[]
       }
       bi_orgs_risco: {
