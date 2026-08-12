@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import type { Periodo } from '@/components/filters/periodo-filtro'
-import { rpc } from '@/lib/rpc'
+import { LIMITE_LISTA, rpc } from '@/lib/rpc'
 import { supabase } from '@/lib/supabase'
 
 export function useIaKpis(dias: Periodo) {
@@ -48,5 +48,34 @@ export function useIaImpactoRetencao() {
   return useQuery({
     queryKey: ['ia', 'impacto-retencao'],
     queryFn: async () => (await rpc(supabase.rpc('bi_ia_impacto_retencao'))) ?? [],
+  })
+}
+
+/**
+ * O comparativo, o diagnóstico e a lista de ação que faltavam na tela.
+ *
+ * `useModoDeEntrada` lê a PRIMEIRA conversa de cada pessoa, não todas: usar
+ * todas mediria a preferência de quem já ficou, que é outra pergunta.
+ */
+export function useModoDeEntrada() {
+  return useQuery({
+    queryKey: ['ia', 'modo-de-entrada'],
+    queryFn: async () => (await rpc(supabase.rpc('bi_ia_modo_de_entrada'))) ?? [],
+  })
+}
+
+export function useProfundidadeConversa() {
+  return useQuery({
+    queryKey: ['ia', 'profundidade-conversa'],
+    queryFn: async () => (await rpc(supabase.rpc('bi_ia_profundidade_conversa'))) ?? [],
+  })
+}
+
+export function useExperimentaramESumiram() {
+  return useQuery({
+    queryKey: ['ia', 'experimentaram-e-sumiram'],
+    queryFn: async () =>
+      (await rpc(supabase.rpc('bi_ia_experimentaram_e_sumiram', { p_limite: LIMITE_LISTA }))) ??
+      [],
   })
 }

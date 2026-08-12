@@ -615,6 +615,18 @@ export type Database = {
           usuarios: number
         }[]
       }
+      bi_ia_experimentaram_e_sumiram: {
+        Args: { p_limite?: number }
+        Returns: {
+          ativo_no_produto: boolean
+          dias_sem_ia: number
+          email: string
+          nome: string
+          organizacao: string
+          plano: string
+          ultima_conversa: string
+        }[]
+      }
       bi_ia_impacto_retencao: {
         Args: never
         Returns: {
@@ -631,6 +643,26 @@ export type Database = {
           solucoes_builder: number
           usuarios_builder: number
           usuarios_consultor: number
+        }[]
+      }
+      bi_ia_modo_de_entrada: {
+        Args: never
+        Returns: {
+          clientes: number
+          margem_pp: number
+          modo: string
+          pct_volta: number
+          voltaram: number
+        }[]
+      }
+      bi_ia_profundidade_conversa: {
+        Args: never
+        Returns: {
+          conversas: number
+          faixa: string
+          ordem: number
+          pct: number
+          total: number
         }[]
       }
       bi_jornada_cursos: {

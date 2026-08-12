@@ -383,7 +383,35 @@ Quatro hipóteses medidas e **reprovadas**, todas na migration:
   soluções são concluídas sem passar pela aba `tools`. A aba não prediz o
   desfecho — ela faz parte dele.
 
-**Falta:** a escada em quatro telas — IA, Organizações, Jornada e Receita.
+**Consultor & Builder subiu a escada (12/ago).** Faltavam um comparativo, um
+diagnóstico e o prescritivo — a tela não tinha nenhuma lista de ação:
+
+- **A porta de entrada muda se o cliente volta.** Quem estreia no modo
+  `planejamento` volta em 36,1%; quem estreia no `chat`, 47,8%. Margem de 6,6 pp.
+  Lê a PRIMEIRA conversa de cada pessoa: usar todas mediria a preferência de quem
+  já ficou. O card declara o que não separa — quem entra para montar um plano
+  pode ter resolvido de primeira.
+- **Onde a conversa para:** 15,1% das conversas param na 1ª mensagem, e 2,0% são
+  abertas e nunca usadas. Declarado no card: conversa curta também descreve
+  pergunta respondida de primeira.
+- **Lista para ação:** 269 clientes que usaram o Consultor em **um único dia**,
+  não voltaram há 30+ dias e **seguem ativos no produto**. É o recorte que faz a
+  lista valer — quem sumiu do produto inteiro é outro problema e já tem lista em
+  Clientes; estes continuam aparecendo e estão ao alcance.
+
+Duas hipóteses reprovadas: *"a IA deixa pergunta sem resposta"* (são 1,34
+mensagem do assistente por mensagem do usuário — não há problema de
+confiabilidade a reportar) e *"crédito de mentoria parado vira lista de ação"*
+(o dado mostra 58 sessões estratégicas disponíveis e **zero** usadas, mas são 47
+pessoas e o assunto já tem card próprio em Organizações — dois donos para o mesmo
+número).
+
+**Corrigido de passagem:** a descrição anunciava "lista cortada nos 5.000 mais
+recentes" numa lista de 269. O corte agora só é declarado quando de fato morde —
+anunciar limitação inexistente ensina o leitor a desconfiar de número que está
+inteiro.
+
+**Falta:** a escada em três telas — Organizações, Jornada e Receita.
 
 Placar da escada:
 
@@ -394,7 +422,7 @@ Placar da escada:
 | Entrada | ✅ 5 regras | ✅ na régua |
 | Formações | ✅ 4 regras | ✅ na régua |
 | Soluções | ✅ 2 regras | ✅ na régua |
-| Consultor & Builder | ✅ 4 regras | pendente |
+| Consultor & Builder | ✅ 4 regras | ✅ na régua |
 | Organizações | ✅ 3 regras | pendente |
 | Jornada & Telas | ✅ 4 regras | pendente |
 | Receita | ✅ 4 regras | congelada (§6.9) |
@@ -481,6 +509,7 @@ gravidade, não de esforço.
 | I | **As seis RPCs de Jornada ainda ancoram em `now()`.** Dívida declarada; nenhuma das quatro regras compara períodos, então pipeline atrasado encurta a janela sem inverter sinal | Jornada | entra no lote geral das ~43 funções com `now()` |
 | J | **`card-retencao-papel` ficou sem regra.** É o card que `cli_gap_papel` apontava antes de ser aposentada. O card segue correto e útil | Clientes | nada urgente — anotado para não parecer esquecimento |
 | K | **Os três cards novos de Entrada não têm regra no motor.** A aba de análise ainda fala das cinco perguntas antigas; o corte comprador × convidado na porta e o efeito do onboarding não aparecem no texto | Entrada | reescrever o catálogo da tela depois que todas subirem a escada, para não mexer duas vezes |
+| O | **Lista nomeada não passa por `private.is_admin()`.** O contrato de PII no CLAUDE.md diz que lista com nome e e-mail fica atrás de `is_admin()`; `public.bi_clientes_em_risco` já devolvia nome e e-mail para qualquer autenticado, e a lista nova de IA seguiu o mesmo modelo — divergir só na nova criaria duas regras para o mesmo dado | IA · Clientes | decisão do Mateus: apertar as duas ou registrar que o contrato vale por "quem tem conta no BI" |
 | M | **Os cards novos de Formações também não têm regra no motor** — mesma situação de Entrada (item K). O texto da aba ainda fala das quatro perguntas antigas | Formações | mesmo lote de reescrita do catálogo |
 | N | **Uma linha da tela de CS foi corrigida fora do combinado.** O headline de atendentes tinha o mesmo defeito do "0 enquanto carrega" e o teste novo reprovava o build; corrigi só essa linha, sem tocar em nada do que está pendente com o Mateus | CS | ciente — nenhuma decisão de CS foi antecipada |
 | L | **Tabela comparativa pede rolagem lateral em 375px.** É o comportamento correto do DS (rola dentro do próprio container, a página não rola), e o headline já carrega o número principal — mas a coluna "Convidado" só aparece rolando | Entrada | avaliar esconder uma coluna no mobile quando o padrão se repetir nas outras telas |
