@@ -281,19 +281,53 @@ rastreio.
 (38,9% × 19,4%), "Onde a jornada termina" virou taxa sobre a audiência de cada
 módulo em vez de contagem, e Power users saiu.
 
-**Falta:** as seis telas restantes com dado local — Entrada, Formações,
-Soluções, IA, Organizações e Jornada. Cada uma entra na lista `TELAS_NA_REGUA`
+**Segunda leva, 12/ago: a análise em aba chegou às oito telas restantes.** Cada
+uma abre num documento escrito e guarda os gráficos na aba ao lado. Vinte e oito
+regras novas no catálogo — 5 em Entrada, 4 em Formações, 2 em Soluções, 4 em IA,
+3 em Organizações, 4 em Jornada, 4 em Receita e 2 em Clientes. Nenhuma suprimida
+na carga de 08/ago. CS ficou de fora a pedido do Mateus, que tem pendências nela.
+
+Quatro regras propostas foram recusadas, três pelo mesmo motivo — publicariam
+número que não existe em card nenhum. `org_time_morto` lia a RPC com limite de
+cem mil enquanto o card chama com vinte e cinco; `sol_aba_pulada` lia coluna
+inexistente; `sol_catalogo_sem_morto` tinha o score invertido e sairia rotulada
+"atenção" dizendo que está tudo bem. `cli_gap_papel` foi **aposentada**, não
+recusada: media pelo tipo de contrato o que `cli_comprador` mede pela régua
+certa, e ocupava a mesma família.
+
+Três correções vieram junto, todas do mesmo princípio — a regra só publica o que
+a tela mostra:
+
+- `marts.v_saude_organizacao` ancorava a janela de 30 dias em `now()`. Com o
+  pipeline atrasado, a organização parecia esvaziar sem nada ter mudado no
+  cliente. Passou para `data_referencia()`, e o número que faltava apareceu:
+  **960 de 2.101 organizações sem uma única pessoa ativa**.
+- O card "Onde a sessão morre" desenhava só contagem absoluta — que segue o
+  tráfego da tela e não distingue a tela que resolve da que trava. Passou a
+  desenhar a taxa, a mesma que o achado publica e das mesmas dez linhas da RPC,
+  declarando que a régua é outra que a da coluna "% saída" do raio-x.
+- `AnaliseDaTela` deixou `periodo` e `recorte` opcionais: Receita e Organizações
+  não têm esses controles e o cabeçalho afirmava um escopo que a tela não
+  oferece.
+
+**Falta:** a escada de profundidade nas telas novas — a aba de análise entrou,
+mas os cards ainda não declaram `nivel`. Cada uma entra em `TELAS_NA_REGUA`
 quando a composição passar; até lá o placar fica visível em vez de esquecido.
 
 Placar da escada:
 
-| Tela | Estado |
-| --- | --- |
-| Visão Geral | ✅ na régua |
-| Clientes & Retenção | ✅ na régua |
-| Entrada · Formações · Soluções · IA · Organizações · Jornada | pendente |
-| Receita | congelada (§6.9) |
-| CS | bloqueada (sem carga) |
+| Tela | Aba de análise | Escada de profundidade |
+| --- | --- | --- |
+| Visão Geral | ✅ 3 regras | ✅ na régua |
+| Clientes & Retenção | ✅ 6 regras | ✅ na régua |
+| Entrada | ✅ 5 regras | pendente |
+| Formações | ✅ 4 regras | pendente |
+| Soluções | ✅ 2 regras | pendente |
+| Consultor & Builder | ✅ 4 regras | pendente |
+| Organizações | ✅ 3 regras | pendente |
+| Jornada & Telas | ✅ 4 regras | pendente |
+| Receita | ✅ 4 regras | congelada (§6.9) |
+| CS | fora desta leva (pendência do Mateus) | bloqueada (sem carga) |
 
 Quatro achados da leva, todos medidos:
 
@@ -306,6 +340,29 @@ Quatro achados da leva, todos medidos:
 4. **Mortalidade por módulo, em taxa:** de quem passou por Formações, 33,8%
    teve ali a última ação; pelo Consultor, 2,8%. O card antigo dizia "59% param
    em Formações", que era popularidade.
+
+O que a segunda leva encontrou, em ordem de gravidade medida (score = múltiplo
+do próprio limiar da regra):
+
+1. **Receita: 112 dias sem um único pagamento registrado** (score 3,73). A série
+   não descreve um negócio parado — descreve um rastreamento que parou. É o
+   primeiro número a levar para o Mateus.
+2. **A cobrança insiste mais do que acerta:** 131 faturas em falha contra 236
+   pagas — 79,3% de falha (score 3,17). Dinheiro que não entra por atrito de
+   cobrança, não por decisão do cliente.
+3. **Jornada: o ranking de pageview está inflado** (score 11,20 — o maior do
+   catálogo). A tela líder aparece na posição média 235 da sessão, contra sessão
+   média de 7 telas. Navegação humana não tem esse comprimento: é aba esquecida
+   aberta ou robô, e contamina de uma vez o ranking, as telas por sessão e a
+   duração mediana.
+4. **Soluções: 1.814 começam, 89 terminam** — 4,9% (score 4,08). A perda não
+   está na descoberta, está depois do início.
+5. **Organizações: onde o master para, o time para junto.** Time ativo de 52,9%
+   nas contas com master ativo contra 14,3% nas de master parado — 3,7×. Com a
+   view corrigida, são 960 organizações sem ninguém ativo.
+6. **Receita concentra num lançamento:** 77 dos 103 compradores num único mês.
+   A série descreve um evento, não um regime — e qualquer projeção feita sobre
+   ela herda esse formato.
 
 ### Levantamento concluído em 11/ago
 
