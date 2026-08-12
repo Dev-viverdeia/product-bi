@@ -468,7 +468,13 @@ As três funções **não aceitam período**: `marts.fact_navegacao` cobre 03/07
 todo domingo. Esse intervalo *é* a janela, e cada card declara de quando fala —
 inclusive a semana de 03–09/07, da qual este mart é a única cópia que existe.
 
-**Falta:** a escada em uma tela — Receita.
+**Receita fica de fora da escada por ora** (decisão do Mateus, 12/ago). Faz
+sentido: a tela mede uma fonte que parou de registrar pagamento há 112 dias
+(pendência A), e subir a escada de uma série que termina onde o rastreamento
+parou seria construir análise sobre um cano entupido. Volta depois que a
+pendência A for decidida.
+
+**Falta:** a escada em Receita, quando a fonte dela for resolvida.
 
 Placar da escada:
 
