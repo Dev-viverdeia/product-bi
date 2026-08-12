@@ -90,3 +90,23 @@ describe('percentual não é calculado no front', () => {
     expect(somaTotal && dividePorTotal).toBe(false)
   })
 })
+
+describe('headline não conta uma lista que ainda não chegou', () => {
+  /*
+    `headline={formatInt((x.data ?? []).length)}` publica "0" enquanto a
+    consulta está no ar — e "0 formações com aluno no período" é uma afirmação
+    falsa com cara de resultado, não um estado de carregamento. O esqueleto do
+    card cobre o corpo, não o headline.
+
+    É o mesmo defeito do `?? 0` do KPI, com outra roupa: o fallback vazio existe
+    para a lista renderizar sem quebrar, e acaba virando número na tela. A forma
+    certa separa as duas coisas — `x.data ? formatInt(x.data.length) : '—'`.
+
+    Encontrado pela sonda de navegador em quatro cards de uma vez (Formações,
+    Soluções, Clientes e o catálogo de regras) depois de a espera da sonda ser
+    corrigida para olhar o headline.
+  */
+  it.each(paginas)('$caminho', ({ fonte }) => {
+    expect(achatar(fonte)).not.toMatch(/headline=\{[^}]*\?\?\s*\[\]\)\.length/)
+  })
+})

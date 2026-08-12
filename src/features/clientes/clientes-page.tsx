@@ -374,7 +374,7 @@ export function ClientesPage() {
                   nivel="prescritivo"
                   icon={AlertTriangleIcon}
                   title="Clientes em risco — lista para ação"
-                  headline={formatInt((risco.data ?? []).length)}
+                  headline={risco.data ? formatInt(risco.data.length) : '—'}
                   headlineLabel="clientes na lista"
                   description="Inatividade: era ativo e está 14+ dias em silêncio · Plano vencendo: contrato expira em ≤30 dias sem uso recente do master"
                   isLoading={risco.isLoading}

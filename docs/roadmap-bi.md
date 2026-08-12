@@ -332,9 +332,35 @@ agregada entre email e "both" é efeito de mistura — mês a mês as taxas se
 cruzam) e "o convite de quem está ativo converte mais" (dá o contrário, e por
 pouco).
 
-**Falta:** a escada nas seis telas restantes — a aba de análise entrou em todas,
-mas os cards ainda não declaram `nivel`. Cada uma entra em `TELAS_NA_REGUA`
-quando a composição passar; até lá o placar fica visível em vez de esquecido.
+**Formações subiu a escada (12/ago).** Tinha três descritivos, dois diagnósticos
+e nenhum comparativo. Entraram os dois que o dado sustenta, cada um publicando a
+própria margem — diferença sem margem não é comparação, e tabela lado a lado
+convida a ler qualquer gap como real:
+
+- **O certificado prende, ou só marca quem já estava preso?** 36,5% de quem
+  certificou agiu no último mês, contra 17,9% de quem estudou e não terminou.
+  Margem de 2,8 pp. Os dois lados já estudaram, de propósito: sem esse recorte a
+  conta viraria "quem usa o produto × quem não usa".
+- **Quem começa pela primeira aula termina mais:** 43,2% certificam contra 33,7%
+  de quem entra no meio da grade. Margem de 1,9 pp.
+
+Duas hipóteses medidas e **reprovadas**, registradas na migration:
+
+- *"Grade longa entrega menos certificado"* (59,0% até 10 aulas × 36,0% acima).
+  Parece forte e não é: **um curso sozinho responde por 59,4% dos alunos da faixa
+  longa** — a faixa é aquele curso disfarçado de faixa. E as faixas se sobrepõem:
+  o pior curso curto certifica 31,2%, o melhor longo 63,5%.
+- *"Maratonar prejudica"* (36,2% × 33,8%). Diferença de 2,4 pontos contra margem
+  de 4,5 — dentro do ruído. Vale saber: a maratona não aparece como problema.
+
+**Defeito encontrado pela sonda de navegador, corrigido nos cinco lugares:**
+`headline={formatInt((x.data ?? []).length)}` publicava **"0 formações com aluno
+no período"** enquanto a consulta estava no ar. É o `?? 0` do KPI com outra
+roupa — o esqueleto do card cobre o corpo, não o headline. Virou trava de CI.
+
+**Falta:** a escada nas cinco telas restantes — Soluções, IA, Organizações,
+Jornada e Receita. A aba de análise entrou em todas; os cards ainda não declaram
+`nivel`. Cada uma entra em `TELAS_NA_REGUA` quando a composição passar.
 
 Placar da escada:
 
@@ -343,7 +369,7 @@ Placar da escada:
 | Visão Geral | ✅ 3 regras | ✅ na régua |
 | Clientes & Retenção | ✅ 6 regras | ✅ na régua |
 | Entrada | ✅ 5 regras | ✅ na régua |
-| Formações | ✅ 4 regras | pendente |
+| Formações | ✅ 4 regras | ✅ na régua |
 | Soluções | ✅ 2 regras | pendente |
 | Consultor & Builder | ✅ 4 regras | pendente |
 | Organizações | ✅ 3 regras | pendente |
@@ -432,6 +458,8 @@ gravidade, não de esforço.
 | I | **As seis RPCs de Jornada ainda ancoram em `now()`.** Dívida declarada; nenhuma das quatro regras compara períodos, então pipeline atrasado encurta a janela sem inverter sinal | Jornada | entra no lote geral das ~43 funções com `now()` |
 | J | **`card-retencao-papel` ficou sem regra.** É o card que `cli_gap_papel` apontava antes de ser aposentada. O card segue correto e útil | Clientes | nada urgente — anotado para não parecer esquecimento |
 | K | **Os três cards novos de Entrada não têm regra no motor.** A aba de análise ainda fala das cinco perguntas antigas; o corte comprador × convidado na porta e o efeito do onboarding não aparecem no texto | Entrada | reescrever o catálogo da tela depois que todas subirem a escada, para não mexer duas vezes |
+| M | **Os cards novos de Formações também não têm regra no motor** — mesma situação de Entrada (item K). O texto da aba ainda fala das quatro perguntas antigas | Formações | mesmo lote de reescrita do catálogo |
+| N | **Uma linha da tela de CS foi corrigida fora do combinado.** O headline de atendentes tinha o mesmo defeito do "0 enquanto carrega" e o teste novo reprovava o build; corrigi só essa linha, sem tocar em nada do que está pendente com o Mateus | CS | ciente — nenhuma decisão de CS foi antecipada |
 | L | **Tabela comparativa pede rolagem lateral em 375px.** É o comportamento correto do DS (rola dentro do próprio container, a página não rola), e o headline já carrega o número principal — mas a coluna "Convidado" só aparece rolando | Entrada | avaliar esconder uma coluna no mobile quando o padrão se repetir nas outras telas |
 
 ## Pendências abertas pela auditoria de 08/ago/2026

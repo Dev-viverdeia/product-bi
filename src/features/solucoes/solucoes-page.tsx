@@ -291,7 +291,7 @@ export function SolucoesPage() {
                 <TabelaCard
                   icon={ArchiveXIcon}
                   title="Candidatas a remoção ou revisão"
-                  headline={formatInt((candidatas.data ?? []).length)}
+                  headline={candidatas.data ? formatInt(candidatas.data.length) : '—'}
                   headlineLabel="soluções para revisar"
                   description="Soluções publicadas no quartil inferior de uso ou sem nenhuma conclusão · revisar antes de remover: nota alta com pouco uso pode ser problema de descoberta, não de qualidade · pageviews só desde jul/2026, então podem ficar abaixo das iniciadas (histórico completo)"
                   isLoading={candidatas.isLoading}

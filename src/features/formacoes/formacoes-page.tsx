@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import {
   AwardIcon,
   BookOpenIcon,
+  DoorOpenIcon,
   GraduationCapIcon,
   StarIcon,
   TimerIcon,
@@ -15,8 +16,11 @@ import { TabelaLonga } from '@/components/tabela/tabela-longa'
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/charts'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
 import {
+  Table,
+  TableBody,
   TableCell,
   TableHead,
+  TableHeader,
   TableRow,
 } from '@/components/ui/table'
 import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
@@ -25,6 +29,8 @@ import {
   useAssuntos,
   useDropoffPosicao,
   useDuracaoIdeal,
+  useEfeitoCertificado,
+  useEntradaNaGrade,
   useFormacoesKpis,
   useFormacoesUso,
   useJornadaCursos,
@@ -41,6 +47,33 @@ export function FormacoesPage() {
   const nps = useNpsCursos()
   const jornada = useJornadaCursos()
   const assuntos = useAssuntos(periodo)
+  const efeitoCert = useEfeitoCertificado()
+  const entradaGrade = useEntradaNaGrade()
+
+  // O headline de cada comparativo é o lado que responde a pergunta do título.
+  // As duas taxas e a margem saem prontas do banco — aqui só se escolhe a linha.
+  const comCertificado = useMemo(
+    () => (efeitoCert.data ?? []).find((e) => e.grupo === 'Tirou certificado') ?? null,
+    [efeitoCert.data],
+  )
+
+  const pelaPrimeira = useMemo(
+    () => (entradaGrade.data ?? []).find((e) => e.grupo === 'Começou pela 1ª aula') ?? null,
+    [entradaGrade.data],
+  )
+
+  // O outro lado de cada comparação entra no rótulo do headline. Vem do dado,
+  // nunca escrito à mão: número em texto fixo envelhece na carga seguinte e
+  // ninguém percebe, porque continua parecendo certo.
+  const noMeioDaGrade = useMemo(
+    () => (entradaGrade.data ?? []).find((e) => e.grupo === 'Entrou no meio da grade') ?? null,
+    [entradaGrade.data],
+  )
+
+  const semCertificado = useMemo(
+    () => (efeitoCert.data ?? []).find((e) => e.grupo === 'Estudou e não tirou') ?? null,
+    [efeitoCert.data],
+  )
 
   // Nenhuma destas RPCs corta a lista, então somar e comparar aqui é honesto.
   const assuntoLider = useMemo(() => {
@@ -133,10 +166,11 @@ export function FormacoesPage() {
             <BentoGrid>
               <BentoItem span={6}>
                 <TabelaCard
+                  nivel="descritivo"
                   id="card-uso-formacoes"
                   icon={GraduationCapIcon}
                   title="Uso por formação"
-                  headline={formatInt((uso.data ?? []).length)}
+                  headline={uso.data ? formatInt(uso.data.length) : '—'}
                   headlineLabel="formações com aluno no período"
                   description="Alunos e aulas no período selecionado · histórico e conclusão desde o início · ordenado por alunos no período"
                   isLoading={uso.isLoading}
@@ -178,6 +212,7 @@ export function FormacoesPage() {
 
               <BentoItem span={6}>
                 <ChartCard
+                  nivel="descritivo"
                   icon={BookOpenIcon}
                   title="Assuntos mais assistidos"
                   headline={assuntoLider ? formatPercent(assuntoLider.parte) : '—'}
@@ -207,6 +242,7 @@ export function FormacoesPage() {
               <BentoItem span={8}>
                 <ChartCard
                   tone="brand"
+                  nivel="diagnostico"
                   id="card-duracao"
                   icon={TimerIcon}
                   title="Duração de aula que maximiza conclusão"
@@ -236,6 +272,7 @@ export function FormacoesPage() {
 
               <BentoItem span={4}>
                 <ChartCard
+                  nivel="diagnostico"
                   id="card-dropoff"
                   icon={TrendingDownIcon}
                   title="Onde o aluno para no curso"
@@ -257,14 +294,114 @@ export function FormacoesPage() {
                     className="h-[280px]"
                   />
                 </ChartCard>
+              </BentoItem>
 
+              <BentoItem span={12}>
+                <TabelaCard
+                  nivel="comparativo"
+                  id="card-entrada-na-grade"
+                  icon={DoorOpenIcon}
+                  title="Quem começa pela primeira aula termina mais"
+                  headline={pelaPrimeira?.pct != null ? formatPercent(pelaPrimeira.pct) : '—'}
+                  headlineLabel={
+                    noMeioDaGrade?.pct != null
+                      ? `certificam, contra ${formatPercent(noMeioDaGrade.pct)} de quem entra no meio`
+                      : 'certificam ao abrir o curso pela primeira aula'
+                  }
+                  description={
+                    pelaPrimeira
+                      ? `Alunos com 90+ dias desde a 1ª aula daquele curso · margem de ${formatDecimal(pelaPrimeira.margem_pp)} pp — a diferença precisa passar disso para não ser ruído · entrar no meio também descreve quem já conhecia o assunto, e isso não sai daqui`
+                      : 'Alunos com 90+ dias desde a 1ª aula daquele curso'
+                  }
+                  isLoading={entradaGrade.isLoading}
+                  isError={entradaGrade.isError}
+                  onRetry={() => void entradaGrade.refetch()}
+                  linhasEsqueleto={2}
+                >
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Por onde abriu o curso</TableHead>
+                        <TableHead className="text-right">Alunos</TableHead>
+                        <TableHead className="text-right">Certificaram</TableHead>
+                        <TableHead className="text-right">Taxa</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(entradaGrade.data ?? []).map((e) => (
+                        <TableRow key={e.grupo}>
+                          <TableCell className="font-medium">{e.grupo}</TableCell>
+                          <TableCell className="num text-right">{formatInt(e.alunos)}</TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(e.certificaram)}
+                          </TableCell>
+                          <TableCell className="num text-right font-medium">
+                            {e.pct != null ? formatPercent(e.pct) : '—'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TabelaCard>
               </BentoItem>
             </BentoGrid>
           ),
           qualidade: (
             <BentoGrid>
+              <BentoItem span={12}>
+                <TabelaCard
+                  nivel="comparativo"
+                  id="card-efeito-certificado"
+                  icon={AwardIcon}
+                  title="O certificado prende, ou só marca quem já estava preso?"
+                  headline={
+                    comCertificado?.pct_ativo != null
+                      ? formatPercent(comCertificado.pct_ativo)
+                      : '—'
+                  }
+                  headlineLabel={
+                    semCertificado?.pct_ativo != null
+                      ? `de quem certificou agiu no último mês, contra ${formatPercent(semCertificado.pct_ativo)}`
+                      : 'de quem certificou agiu no último mês'
+                  }
+                  description={
+                    comCertificado
+                      ? `Clientes com 120+ dias de casa · os dois lados já estudaram, de propósito: sem isso a conta viraria "quem usa o produto × quem não usa" · margem de ${formatDecimal(comCertificado.margem_pp)} pp · associação, não causa — quem já ia ficar também termina mais`
+                      : 'Clientes com 120+ dias de casa que já estudaram'
+                  }
+                  isLoading={efeitoCert.isLoading}
+                  isError={efeitoCert.isError}
+                  onRetry={() => void efeitoCert.refetch()}
+                  linhasEsqueleto={2}
+                >
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Grupo</TableHead>
+                        <TableHead className="text-right">Clientes</TableHead>
+                        <TableHead className="text-right">Agiram nos 30d</TableHead>
+                        <TableHead className="text-right">Taxa</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(efeitoCert.data ?? []).map((e) => (
+                        <TableRow key={e.grupo}>
+                          <TableCell className="font-medium">{e.grupo}</TableCell>
+                          <TableCell className="num text-right">{formatInt(e.clientes)}</TableCell>
+                          <TableCell className="num text-right">{formatInt(e.ativos)}</TableCell>
+                          <TableCell className="num text-right font-medium">
+                            {e.pct_ativo != null ? formatPercent(e.pct_ativo) : '—'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TabelaCard>
+              </BentoItem>
+
               <BentoItem span={6}>
                 <TabelaCard
+                  nivel="descritivo"
                   id="card-jornada"
                   icon={AwardIcon}
                   title="Tempo até o certificado"
@@ -303,6 +440,7 @@ export function FormacoesPage() {
 
               <BentoItem span={6}>
                 <TabelaCard
+                  nivel="prescritivo"
                   icon={StarIcon}
                   title="NPS por formação"
                   headline={

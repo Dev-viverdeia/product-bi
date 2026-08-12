@@ -36,6 +36,27 @@ export function useDropoffPosicao() {
   })
 }
 
+/**
+ * Os dois comparativos da tela. Cada um devolve a própria margem em pontos
+ * percentuais — a régua exige que a diferença chegue com o quanto ela poderia
+ * ser ruído, senão a tabela lado a lado convida a ler qualquer gap como real.
+ */
+export function useEfeitoCertificado() {
+  return useQuery({
+    queryKey: ['formacoes', 'efeito-certificado'],
+    queryFn: async () =>
+      (await rpc(supabase.rpc('bi_formacoes_efeito_certificado'))) ?? [],
+  })
+}
+
+export function useEntradaNaGrade() {
+  return useQuery({
+    queryKey: ['formacoes', 'entrada-na-grade'],
+    queryFn: async () =>
+      (await rpc(supabase.rpc('bi_formacoes_entrada_na_grade'))) ?? [],
+  })
+}
+
 export function useNpsCursos() {
   return useQuery({
     queryKey: ['formacoes', 'nps-cursos'],

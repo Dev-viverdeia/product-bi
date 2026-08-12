@@ -248,7 +248,9 @@ export function CsPage() {
                 <TabelaCard
                   icon={UserRoundCheckIcon}
                   title="Quem atendeu"
-                  headline={semCarga ? '—' : formatInt((atendentes.data ?? []).length)}
+                  headline={
+                    semCarga || !atendentes.data ? '—' : formatInt(atendentes.data.length)
+                  }
                   headlineLabel="pessoas atenderam no período"
                   description="Quem de fato respondeu o ciclo (primeira mensagem humana de saída), que é diferente de quem está formalmente atribuído à conversa."
                   isLoading={atendentes.isLoading}

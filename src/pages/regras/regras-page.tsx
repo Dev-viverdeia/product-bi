@@ -50,7 +50,7 @@ export function RegrasPage() {
           <TabelaCard
             icon={ListChecksIcon}
             title={NOME_DA_TELA[tela] ?? tela}
-            headline={formatInt((lista ?? []).length)}
+            headline={lista ? formatInt(lista.length) : '—'}
             headlineLabel="perguntas avaliadas a cada carga"
             description="O limiar de cada regra vive na migration, não em tela editável: o ciclo lento é o recurso, porque impede afrouxar a régua na semana em que o bloco ficou vazio."
             isLoading={regras.isLoading}

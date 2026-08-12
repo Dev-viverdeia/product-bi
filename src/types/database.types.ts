@@ -549,6 +549,26 @@ export type Database = {
           transicoes: number
         }[]
       }
+      bi_formacoes_efeito_certificado: {
+        Args: never
+        Returns: {
+          ativos: number
+          clientes: number
+          grupo: string
+          margem_pp: number
+          pct_ativo: number
+        }[]
+      }
+      bi_formacoes_entrada_na_grade: {
+        Args: never
+        Returns: {
+          alunos: number
+          certificaram: number
+          grupo: string
+          margem_pp: number
+          pct: number
+        }[]
+      }
       bi_formacoes_kpis: {
         Args: { p_dias?: number }
         Returns: {
