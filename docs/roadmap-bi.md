@@ -444,7 +444,31 @@ estourava o timeout da API na primeira chamada (HTTP 500 no navegador). Era
 desenho, não volume — duas subconsultas correlacionadas rodando uma vez por
 organização. Viraram agregados de conjunto: **6.798 ms → 107 ms**.
 
-**Falta:** a escada em duas telas — Jornada e Receita.
+**Jornada & Telas subiu a escada (12/ago).** Tinha três descritivos e dois
+diagnósticos — nenhum comparativo, nenhum prescritivo.
+
+- **As sessões que inflam o ranking.** 38 sessões — 0,08% do total — carregam
+  **15,5% de todas as telas vistas**; somadas às de 51 a 200 telas, 355 sessões
+  (0,8%) carregam 22,7%. Sessão de centenas de telas não é hábito: é aba
+  esquecida aberta ou robô, e contamina de uma vez o ranking de pageview, as
+  telas por sessão e a duração mediana. É o card que faltava desde que
+  `jor_posicao_inflada` apareceu, e o alvo dele é a instrumentação.
+- **Quem chega por link direto não navega:** 41,2% dessas sessões terminam na
+  primeira tela, contra 1,3% de quem entra por `/`, `/login` ou `/convite` — e
+  77% das sessões chegam por link direto. Margem de 0,6 pp. Declarado: sessão de
+  tela única vinda de link direto também descreve quem veio ver uma coisa
+  específica e viu.
+- **Navegar fundo prediz seguir ativo:** 62,7% × 49,8%, margem de 4,0 pp. As
+  janelas são **disjuntas de propósito** — navegação medida na primeira semana do
+  mart, atividade nos 30 dias até o último dia com dado — para o comportamento
+  não ser lido depois do resultado.
+
+As três funções **não aceitam período**: `marts.fact_navegacao` cobre 03/07 a
+08/08/2026 e mais nada, porque a plataforma purga navegação com mais de 30 dias
+todo domingo. Esse intervalo *é* a janela, e cada card declara de quando fala —
+inclusive a semana de 03–09/07, da qual este mart é a única cópia que existe.
+
+**Falta:** a escada em uma tela — Receita.
 
 Placar da escada:
 
@@ -457,7 +481,7 @@ Placar da escada:
 | Soluções | ✅ 2 regras | ✅ na régua |
 | Consultor & Builder | ✅ 4 regras | ✅ na régua |
 | Organizações | ✅ 3 regras | ✅ na régua |
-| Jornada & Telas | ✅ 4 regras | pendente |
+| Jornada & Telas | ✅ 4 regras | ✅ na régua |
 | Receita | ✅ 4 regras | congelada (§6.9) |
 | CS | fora desta leva (pendência do Mateus) | bloqueada (sem carga) |
 

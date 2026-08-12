@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import {
   ArrowLeftRightIcon,
+  BugIcon,
   DoorOpenIcon,
   LayersIcon,
   LogOutIcon,
@@ -20,17 +21,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { TableCell, TableHead, TableRow } from '@/components/ui/table'
-import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { formatDateShort, formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import { LIMITE_LISTA } from '@/lib/rpc'
 import { AnaliseDaTela } from '@/features/resumo/analise-tela'
 import {
   useFluxoDaTela,
   useJornadaKpis,
   usePontosSaida,
+  usePortaDeEntrada,
   usePortasEntrada,
+  useProfundidadeERetencao,
   useProfundidadeSessao,
   useRaioXTelas,
+  useSessoesInfladas,
 } from '@/features/jornada/queries'
 
 function tintaPct(pct: number | null, teto = 0.5) {
@@ -51,12 +62,38 @@ export function JornadaPage() {
   const entradas = usePortasEntrada(periodo)
   const saidas = usePontosSaida(periodo)
   const profundidade = useProfundidadeSessao(periodo)
+  const infladas = useSessoesInfladas()
+  const porta = usePortaDeEntrada()
+  const profundidadeRetencao = useProfundidadeERetencao()
 
   // Raio-x e fluxo podem vir cortados em LIMITE_LISTA; por isso lidero pela
   // primeira linha (que a ordenação garante) e nunca por um total somado.
   const telaMaisVista = raioX.data?.[0] ?? null
   const destinoLider = fluxo.data?.[0] ?? null
   const portaLider = entradas.data?.[0] ?? null
+  // A faixa mais gorda de sessões-monstro é o que o card prescritivo afirma: a
+  // fatia minúscula de sessões que carrega uma fatia enorme das telas vistas.
+  const sessoesGigantes = useMemo(
+    () => (infladas.data ?? []).find((f) => f.ordem === 4) ?? null,
+    [infladas.data],
+  )
+  const linkDireto = useMemo(
+    () => (porta.data ?? []).find((p) => p.grupo === 'Por link direto') ?? null,
+    [porta.data],
+  )
+  const portaDaFrente = useMemo(
+    () => (porta.data ?? []).find((p) => p.grupo === 'Pela porta da frente') ?? null,
+    [porta.data],
+  )
+  const navegaFundo = useMemo(
+    () => (profundidadeRetencao.data ?? []).find((p) => p.grupo.startsWith('Navega fundo')) ?? null,
+    [profundidadeRetencao.data],
+  )
+  const navegaRaso = useMemo(
+    () => (profundidadeRetencao.data ?? []).find((p) => p.grupo.startsWith('Navega raso')) ?? null,
+    [profundidadeRetencao.data],
+  )
+
   // O card responde "onde a sessão termina com frequência anormal", não "onde
   // termina em volume" — volume segue o tráfego da tela e não distingue a tela
   // que resolve da tela que trava. Por isso a ordem é pela taxa, e é a mesma
@@ -136,6 +173,65 @@ export function JornadaPage() {
             <BentoGrid>
               <BentoItem span={12}>
                 <TabelaCard
+                  nivel="prescritivo"
+                  id="card-sessoes-infladas"
+                  icon={BugIcon}
+                  title="As sessões que inflam o ranking"
+                  headline={
+                    sessoesGigantes?.pct_telas != null
+                      ? formatPercent(sessoesGigantes.pct_telas)
+                      : '—'
+                  }
+                  headlineLabel={
+                    sessoesGigantes
+                      ? `das telas vistas saem de ${formatInt(sessoesGigantes.sessoes)} sessões`
+                      : undefined
+                  }
+                  description={
+                    sessoesGigantes
+                      ? `Sessão de centenas de telas não é hábito de uso — é aba esquecida aberta ou robô · janela: ${formatDateShort(sessoesGigantes.janela_inicio)} a ${formatDateShort(sessoesGigantes.janela_fim)}, todo o histórico que a purga da plataforma ainda não apagou · enquanto essas sessões contarem, o ranking de pageview, as telas por sessão e a duração mediana estão contaminados de uma vez`
+                      : 'Sessões por número de telas, em todo o histórico disponível'
+                  }
+                  isLoading={infladas.isLoading}
+                  isError={infladas.isError}
+                  onRetry={() => void infladas.refetch()}
+                  linhasEsqueleto={4}
+                >
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tamanho da sessão</TableHead>
+                        <TableHead className="text-right">Sessões</TableHead>
+                        <TableHead className="text-right">% das sessões</TableHead>
+                        <TableHead className="text-right">Telas vistas</TableHead>
+                        <TableHead className="text-right">% das telas</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(infladas.data ?? []).map((f) => (
+                        <TableRow key={f.faixa}>
+                          <TableCell className="font-medium">{f.faixa}</TableCell>
+                          <TableCell className="num text-right">{formatInt(f.sessoes)}</TableCell>
+                          <TableCell className="num text-right">
+                            {f.pct_sessoes != null ? formatPercent(f.pct_sessoes) : '—'}
+                          </TableCell>
+                          <TableCell className="num text-right">{formatInt(f.telas)}</TableCell>
+                          <TableCell
+                            className="num text-right font-medium"
+                            style={tintaPct(f.pct_telas)}
+                          >
+                            {f.pct_telas != null ? formatPercent(f.pct_telas) : '—'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TabelaCard>
+              </BentoItem>
+
+              <BentoItem span={12}>
+                <TabelaCard
+                  nivel="descritivo"
                   id="card-raio-x"
                   icon={ScanSearchIcon}
                   title="Raio-x das telas"
@@ -186,6 +282,7 @@ export function JornadaPage() {
 
               <BentoItem span={12}>
                 <TabelaCard
+                  nivel="diagnostico"
                   icon={ArrowLeftRightIcon}
                   title="Para onde vão a partir de uma tela"
                   headline={destinoLider?.pct != null ? formatPercent(destinoLider.pct) : '—'}
@@ -241,6 +338,7 @@ export function JornadaPage() {
             <BentoGrid>
               <BentoItem span={6}>
                 <ChartCard
+                  nivel="descritivo"
                   id="card-portas-entrada"
                   icon={DoorOpenIcon}
                   title="Portas de entrada"
@@ -268,6 +366,7 @@ export function JornadaPage() {
 
               <BentoItem span={6}>
                 <ChartCard
+                  nivel="diagnostico"
                   id="card-pontos-saida"
                   icon={LogOutIcon}
                   title="Onde a sessão morre"
@@ -300,6 +399,7 @@ export function JornadaPage() {
               <BentoItem span={12}>
                 <ChartCard
                   tone="brand"
+                  nivel="descritivo"
                   icon={LayersIcon}
                   title="Profundidade das sessões"
                   headline={exploram != null ? formatPercent(exploram) : '—'}
@@ -320,6 +420,111 @@ export function JornadaPage() {
                     className="h-[260px]"
                   />
                 </ChartCard>
+              </BentoItem>
+
+              <BentoItem span={6}>
+                <TabelaCard
+                  nivel="comparativo"
+                  id="card-porta-de-entrada"
+                  icon={ArrowLeftRightIcon}
+                  title="Quem chega por link direto não navega"
+                  headline={
+                    linkDireto?.pct_tela_unica != null
+                      ? formatPercent(linkDireto.pct_tela_unica)
+                      : '—'
+                  }
+                  headlineLabel={
+                    portaDaFrente?.pct_tela_unica != null
+                      ? `terminam na 1ª tela, contra ${formatPercent(portaDaFrente.pct_tela_unica)} de quem entra pela porta da frente`
+                      : 'das sessões por link direto terminam na 1ª tela'
+                  }
+                  description={
+                    linkDireto
+                      ? `Porta da frente = a sessão abriu em /, /login ou /convite · margem de ${formatDecimal(linkDireto.margem_pp)} pp · sessão de tela única vinda de link direto também descreve quem veio ver uma coisa específica e viu — o card não separa isso de quem desistiu`
+                      : 'Porta da frente = a sessão abriu em /, /login ou /convite'
+                  }
+                  isLoading={porta.isLoading}
+                  isError={porta.isError}
+                  onRetry={() => void porta.refetch()}
+                  linhasEsqueleto={2}
+                >
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Como a sessão começou</TableHead>
+                        <TableHead className="text-right">Sessões</TableHead>
+                        <TableHead className="text-right">Terminam na 1ª</TableHead>
+                        <TableHead className="text-right">Telas (mediana)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(porta.data ?? []).map((p) => (
+                        <TableRow key={p.grupo}>
+                          <TableCell className="font-medium">{p.grupo}</TableCell>
+                          <TableCell className="num text-right">{formatInt(p.sessoes)}</TableCell>
+                          <TableCell
+                            className="num text-right font-medium"
+                            style={tintaPct(p.pct_tela_unica)}
+                          >
+                            {p.pct_tela_unica != null ? formatPercent(p.pct_tela_unica) : '—'}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {formatDecimal(p.mediana_telas)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TabelaCard>
+              </BentoItem>
+
+              <BentoItem span={6}>
+                <TabelaCard
+                  nivel="comparativo"
+                  id="card-profundidade-retencao"
+                  icon={LayersIcon}
+                  title="Navegar fundo prediz seguir ativo"
+                  headline={
+                    navegaFundo?.pct_ativo != null ? formatPercent(navegaFundo.pct_ativo) : '—'
+                  }
+                  headlineLabel={
+                    navegaRaso?.pct_ativo != null
+                      ? `seguem ativos, contra ${formatPercent(navegaRaso.pct_ativo)} de quem navegou raso`
+                      : 'de quem navegou fundo segue ativo'
+                  }
+                  description={
+                    navegaFundo
+                      ? `Navegação medida de ${formatDateShort(navegaFundo.janela_inicio)} a ${formatDateShort(navegaFundo.janela_fim)}; atividade medida nos 30 dias até o último dia com dado — janelas disjuntas de propósito, para o comportamento não ser lido depois do resultado · margem de ${formatDecimal(navegaFundo.margem_pp)} pp · associação, não causa: navegar fundo também descreve quem já chegou engajado`
+                      : 'Navegação na primeira semana registrada; atividade nos últimos 30 dias com dado'
+                  }
+                  isLoading={profundidadeRetencao.isLoading}
+                  isError={profundidadeRetencao.isError}
+                  onRetry={() => void profundidadeRetencao.refetch()}
+                  linhasEsqueleto={2}
+                >
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Como navegou na 1ª semana</TableHead>
+                        <TableHead className="text-right">Clientes</TableHead>
+                        <TableHead className="text-right">Ativos hoje</TableHead>
+                        <TableHead className="text-right">Taxa</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(profundidadeRetencao.data ?? []).map((p) => (
+                        <TableRow key={p.grupo}>
+                          <TableCell className="font-medium">{p.grupo}</TableCell>
+                          <TableCell className="num text-right">{formatInt(p.clientes)}</TableCell>
+                          <TableCell className="num text-right">{formatInt(p.ativos)}</TableCell>
+                          <TableCell className="num text-right font-medium">
+                            {p.pct_ativo != null ? formatPercent(p.pct_ativo) : '—'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TabelaCard>
               </BentoItem>
             </BentoGrid>
           ),

@@ -682,6 +682,45 @@ export type Database = {
           telas_por_sessao: number
         }[]
       }
+      bi_jornada_porta_de_entrada: {
+        Args: never
+        Returns: {
+          grupo: string
+          janela_fim: string
+          janela_inicio: string
+          margem_pp: number
+          mediana_telas: number
+          pct_tela_unica: number
+          sessoes: number
+          tela_unica: number
+        }[]
+      }
+      bi_jornada_profundidade_e_retencao: {
+        Args: never
+        Returns: {
+          ativos: number
+          clientes: number
+          grupo: string
+          janela_fim: string
+          janela_inicio: string
+          margem_pp: number
+          pct_ativo: number
+        }[]
+      }
+      bi_jornada_sessoes_infladas: {
+        Args: never
+        Returns: {
+          faixa: string
+          janela_fim: string
+          janela_inicio: string
+          ordem: number
+          pct_sessoes: number
+          pct_telas: number
+          pessoas: number
+          sessoes: number
+          telas: number
+        }[]
+      }
       bi_ltv_cohort: {
         Args: never
         Returns: {

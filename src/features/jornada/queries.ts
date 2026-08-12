@@ -54,3 +54,32 @@ export function useProfundidadeSessao(dias: Periodo) {
       (await rpc(supabase.rpc('bi_profundidade_sessao', { p_dias: dias }))) ?? [],
   })
 }
+
+/**
+ * As três perguntas que faltavam na tela.
+ *
+ * Nenhuma aceita período: `marts.fact_navegacao` cobre o que a purga da
+ * plataforma ainda não apagou, e esse intervalo É a janela. Cada uma devolve
+ * `janela_inicio`/`janela_fim` para o card declarar de quando fala.
+ */
+export function useSessoesInfladas() {
+  return useQuery({
+    queryKey: ['jornada', 'sessoes-infladas'],
+    queryFn: async () => (await rpc(supabase.rpc('bi_jornada_sessoes_infladas'))) ?? [],
+  })
+}
+
+export function usePortaDeEntrada() {
+  return useQuery({
+    queryKey: ['jornada', 'porta-de-entrada'],
+    queryFn: async () => (await rpc(supabase.rpc('bi_jornada_porta_de_entrada'))) ?? [],
+  })
+}
+
+export function useProfundidadeERetencao() {
+  return useQuery({
+    queryKey: ['jornada', 'profundidade-retencao'],
+    queryFn: async () =>
+      (await rpc(supabase.rpc('bi_jornada_profundidade_e_retencao'))) ?? [],
+  })
+}
