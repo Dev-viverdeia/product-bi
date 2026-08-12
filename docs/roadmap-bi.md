@@ -277,12 +277,35 @@ mediam errado, entraram quatro que respondem outra coisa — quem apareceu contr
 a base, de onde veio o número de ativos, uso raso × profundo, e a saúde do
 rastreio.
 
-**Falta:** as outras sete telas com dado local. Cada uma entra na lista
-`TELAS_NA_REGUA` quando a composição passar; até lá o placar fica visível.
+**Clientes & Retenção também subiu.** Entrou o corte comprador × convidado
+(38,9% × 19,4%), "Onde a jornada termina" virou taxa sobre a audiência de cada
+módulo em vez de contagem, e Power users saiu.
 
-Dois achados da leva, medidos: **35,2% dos ativos entraram no próprio período**
-(o crescimento é comprado, não retido) e **Soluções tem 1,6% de compromisso**
-contra praticamente tudo nos outros módulos — atrai atenção e não converte.
+**Falta:** as seis telas restantes com dado local — Entrada, Formações,
+Soluções, IA, Organizações e Jornada. Cada uma entra na lista `TELAS_NA_REGUA`
+quando a composição passar; até lá o placar fica visível em vez de esquecido.
+
+Placar da escada:
+
+| Tela | Estado |
+| --- | --- |
+| Visão Geral | ✅ na régua |
+| Clientes & Retenção | ✅ na régua |
+| Entrada · Formações · Soluções · IA · Organizações · Jornada | pendente |
+| Receita | congelada (§6.9) |
+| CS | bloqueada (sem carga) |
+
+Quatro achados da leva, todos medidos:
+
+1. **35,2% dos ativos entraram no próprio período** — o crescimento é comprado,
+   não retido, e o KPI de ativos não distinguia isso.
+2. **Comprador retém 38,9%, convidado 19,4%.** O produto retém quem paga e
+   perde quem o pagante trouxe.
+3. **Soluções tem 1,6% de compromisso** contra praticamente tudo nos outros
+   módulos — atrai atenção e não converte.
+4. **Mortalidade por módulo, em taxa:** de quem passou por Formações, 33,8%
+   teve ali a última ação; pelo Consultor, 2,8%. O card antigo dizia "59% param
+   em Formações", que era popularidade.
 
 ### Levantamento concluído em 11/ago
 
