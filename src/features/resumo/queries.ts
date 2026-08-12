@@ -18,7 +18,11 @@ export type Achado = {
   familia: string
   severidade: string
   titulo: string
+  /** o fato, com o número e a régua */
   gabarito: string
+  /** o que o fato quer dizer — e o que ele não quer dizer */
+  gabarito_leitura: string
+  /** o que fazer a respeito */
   gabarito_acao: string
   parametros: Record<string, unknown> | null
   score: number

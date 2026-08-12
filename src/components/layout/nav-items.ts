@@ -2,10 +2,12 @@ import {
   BanknoteIcon,
   BookOpenIcon,
   BotIcon,
+  ChartColumnIcon,
   Building2Icon,
   CheckCheckIcon,
   CompassIcon,
   DoorOpenIcon,
+  FileTextIcon,
   GraduationCapIcon,
   HeadphonesIcon,
   HeartCrackIcon,
@@ -57,15 +59,29 @@ export type NavItem = {
    * atalho para cada uma. Declarar nos dois lugares seria garantir que um dia
    * divergem.
    *
-   * Visão Geral e Organizações não têm: abas se pagam quando a tela responde
-   * 3+ perguntas distintas, e panorama fatiado deixa de ser panorama.
+   * Duas naturezas de aba convivem. Nos módulos, elas separam PERGUNTAS
+   * distintas (retenção, risco, o que funciona) — e se pagam a partir de três.
+   * Na Visão Geral, separam FORMATOS da mesma leitura: a análise escrita e os
+   * gráficos que a sustentam. Sem essa separação a página vira um documento
+   * espremido entre painéis, que foi como ela nasceu.
+   *
+   * Organizações segue sem: panorama fatiado deixa de ser panorama.
    */
   abas?: AbaDoModulo[]
 }
 
 /** Ponto único para registrar novas seções do produto. */
 export const navItems: NavItem[] = [
-  { title: 'Visão geral', shortTitle: 'Visão geral', to: '/', icon: LayoutDashboardIcon },
+  {
+    title: 'Visão geral',
+    shortTitle: 'Visão geral',
+    to: '/',
+    icon: LayoutDashboardIcon,
+    abas: [
+      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
+      { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
+    ],
+  },
   {
     title: 'Clientes',
     shortTitle: 'Clientes',

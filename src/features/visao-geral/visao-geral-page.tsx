@@ -9,6 +9,7 @@ import {
   UsersIcon,
 } from 'lucide-react'
 import { BentoCabecalho, BentoGrid, BentoItem } from '@/components/layout/bento'
+import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
@@ -28,7 +29,7 @@ import { labelTipoEvento } from '@/lib/labels-plataforma'
 import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
 import { SegmentoFiltro } from '@/components/filters/segmento-filtro'
 import { useSegmento } from '@/components/filters/use-segmento'
-import { ResumoCard } from '@/features/resumo/resumo-card'
+import { AnaliseDaTela } from '@/features/resumo/analise-tela'
 import {
   useAcoesPorModulo,
   useAtividadeDiaria,
@@ -91,9 +92,11 @@ export function VisaoGeralPage() {
     : null
 
   return (
-    <BentoGrid>
-      {/* Filtros ficam acima do mosaico: escopam a tela inteira */}
-      <BentoCabecalho>
+    <div className="space-y-4">
+      {/* Fora das abas: contexto das duas. Trocar entre a leitura e os gráficos
+          não pode custar o número de referência nem o recorte. */}
+      <BentoGrid>
+        <BentoCabecalho>
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">Visão geral</h2>
           <p className="text-muted-foreground text-sm">
@@ -101,70 +104,72 @@ export function VisaoGeralPage() {
             {sincronizadoAs ? ` · dados sincronizados às ${sincronizadoAs}` : ''}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <SegmentoFiltro />
-          <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
-        </div>
-      </BentoCabecalho>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <SegmentoFiltro />
+            <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
+          </div>
+        </BentoCabecalho>
 
-      {/* Faixa 2 da anatomia: o resumo é o card de destaque da tela — o lugar
-          mais nobre pertence ao que direciona, não ao gráfico mais bonito. */}
-      <BentoItem span={12}>
-        <ResumoCard tela="visao-geral" periodo={periodo} recorte={recorte} />
-      </BentoItem>
+        <BentoItem span={12} id="card-kpis">
+            <KpiGrid>
+            <KpiCard
+              label="Usuários ativos"
+              value={kpis.data?.ativos ?? null}
+              format={formatInt}
+              delta={
+                kpis.data
+                  ? deltaOuNada(kpis.data.ativos, kpis.data.ativos_ant, vsPeriodo)
+                  : undefined
+              }
+              isLoading={kpis.isLoading}
+              isError={kpis.isError}
+            />
+            <KpiCard
+              label="Novos clientes"
+              value={kpis.data?.novos ?? null}
+              format={formatInt}
+              delta={
+                kpis.data
+                  ? deltaOuNada(kpis.data.novos, kpis.data.novos_ant, vsPeriodo)
+                  : undefined
+              }
+              isLoading={kpis.isLoading}
+              isError={kpis.isError}
+            />
+            <KpiCard
+              label="Aulas concluídas"
+              value={kpis.data?.aulas ?? null}
+              format={formatInt}
+              delta={
+                kpis.data
+                  ? deltaOuNada(kpis.data.aulas, kpis.data.aulas_ant, vsPeriodo)
+                  : undefined
+              }
+              isLoading={kpis.isLoading}
+              isError={kpis.isError}
+            />
+            <KpiCard
+              label="Pageviews"
+              value={kpis.data?.pageviews ?? null}
+              format={formatCompact}
+              delta={
+                kpis.data
+                  ? deltaOuNada(kpis.data.pageviews, kpis.data.pageviews_ant, vsPeriodo)
+                  : undefined
+              }
+              isLoading={kpis.isLoading}
+              isError={kpis.isError}
+            />
+          </KpiGrid>
+        </BentoItem>
+      </BentoGrid>
 
-      <BentoItem span={12} id="card-kpis">
-        <KpiGrid>
-          <KpiCard
-            label="Usuários ativos"
-            value={kpis.data?.ativos ?? null}
-            format={formatInt}
-            delta={
-              kpis.data
-                ? deltaOuNada(kpis.data.ativos, kpis.data.ativos_ant, vsPeriodo)
-                : undefined
-            }
-            isLoading={kpis.isLoading}
-            isError={kpis.isError}
-          />
-          <KpiCard
-            label="Novos clientes"
-            value={kpis.data?.novos ?? null}
-            format={formatInt}
-            delta={
-              kpis.data
-                ? deltaOuNada(kpis.data.novos, kpis.data.novos_ant, vsPeriodo)
-                : undefined
-            }
-            isLoading={kpis.isLoading}
-            isError={kpis.isError}
-          />
-          <KpiCard
-            label="Aulas concluídas"
-            value={kpis.data?.aulas ?? null}
-            format={formatInt}
-            delta={
-              kpis.data
-                ? deltaOuNada(kpis.data.aulas, kpis.data.aulas_ant, vsPeriodo)
-                : undefined
-            }
-            isLoading={kpis.isLoading}
-            isError={kpis.isError}
-          />
-          <KpiCard
-            label="Pageviews"
-            value={kpis.data?.pageviews ?? null}
-            format={formatCompact}
-            delta={
-              kpis.data
-                ? deltaOuNada(kpis.data.pageviews, kpis.data.pageviews_ant, vsPeriodo)
-                : undefined
-            }
-            isLoading={kpis.isLoading}
-            isError={kpis.isError}
-          />
-        </KpiGrid>
-      </BentoItem>
+      <ModuloTabs
+        rota="/"
+        conteudos={{
+          analise: <AnaliseDaTela tela="visao-geral" periodo={periodo} recorte={recorte} />,
+          graficos: (
+            <BentoGrid>
 
       <BentoItem span={8}>
         <ChartCard
@@ -199,7 +204,7 @@ export function VisaoGeralPage() {
           title="Quem apareceu, e quem não"
           headline={penetracao != null ? formatPercent(penetracao) : '—'}
           headlineLabel="da base pagante teve alguma ação"
-          description={`Clientes com ao menos uma ação no período, contra a base inteira sob a régua e_cliente · últimos ${periodo} dias · quem não aparece ainda não é churn: é contrato pago sem uso`}
+          description={`Clientes com ao menos uma ação no período, contra a base pagante inteira · últimos ${periodo} dias`}
           isLoading={kpis.isLoading}
           isError={kpis.isError}
           isEmpty={kpis.data == null}
@@ -229,7 +234,7 @@ export function VisaoGeralPage() {
           title="De onde veio o número de ativos"
           headline={parteNovos != null ? formatPercent(parteNovos) : '—'}
           headlineLabel="dos ativos entraram no próprio período"
-          description={`Cada cliente ativo cai em uma origem só: retido (ativo também na janela anterior), reativado (voltou depois de sumir) ou novo (primeira ação dentro do período) · crescer comprando cliente novo é o oposto de crescer retendo, e o total de ativos não distingue os dois · últimos ${periodo} dias`}
+          description={`Cada cliente ativo entra em uma origem só: retido (ativo também na janela anterior), reativado (voltou depois de sumir) ou novo (primeira ação no período) · últimos ${periodo} dias`}
           isLoading={composicao.isLoading}
           isError={composicao.isError}
           onRetry={() => void composicao.refetch()}
@@ -258,7 +263,7 @@ export function VisaoGeralPage() {
           title="Ações por módulo"
           headline={moduloLider ? formatCompact(moduloLider.total) : '—'}
           headlineLabel={moduloLider ? `em ${moduloLider.modulo}` : undefined}
-          description={`Todas as ações de produto do período, agrupadas por módulo · a versão anterior deste card ordenava tipos de evento soltos, o que fazia a visualização de solução vencer o agendamento de mentoria por construção · últimos ${periodo} dias`}
+          description={`Todas as ações de produto do período, agrupadas por módulo · últimos ${periodo} dias`}
           isLoading={porModulo.isLoading}
           isError={porModulo.isError}
           onRetry={() => void porModulo.refetch()}
@@ -286,7 +291,7 @@ export function VisaoGeralPage() {
           title="O uso é raso ou profundo?"
           headline={parteCompromisso != null ? formatPercent(parteCompromisso) : '—'}
           headlineLabel="das ações são compromisso, não consumo"
-          description="Consumo é olhar (visualizar uma solução); compromisso é produzir, concluir ou agendar. Um módulo com muito consumo e pouco compromisso atrai atenção e não converte — e somar os dois num ranking único esconde exatamente isso. Ler com cuidado: hoje a plataforma só emite um evento de consumo, a visualização de solução. Módulo em 100% não significa que ninguém só olha lá — significa que o olhar não é rastreado. O contraste vale para Soluções; para os demais, a barra mede instrumentação."
+          description="Consumo é olhar; compromisso é produzir, concluir ou agendar · atenção: a plataforma emite hoje um único evento de consumo (visualizar solução), então módulo em 100% quer dizer que o olhar não é rastreado ali, não que todo uso seja profundo"
           isLoading={porModulo.isLoading}
           isError={porModulo.isError}
           onRetry={() => void porModulo.refetch()}
@@ -321,7 +326,7 @@ export function VisaoGeralPage() {
           title="Saúde do rastreio"
           headline={formatInt(rastreiosParados)}
           headlineLabel="rastreios parados há mais de 30 dias"
-          description="Última data com registro por tipo de evento, contada a partir do dia do dado e não de hoje. Rastreio parado é dependência do time da plataforma: a lista existe para virar pedido, e enquanto não vira, toda série que atravessa a data de óbito lê queda de comportamento onde houve queda de instrumentação."
+          description="Última data com registro por tipo de evento, contada a partir do dia do dado e não de hoje · série que atravessa a data de óbito de um evento lê queda de comportamento onde houve queda de instrumentação"
           isLoading={rastreio.isLoading}
           isError={rastreio.isError}
           onRetry={() => void rastreio.refetch()}
@@ -392,6 +397,10 @@ export function VisaoGeralPage() {
           />
         </ChartCard>
       </BentoItem>
-    </BentoGrid>
+            </BentoGrid>
+          ),
+        }}
+      />
+    </div>
   )
 }

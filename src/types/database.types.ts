@@ -57,6 +57,7 @@ export type Database = {
           familia: string
           gabarito: string
           gabarito_acao: string
+          gabarito_leitura: string
           motivo: string
           parametros: Json
           regra: string
@@ -74,6 +75,7 @@ export type Database = {
           familia: string
           gabarito: string
           gabarito_acao: string
+          gabarito_leitura: string
           motivo: string
           parametros: Json
           regra: string
@@ -649,6 +651,7 @@ export type Database = {
           familia: string
           gabarito: string
           gabarito_acao: string
+          gabarito_leitura: string
           id: string
           limiar_descricao: string
           ordem: number
