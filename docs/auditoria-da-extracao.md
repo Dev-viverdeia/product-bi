@@ -17,7 +17,7 @@ Método: contar os dois lados na mesma consulta. O FDW expõe `plataforma.*` e
 | Conversão de fuso (`*_brt`) | ✅ **correta** em todas as testadas |
 | Watermark / frescor | ✅ rodando, última carga há minutos |
 | Arquivo de navegação | ✅ funcionando por desenho |
-| **Propagação de exclusão nos fatos da plataforma** | ❌ **QUEBRADA** |
+| **Propagação de exclusão nos fatos da plataforma** | ❌ quebrada → ✅ **CORRIGIDA em 13/08** |
 
 ---
 
@@ -53,7 +53,7 @@ não da extração.)
 de +73.758 **não é defeito, é o propósito**: a plataforma purga navegação com mais
 de 30 dias e o BI guarda. São 42 dias aqui contra 34 lá.
 
-## 4. ❌ Exclusão não propaga nos fatos da plataforma
+## 4. Exclusão não propagava nos fatos — corrigido em 13/08/2026
 
 **13 clientes foram apagados da plataforma.** A dimensão fez o certo — nenhum
 deles permanece em `marts.dim_usuario`. Os fatos não:
@@ -85,17 +85,56 @@ dependendo de quem pergunta.
 > na dim. Investigar na correção — pode ser usuário de outro tenant ou linha
 > anterior ao recorte da dimensão.
 
-### Correção proposta
+### O escopo real era 10× maior que o primeiro diagnóstico
 
-O sync incremental por watermark **não consegue ver exclusão** — ele só lê linhas
-com `updated_at` maior que a marca, e linha apagada não tem `updated_at`. Portanto
-não é bug de uma função: é limitação do desenho, e precisa de um passo próprio.
+Antes de escrever a correção fui investigar os 30 `user_id` fantasma que pareciam
+não ser exclusão. **Eram todos exclusão** — os 43 sumiram de `profiles`. Mas 33
+deles **ainda tinham linha na origem**: a plataforma apagou o perfil e deixou a
+atividade órfã no banco dela.
 
-1. **Passo de reconciliação por chave**, periódico (diário basta): para cada fato,
-   apagar do espelho o que não existe mais na origem. Barato — compara só `id`.
-2. **Teste no CI** que reprova espelho com órfão, como o contrato manda ("com
-   teste").
-3. **Decidir o caso dos 30 `user_id` fantasma** que não são exclusão.
+Isso invalidou a correção que eu tinha proposto. Reconciliar só por chave teria
+limpado 438 das 4.662 linhas e eu teria declarado o problema resolvido.
+
+Contagem final do que estava exposto: **211 pessoas apagadas, 4.662 linhas.**
+
+| espelho | linhas de pessoa apagada |
+| --- | ---: |
+| `fact_evento` | 3.149 |
+| `fact_progresso_aula` | 629 |
+| `fact_pageview` | 524 |
+| `fact_nps_aula` | 222 |
+| `fact_progresso_solucao` | 110 |
+| `fact_certificado` | 28 |
+
+### A correção (migrations `20260813203000` e `20260813204500`)
+
+`etl.propagar_exclusoes()` apaga por **dois critérios**, não um:
+
+- **por pessoa** — a linha é de alguém que não existe mais em `plataforma.profiles`
+- **por chave** — o `id` não existe mais na origem
+
+O critério de chave **não se aplica a pageview e navegação**: a plataforma purga
+navegação com mais de 30 dias e o BI guarda de propósito. Aplicá-lo ali apagaria
+justamente o arquivo que é o nosso maior valor.
+
+⚠️ **Guarda de sanidade, que não é zelo excessivo.** Toda a lógica apaga com base
+em "não existe na origem". Se o FDW cair, se a credencial expirar ou se a consulta
+remota voltar vazia, "não existe" vira verdade para TODAS as linhas e a função
+apaga os marts inteiros — em silêncio, dentro do cron, de madrugada. A função
+aborta se `profiles` vier com menos de 90% do tamanho da dim.
+
+**Resultado da execução:** 4.680 linhas removidas (4.662 por pessoa, 18 por
+chave). Verificado depois: **zero** linhas de pessoa apagada em qualquer mart, e a
+divergência de contagem fechou — `fact_progresso_aula` devolve 148.115 com e sem o
+join com a dim, contra 148.744 × 148.115 antes.
+
+**O que impede a volta:**
+
+1. `bi_propagar_exclusoes` no pg_cron, **diário às 04:10 BRT** — não a cada 30
+   min: é varredura de conjunto contra o FDW, e exclusão de conta não é evento de
+   minuto.
+2. `marts.contar_linhas_de_apagados()` — deve devolver zero. Qualquer valor acima
+   é o passo falhando em silêncio, que é exatamente como o problema nasceu.
 
 ## 5. O que ainda não foi auditado
 
