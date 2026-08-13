@@ -21,7 +21,8 @@ Regras inegociáveis herdadas do DS:
 
 - **LIGHT-FIRST (regra zero)**: a marca é clara. Dark mode existe e é completo, mas é escolha do usuário (toggle no header) — `defaultTheme="light"`.
   - **Canvas é cinza quase branco, card é branco**: `--via-canvas: #f4f5f7` + `--via-card-borda`. Enquanto os dois eram `#ffffff`, o card só existia por uma borda de 5% e a tela lia como uma folha só. A separação vem de **borda fina e sombra**, não de contraste de fundo. O cinza é neutro de propósito — a escala do DS é fria por construção e, numa página inteira, lê como lavanda.
-  - **Navy é componente, nunca fundo de página**: vale para o canvas. A barra (`--nav-surface`) e o `.brand-card` são navy por serem componentes.
+    - ⚠️ **O shell novo troca estas duas superfícies por quatro** (página · moldura · seção · card) e o contraste passa a ser estrutural, não só de borda — a aba ativa depende dele para existir. Ver "Layout do produto". Enquanto a migração não roda, `--via-canvas` continua valendo; quando rodar, a rampa de quatro degraus entra em `src/index.css` **como token**, não como cor solta no componente.
+  - **Navy é componente, nunca fundo de página**: vale para o canvas. O `.brand-card` é navy por ser componente. ⚠️ A barra `--nav-surface` deixa de ser navy no shell novo — barra e rail passam a ser **brancos** e o navy recua para tinta, disco da marca e bloco de destaque. É a regra zero levada até o fim, não uma exceção a ela.
 - **Paleta restrita**: branco · off-white · cinzas · azul-escuro `#1E3A5F` · navy · preto. Coral `#B85C5C`/danger só destrutivo real; verde `#1F8A5B` só status. **BANIDO**: gold/amarelo/roxo/cyan/magenta/neon, gradientes quentes.
 - **Fonte: Outfit** (decisão do Mateus, no lugar da Geist do DS) + **JetBrains Mono** para números/código/tabelas (fallback oficial do DS). Self-hosted via `@fontsource-variable/*`. Pesos: body 400–500, headings 500–600 — nunca bold massivo. Tracking negativo leve já aplicado no base.
 - Nunca hardcodar cor/raio/sombra — sempre token. Raios canônicos: xs 6 · sm 10 · md 14 (botão/input) · lg 20 (**card padrão**) · xl 28 (modal/card grande) · 2xl 40. Sombras navy-tinted no light, pretas no dark (`--shadow-*` já mapeadas).
@@ -149,8 +150,10 @@ src/
   app/          providers + router
   components/
     charts/     kit de gráficos
-    layout/     shell autenticado: app-header (barra navy), app-layout,
-                bento.tsx, modulo-tabs.tsx, nav-items.ts, alerta-pipeline
+    layout/     shell autenticado: app-layout, bento.tsx, nav-items.ts,
+                alerta-pipeline. Em migração para o shell novo (rail + barra
+                com aba-canal) — ver "Layout do produto"
+    filters/    período, segmento e os hooks de URL que os guardam
     tabela/     tabela-longa.tsx (lista nominal com busca e paginação)
     ui-marca/   peças da marca fora do shadcn (status-pill)
     ui/         shadcn — gerado por CLI, fora do lint, não editar à mão
@@ -162,14 +165,77 @@ src/
 
 Módulo novo: página em `pages/` ou `features/` → rota em `src/app/router.tsx` (dentro de ProtectedRoute → AppLayout, via `lazy()`) → item em `src/components/layout/nav-items.ts` (com `shortTitle`, e `abas` se tiver) → migration + `db:types` se tocar banco.
 
-### Layout de módulo
+### Layout do produto — o shell (medido na referência, 13/ago/2026)
 
-- **Navegação no topo**, não lateral: barra navy flutuante (`AppHeader`). A sidebar foi removida — não reintroduzir.
-- **Mosaico, não empilhamento**: a página é um `BentoGrid` de 12 colunas com **um único gap**. `BentoItem` aceita `span` e `rows`. Card preenche a altura via `[&>*]:h-full` na primitiva; não repetir nas páginas.
-- **Cabeçalho de módulo (título + filtros) usa `BentoCabecalho`** — nunca pendurar `flex-wrap` direto no `BentoItem`: todo filho direto herda o `h-full` do mosaico e, quando o flex quebra linha (mobile), o filho inflado estoura por cima do bloco de baixo. Foi defeito real medido em 7 telas (128–148px de sobreposição em 375px).
-- **Abas por contexto** (`ModuloTabs`): `analise` sempre primeira, e as seguintes fatiadas por pergunta quando a tela responde 3+ (`retencao`, `risco`, `funciona`). Tela de pergunta única fica com `analise` | `graficos` — Visão Geral e Organizações são assim, porque fatiar um panorama por tema deixa de ser panorama. A aba vive na URL (`?aba=`) e é declarada uma vez em `nav-items.ts` — a barra do topo consome a mesma lista.
+Refeito a partir de um mockup de referência que o Mateus trouxe, com **fidelidade como requisito declarado**. Os números abaixo saíram de medição de pixel na imagem, não de estimativa: cinco tentativas foram recusadas por eu estar interpretando a referência em vez de medi-la. Mockup navegável e aprovado: **`docs/mockup-layout.html`**.
+
+> **Estado: o mockup está aprovado, a migração para React não começou.** As peças marcadas *(a construir)* ainda não existem em `src/`. Enquanto não existirem, a fonte da verdade da forma é o mockup.
+
+**Quatro superfícies, nesta ordem: página → moldura → seção → card.**
+
+| camada | claro | escuro | quem usa |
+| --- | --- | --- | --- |
+| página | `#dde1e9` | `#05090f` | fundo do documento, fora da moldura |
+| moldura | `#edf0f5` | `#0a1120` | interior do quadro **e a cor da aba ativa** |
+| seção | `#e4e8ef` | `#0f1828` | contêiner que agrupa cards |
+| card / cromo | `#ffffff` | `#18233c` | barra, rail e card — o único branco |
+
+- ⚠️ **O piso de ~6% de distância entre moldura e cromo é funcional, não estético.** A aba ativa é pintada com a cor da moldura; com os dois a 3% de distância (foi o caso com `#f5f6f9`) a aba simplesmente não aparece e o header inteiro perde o sentido. Conferir por amostragem de pixel, não no olho.
+- No escuro a ordem se inverte — a moldura é a mais escura e o cromo sobe. Os valores do escuro são escolhidos, **não são o claro invertido**: inverter dá cinza sujo.
+- **Raios: a escala canônica do DS basta.** moldura `2xl` 40 · seção `xl` 28 · card `lg` 20 · tile `md` 14 · pílula e circular `full`. O mockup nasceu com 34/30/26/24/18; encaixar na escala não mudou nada visualmente, e é o que permite o layout virar token em vez de número solto.
+
+**A navegação voltou para o lado, e a reversão tem motivo medido.** O CLAUDE.md dizia "navegação no topo, a sidebar foi removida — não reintroduzir". O que estava errado era a *sidebar*, não o *lado*: ela era ícone **+ rótulo**, e a barra horizontal que a substituiu somava 1.189px de rótulo em dez módulos, só cabendo a partir de `xl`. O rail de agora é **só ícone, 68px**, então não disputa largura com os gráficos — e as abas do módulo saíram da página para dentro da barra, que é o que devolve a banda vertical que a sidebar antiga custava. Não reintroduzir **sidebar com rótulo**; o rail de ícone é a decisão vigente.
+
+- `AppRail` *(a construir)* — rail vertical branco, só ícone, agrupado por `GRUPOS_DE_NAV`, ferramentas no rodapé. **O tooltip É o rótulo** — sem ele o rail vira adivinhação, então sem delay.
+- `AppBarra` *(a construir)* — uma barra branca só: marca · aba ativa · abas inativas · busca · frescor · tema · conta. Substitui `app-header.tsx` (navy) e absorve `modulo-tabs.tsx`.
+- `AppMoldura` *(a construir)* — o quadro cinza que contém barra e conteúdo.
+
+#### `AbaCanal` — a aba ativa (a construir)
+
+A peça que define o layout inteiro. É um **canal da cor da moldura que atravessa a barra branca de cima a baixo e continua na tela**. Não é uma língua pendurada para fora da barra: a barra termina reta, e o que dá a sensação de "descer e virar tela" é a continuidade da cor mais o alargamento em S das laterais.
+
+| medida | valor | de onde veio |
+| --- | --- | --- |
+| altura da barra | 78px | referência, y 54→132 |
+| topo da aba | 7px abaixo do topo da barra | a faixa branca que a mantém *dentro* da barra |
+| alargamento por lado | 80px | referência, 180px no topo → 340px na base |
+| projeção abaixo da barra | **0** | a barra termina reta |
+| tangente nas duas pontas | horizontal | é o que faz a curva entrar sem quina |
+
+- **Três peças — ombro · miolo · ombro** — para a aba acompanhar qualquer rótulo. O miolo é retângulo (entre os ombros a largura é constante); os ombros são **SVG**, porque a forma é uma cúbica de verdade. `radial-gradient` só faz quarto de círculo e me traiu duas vezes seguidas nesta peça.
+- **O alargamento ocupa largura de verdade**, sem margem negativa. Tentei abrir a aba por cima da vizinhança e o ombro comeu o "BI" da marca e a borda da pílula seguinte. Na referência a folga é real: ~85px de cada lado. É o preço da curva e entra no orçamento de largura do header.
+- Funciona nos dois temas por construção, sem regra nova: a aba usa a cor da moldura, então no escuro ela é a mais escura e a barra é que sobe.
+
+#### O corpo da tela
+
+**título → controles → KPIs → seções.**
+
+- **Os controles ficam no PÉ do bloco de título** (`margin-top:auto`), alinhados com o rodapé do painel da direita. Encostados no subtítulo deixam um buraco embaixo — foi defeito real da primeira versão desta tela.
+- `ControleSegmentado` *(a construir)* — período (7/30/90) e recortes curtos. **Um trilho só**, com o escolhido em branco sólido: o contorno é do trilho, não de cada opção, senão viram três botões concorrendo. Radix `ToggleGroup`.
+- `FrescorDoDado` *(a construir)* — "sincronizado há X". Não é enfeite: sem ele o leitor não sabe se "últimos 30 dias" terminam hoje ou no dia em que o pipeline parou. É a mesma pergunta que `marts.data_referencia()` responde no banco.
+- `SecaoDeAnalise` *(a construir)* — **contêiner cinza que agrupa cards que respondem à mesma pergunta**, com cabeçalho próprio (título + controle da seção + ações). É a peça que faltava: sem ela a página é uma pilha de cards sem hierarquia, e é ela que o catálogo de análises vai preencher.
+- **Mosaico dentro da seção**: o `BentoGrid` de 12 colunas com **um único gap** continua valendo, agora aninhado na seção em vez de solto na página. `BentoItem` aceita `span` e `rows`; card preenche a altura via `[&>*]:h-full` na primitiva — não repetir nas páginas.
+- **Nunca pendurar `flex-wrap` direto no `BentoItem`**: todo filho direto herda o `h-full` do mosaico e, quando o flex quebra linha (mobile), o filho inflado estoura por cima do bloco de baixo. Foi defeito real medido em 7 telas (128–148px de sobreposição em 375px).
+
+#### Bibliotecas: nenhuma nova é necessária
+
+Levantado contra o mockup inteiro, peça por peça:
+
+- **Gráficos — Recharts cobre tudo, e o que ele faz mal já é SVG/CSS na mão.** Heatmap é grid CSS (Recharts não tem célula de calendário decente) e o arco de diferença do painel é ~40 linhas de SVG com ticks — `RadialBarChart` desenha arco liso, e forçar tick vira gambiarra. Manter na mão é o certo: fica orientado a token e passa pelo validador da skill `dataviz`. **Não adicionar lib de gauge, nem de heatmap, nem trocar Recharts.**
+- **Controles — `radix-ui` 1.6.7 (já instalado) traz o que falta**: `ToggleGroup` (segmentado), `Popover`, `ScrollArea`, `Progress`, `Slider`, `Collapsible`. Zero dependência nova.
+- **Forma da aba, moldura, seções, rail** — SVG inline e CSS. Nada disso pede biblioteca.
+- **Animação** — `motion` já está, e `ChartReveal` já é a porta de entrada.
+- ⚠️ **Uma pendência de produto, não técnica: a busca global do header.** Se for paleta de comando de verdade (Cmd+K, atravessa cliente/formação/solução), o caminho é `cmdk` (+~14kB, padrão do shadcn). Se for filtro da tela atual, não precisa de nada. **Decisão do Mateus** — não adicionar `cmdk` antes dela.
+
+#### O que sai
+
+`app-header.tsx` (barra navy) e `modulo-tabs.tsx` — as abas passam a viver na barra. `BentoCabecalho` é substituído pelo bloco de título + controles.
+
+### Regras de módulo que atravessam o layout
+
+- **Abas por contexto**: `analise` sempre primeira, e as seguintes fatiadas por pergunta quando a tela responde 3+ (`retencao`, `risco`, `funciona`). Tela de pergunta única fica com `analise` | `graficos` — Visão Geral e Organizações são assim, porque fatiar um panorama por tema deixa de ser panorama. A aba vive na URL (`?aba=`) e é declarada uma vez em `nav-items.ts`; **a barra do topo consome a mesma lista**.
   - **O `valor` da aba é o mesmo texto que a regra grava em `ancora_aba`.** Renomear a aba sem renomear no catálogo quebra o link "Ver o gráfico que sustenta" em silêncio: ele troca de aba e não rola para nada.
-  - Fora das abas: cabeçalho, filtro de período, KPIs **e avisos de limitação do dado**.
+  - Fora das abas: título, controles, KPIs **e avisos de limitação do dado**.
 - **Lista usa `TabelaLonga`** (busca + paginação, 12 por página). Vale para toda tabela cuja quantidade de linhas vem do dado — nomes, módulos, etapas, safras, destinos. Se a RPC corta em N linhas, a tela **declara o corte**.
   - Fica em `<Table>` cru o que é **bloco, não lista**: funil de etapas fixas, comparação de 2–3 grupos nomeados, baldes de status. O leitor lê o conjunto inteiro; busca e paginação ali só atrapalhariam (e nem apareceriam — a `TabelaLonga` esconde os controles abaixo de uma página).
   - **Matriz não pagina**: a grade de cohort corta nas 12 safras mais recentes e diz quantas ficaram de fora. Paginar cortaria a leitura diagonal no meio.
