@@ -39,31 +39,37 @@
   --via-gray-900: #101828;
 
   /* ---------------------------------------------------------------
-     SUPERFÍCIES DO PRODUTO — quatro degraus, do fundo para o cromo:
-     página → moldura → seção → card.
+     SUPERFÍCIES DO PRODUTO — três degraus, do fundo para o cromo:
+     página → seção → card.
 
-     Não é decoração. A aba ativa da barra é pintada com a cor da MOLDURA e
-     atravessa o cromo branco até se fundir com a tela; se moldura e cromo
+     Não é decoração. A aba ativa da barra é pintada com a cor da PÁGINA e
+     atravessa o cromo branco até se fundir com a tela; se página e cromo
      ficarem perto demais, a aba desaparece e o header inteiro perde o sentido.
      Aconteceu: com #f5f6f9 (3% do branco) a aba sumiu.
+
+     ⚠️ Houve um quarto degrau — a moldura, o retângulo cinza que envolvia barra
+     e conteúdo. Saiu em 13/ago: o Mateus queria a tela mais aberta, e a moldura
+     cobrava dois paddings e um raio grande só para desenhar uma borda que não
+     separava nada. O papel dela (dar cinza contínuo para a aba se fundir) passou
+     para a própria página, que agora assume o valor claro que era da moldura —
+     o degrau escuro anterior só existia como margem em volta do quadro.
 
      O piso é funcional e tem CRITÉRIO DIFERENTE POR TEMA — no claro o olho lê
      diferença absoluta, no escuro lê razão:
 
-       claro   ≥ 6% de luminância absoluta entre moldura e cromo   (aqui: 6,7%)
+       claro   ≥ 6% de luminância absoluta entre página e cromo    (aqui: 6,7%)
        escuro  ≥ 1,5× de razão de luminância                       (aqui: 1,66×)
 
      Aplicar a régua do claro no escuro reprovaria um par que funciona (4,3%
      absolutos), e aplicar a do escuro no claro aprovaria um par invisível
-     (1,07× é o branco contra a moldura). Conferir por medição, não no olho.
-     Luminâncias no claro (0–255): 221 · 230 · 238 · 255.
+     (1,07× é o branco contra a página). Conferir por medição, não no olho.
+     Luminâncias no claro (0–255): 238 · 230 · 255.
 
      Neutros de propósito. A escala de cinzas do DS é fria por construção (no
      gray-300 o azul fica 13 pontos acima do vermelho) e, no tamanho de uma
      página inteira, isso lê como lavanda. O mockup de referência nasceu com
      spread de canal 12; aqui cada degrau fica em 4. */
-  --via-superficie-pagina: #dcdde0;
-  --via-superficie-moldura: #edeef1;
+  --via-superficie-pagina: #edeef1;
   --via-superficie-secao: #e5e6e9;
   /* Preenchimento de controle recessivo DENTRO do cromo branco — pílula de aba
      inativa, trilho do segmentado, campo de busca. Precisa de degrau próprio:
@@ -94,7 +100,7 @@
 }
 
 .dark {
-  /* No escuro a ordem se inverte: a moldura é o degrau mais ESCURO e o cromo
+  /* No escuro a ordem se inverte: a página é o degrau mais ESCURO e o cromo
      sobe. Os valores são escolhidos, não são o claro invertido — inverter uma
      escala fria dá cinza sujo.
 
@@ -102,8 +108,7 @@
      rampa de dataviz do tema escuro foi validada pelo script da skill contra
      essa superfície exata. Mexer nela invalidaria a validação de contraste e
      visão de cor sem ninguém perceber. */
-  --via-superficie-pagina: #060a13;
-  --via-superficie-moldura: #0a1120;
+  --via-superficie-pagina: #0a1120;
   --via-superficie-secao: #0f1728;
   --via-superficie-controle: #1a2440;
 
@@ -130,11 +135,10 @@
   --aba-abertura: 80px;
   --aba-recuo: 7px;
 
-  /* `--background` é a PÁGINA — o degrau que aparece só como margem em volta da
-     moldura. O card continua branco, e agora a separação vem da rampa inteira,
-     não só da borda. Ver as superfícies na camada 1. */
+  /* `--background` é a PÁGINA — a superfície em que barra, rail e cards pousam,
+     e a cor com que a aba ativa é pintada. O card continua branco, e a
+     separação vem da rampa, não só da borda. Ver as superfícies na camada 1. */
   --background: var(--via-superficie-pagina);
-  --moldura: var(--via-superficie-moldura);
   --secao: var(--via-superficie-secao);
   --controle: var(--via-superficie-controle);
   --foreground: var(--via-navy);
@@ -163,7 +167,7 @@
      aqui e em nenhum outro lugar.
 
      ⚠️ Era navy nos dois temas até 13/ago. Deixou de ser quando a aba ativa
-     virou um canal da cor da moldura atravessando o cromo: com a barra navy o
+     virou um canal da cor da página atravessando o cromo: com a barra navy o
      canal precisaria ser navy também, e aí ele não se funde com a tela clara.
      Barra branca é a regra zero light-first levada até o fim — o navy recua
      para tinta, disco da marca e `.brand-card`. */
@@ -210,7 +214,6 @@
 
 .dark {
   --background: var(--via-superficie-pagina);
-  --moldura: var(--via-superficie-moldura);
   --secao: var(--via-superficie-secao);
   --controle: var(--via-superficie-controle);
   --foreground: #f4f6fa;
@@ -234,7 +237,7 @@
   --input: rgba(255, 255, 255, 0.18);
   --ring: rgba(255, 255, 255, 0.45);
 
-  /* No escuro o cromo é o mesmo degrau do card — a moldura é que desce. */
+  /* No escuro o cromo é o mesmo degrau do card — a página é que desce. */
   --nav-surface: var(--card);
   --nav-foreground: #f4f6fa;
 
@@ -288,7 +291,6 @@
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-moldura: var(--moldura);
   --color-secao: var(--secao);
   --color-controle: var(--controle);
   --color-card: var(--card);
@@ -411,7 +413,7 @@
     background: linear-gradient(
       to bottom,
       transparent var(--aba-recuo),
-      var(--color-moldura) var(--aba-recuo)
+      var(--color-background) var(--aba-recuo)
     );
   }
 

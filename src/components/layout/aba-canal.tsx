@@ -28,7 +28,7 @@ function Ombro({ d }: { d: string }) {
       aria-hidden
       viewBox={`0 0 80 ${ALTURA}`}
       preserveAspectRatio="none"
-      className="fill-moldura block h-full w-[var(--aba-abertura)] shrink-0"
+      className="fill-background block h-full w-[var(--aba-abertura)] shrink-0"
     >
       <path d={d} />
     </svg>
@@ -38,7 +38,7 @@ function Ombro({ d }: { d: string }) {
 /**
  * A aba ativa da barra do módulo.
  *
- * É um **canal da cor da moldura que atravessa a barra branca de cima a baixo e
+ * É um **canal da cor da página que atravessa a barra branca de cima a baixo e
  * continua na tela**. O que ela comunica não é destaque, é CONTINUIDADE: aquela
  * é a superfície em que você está, e por isso não tem borda inferior nenhuma.
  *
@@ -57,7 +57,7 @@ function Ombro({ d }: { d: string }) {
  * pílula seguinte. Na referência a folga é real, ~85px de cada lado; é o preço
  * da curva e entra no orçamento de largura da barra.
  *
- * Funciona nos dois temas sem regra própria: a aba usa a cor da moldura, então
+ * Funciona nos dois temas sem regra própria: a aba usa a cor da página, então
  * no escuro ela é o degrau mais escuro e o cromo é que sobe.
  */
 export function AbaCanal({ children, className }: { children: ReactNode; className?: string }) {

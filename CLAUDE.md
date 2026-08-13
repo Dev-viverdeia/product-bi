@@ -21,7 +21,7 @@ Regras inegociáveis herdadas do DS:
 
 - **LIGHT-FIRST (regra zero)**: a marca é clara. Dark mode existe e é completo, mas é escolha do usuário (toggle no header) — `defaultTheme="light"`.
   - **Canvas é cinza quase branco, card é branco**: `--via-canvas: #f4f5f7` + `--via-card-borda`. Enquanto os dois eram `#ffffff`, o card só existia por uma borda de 5% e a tela lia como uma folha só. A separação vem de **borda fina e sombra**, não de contraste de fundo. O cinza é neutro de propósito — a escala do DS é fria por construção e, numa página inteira, lê como lavanda.
-    - ⚠️ **O shell novo troca estas duas superfícies por quatro** (página · moldura · seção · card) e o contraste passa a ser estrutural, não só de borda — a aba ativa depende dele para existir. Ver "Layout do produto". Enquanto a migração não roda, `--via-canvas` continua valendo; quando rodar, a rampa de quatro degraus entra em `src/index.css` **como token**, não como cor solta no componente.
+    - ⚠️ **O shell novo substituiu estas duas superfícies por três** (página · seção · card, em `--via-superficie-*`) e o contraste passou a ser estrutural, não só de borda — a aba ativa da barra depende dele para existir. `--via-canvas` saiu junto. Ver "Layout do produto".
   - **Navy é componente, nunca fundo de página**: vale para o canvas. O `.brand-card` é navy por ser componente. ⚠️ A barra `--nav-surface` deixa de ser navy no shell novo — barra e rail passam a ser **brancos** e o navy recua para tinta, disco da marca e bloco de destaque. É a regra zero levada até o fim, não uma exceção a ela.
 - **Paleta restrita**: branco · off-white · cinzas · azul-escuro `#1E3A5F` · navy · preto. Coral `#B85C5C`/danger só destrutivo real; verde `#1F8A5B` só status. **BANIDO**: gold/amarelo/roxo/cyan/magenta/neon, gradientes quentes.
 - **Fonte: Outfit** (decisão do Mateus, no lugar da Geist do DS) + **JetBrains Mono** para números/código/tabelas (fallback oficial do DS). Self-hosted via `@fontsource-variable/*`. Pesos: body 400–500, headings 500–600 — nunca bold massivo. Tracking negativo leve já aplicado no base.
@@ -150,7 +150,7 @@ src/
   app/          providers + router
   components/
     charts/     kit de gráficos
-    layout/     shell: app-layout (moldura), app-barra + aba-canal, app-rail,
+    layout/     shell: app-layout, app-barra + aba-canal, app-rail,
                 cabecalho-de-modulo, secao-de-analise, bento, nav-items
     filters/    período e segmento — controles de recorte da tela
     tabela/     tabela-longa (lista paginada) e lista-de-acao (quem contatar)
@@ -171,36 +171,37 @@ Refeito a partir de um mockup de referência que o Mateus trouxe, com **fidelida
 
 > **Estado: a fundação está construída e validada; as PÁGINAS ainda não foram migradas.** O shell, a rampa de superfícies e as peças novas estão em `src/` e vivem no showcase `/design`. As dez telas ainda desenham o próprio cabeçalho e ainda não usam `CabecalhoDeModulo` nem `SecaoDeAnalise` — é a fase seguinte, e ela depende do catálogo de análises.
 
-**Quatro superfícies, nesta ordem: página → moldura → seção → card.**
+**Três superfícies, nesta ordem: página → seção → card.**
 
-Tokens em `src/index.css`, camada 1 (`--via-superficie-*`) → camada 2 (`--moldura`, `--secao`, `--controle`, `--background`) → `@theme inline` (`bg-moldura`, `bg-secao`, `bg-controle`).
+Tokens em `src/index.css`, camada 1 (`--via-superficie-*`) → camada 2 (`--background`, `--secao`, `--controle`) → `@theme inline` (`bg-secao`, `bg-controle`).
 
 | camada | claro | escuro | quem usa |
 | --- | --- | --- | --- |
-| página | `#dcdde0` | `#060a13` | `--background`; só aparece como margem em volta da moldura |
+| página | `#edeef1` | `#0a1120` | o fundo em que barra, rail e cards pousam — **e a cor da aba ativa** |
 | seção | `#e5e6e9` | `#0f1728` | contêiner que agrupa cards da mesma pergunta |
-| moldura | `#edeef1` | `#0a1120` | interior do quadro **e a cor da aba ativa** |
 | controle | `#e9eaee` | `#1a2440` | pílula de aba inativa, trilho do segmentado, tile de ícone |
 | card / cromo | `#ffffff` | `#131c30` | barra, rail e card — o único branco |
 
-- ⚠️ **O piso entre moldura e cromo é funcional, não estético, e tem critério DIFERENTE por tema.** A aba ativa é pintada com a cor da moldura; com os dois a 3% de distância (foi o caso com `#f5f6f9`) a aba simplesmente não aparece e o header inteiro perde o sentido.
+⚠️ **Houve uma MOLDURA — um retângulo cinza arredondado envolvendo barra e conteúdo — e ela saiu em 13/ago.** Estava no mockup de referência e foi construída; o Mateus a recusou na tela real por deixar tudo fechado. Ela cobrava dois paddings e um raio grande para desenhar uma borda que não separava nada. O papel dela era dar superfície contínua para a aba se fundir, e esse papel passou para a própria página — que assumiu o valor claro que era da moldura, porque o degrau escuro anterior só existia como margem em volta do quadro. **Não reintroduzir**: se um bloco precisar de fundo próprio, o lugar é a `SecaoDeAnalise`.
+
+- ⚠️ **O piso entre página e cromo é funcional, não estético, e tem critério DIFERENTE por tema.** A aba ativa é pintada com a cor da página; com os dois a 3% de distância (foi o caso com `#f5f6f9`) a aba simplesmente não aparece e o header inteiro perde o sentido.
   - claro: **≥ 6% de luminância absoluta** — hoje 6,7%.
   - escuro: **≥ 1,5× de razão de luminância** — hoje 1,66×.
-  - Aplicar a régua do claro no escuro reprovaria um par que funciona (4,3% absolutos); aplicar a do escuro no claro aprovaria um par invisível (branco contra moldura é 1,07×). Em nível baixo o olho lê razão; em nível alto lê diferença. Conferir por medição, não no olho.
+  - Aplicar a régua do claro no escuro reprovaria um par que funciona (4,3% absolutos); aplicar a do escuro no claro aprovaria um par invisível (branco contra página é 1,07×). Em nível baixo o olho lê razão; em nível alto lê diferença. Conferir por medição, não no olho.
 - **As cores do mockup NÃO entraram cruas.** Elas tinham spread de canal 12 (a diferença entre o maior e o menor canal RGB), e o DS exige neutro — a escala de cinzas dele é fria por construção e, no tamanho de uma página, isso lê como lavanda. Os valores acima mantêm as mesmas luminâncias com spread 4.
-- ⚠️ **O `--card` do escuro (`#131c30`) não pode mudar.** A rampa de dataviz do tema escuro foi validada pelo script da skill contra essa superfície exata. Foi por isso que a moldura do escuro desceu em vez de o cromo subir: mexer no card invalidaria a validação de contraste e visão de cor sem ninguém perceber.
-- No escuro a ordem se inverte — a moldura é a mais escura e o cromo sobe. Os valores do escuro são escolhidos, **não são o claro invertido**: inverter dá cinza sujo.
-- **Raios: a escala canônica do DS basta.** moldura `2xl` 40 · seção `xl` 28 · card `lg` 20 · tile `md` 14 · pílula e circular `full`. O mockup nasceu com 34/30/26/24/18; encaixar na escala não mudou nada visualmente, e é o que permite o layout virar token em vez de número solto.
+- ⚠️ **O `--card` do escuro (`#131c30`) não pode mudar.** A rampa de dataviz do tema escuro foi validada pelo script da skill contra essa superfície exata. Foi por isso que a página do escuro desceu em vez de o cromo subir: mexer no card invalidaria a validação de contraste e visão de cor sem ninguém perceber.
+- No escuro a ordem se inverte — a página é a mais escura e o cromo sobe. Os valores do escuro são escolhidos, **não são o claro invertido**: inverter dá cinza sujo.
+- **Raios: a escala canônica do DS basta.** barra e rail `2xl` 40 · seção `xl` 28 · card `lg` 20 · tile `md` 14 · pílula e circular `full`. O mockup nasceu com 34/30/26/24/18; encaixar na escala não mudou nada visualmente, e é o que permite o layout virar token em vez de número solto.
 
 **A navegação voltou para o lado, e a reversão tem motivo medido.** O CLAUDE.md dizia "navegação no topo, a sidebar foi removida — não reintroduzir". O que estava errado era a *sidebar*, não o *lado*: ela era ícone **+ rótulo**, e a barra horizontal que a substituiu somava 1.189px de rótulo em dez módulos, só cabendo a partir de `xl`. O rail de agora é **só ícone, 68px**, então não disputa largura com os gráficos — e as abas do módulo saíram da página para dentro da barra, que é o que devolve a banda vertical que a sidebar antiga custava. Não reintroduzir **sidebar com rótulo**; o rail de ícone é a decisão vigente.
 
 - `AppRail` (`app-rail.tsx`) — rail vertical branco, só ícone, agrupado por `GRUPOS_DE_NAV`, ferramentas no rodapé. **O tooltip É o rótulo** — sem ele o rail vira adivinhação, então sem delay.
 - `AppBarra` (`app-barra.tsx`) — uma barra branca só: marca · aba ativa · abas inativas · busca · frescor · tema · conta. Substitui `app-header.tsx` (navy) e absorve `modulo-tabs.tsx`.
-- A moldura vive no `AppLayout` — o quadro cinza que contém barra e conteúdo.
+- `AppLayout` — calha lateral, largura máxima e nada mais entre o conteúdo e a borda da tela. Sem moldura.
 
 #### `AbaCanal` — a aba ativa (`aba-canal.tsx`)
 
-A peça que define o layout inteiro. É um **canal da cor da moldura que atravessa a barra branca de cima a baixo e continua na tela**. Não é uma língua pendurada para fora da barra: a barra termina reta, e o que dá a sensação de "descer e virar tela" é a continuidade da cor mais o alargamento em S das laterais.
+A peça que define o layout inteiro. É um **canal da cor da página que atravessa a barra branca de cima a baixo e continua na tela**. Não é uma língua pendurada para fora da barra: a barra termina reta, e o que dá a sensação de "descer e virar tela" é a continuidade da cor mais o alargamento em S das laterais.
 
 | medida | valor | de onde veio |
 | --- | --- | --- |
@@ -212,7 +213,7 @@ A peça que define o layout inteiro. É um **canal da cor da moldura que atraves
 
 - **Três peças — ombro · miolo · ombro** — para a aba acompanhar qualquer rótulo. O miolo é retângulo (entre os ombros a largura é constante); os ombros são **SVG**, porque a forma é uma cúbica de verdade. `radial-gradient` só faz quarto de círculo e me traiu duas vezes seguidas nesta peça.
 - **O alargamento ocupa largura de verdade**, sem margem negativa. Tentei abrir a aba por cima da vizinhança e o ombro comeu o "BI" da marca e a borda da pílula seguinte. Na referência a folga é real: ~85px de cada lado. É o preço da curva e entra no orçamento de largura do header.
-- Funciona nos dois temas por construção, sem regra nova: a aba usa a cor da moldura, então no escuro ela é a mais escura e a barra é que sobe.
+- Funciona nos dois temas por construção, sem regra nova: a aba usa a cor da página, então no escuro ela é a mais escura e a barra é que sobe.
 
 #### O corpo da tela
 
@@ -232,7 +233,7 @@ Levantado contra o mockup inteiro, peça por peça:
 - **Gráficos — Recharts cobre tudo, e o que ele faz mal já é SVG/CSS na mão.** Heatmap é grid CSS, porque Recharts não tem célula de calendário decente. Manter na mão é o certo: fica orientado a token e passa pelo validador da skill `dataviz`. **Não adicionar lib de gauge, nem de heatmap, nem trocar Recharts.**
   - ⚠️ **O arco do mockup não foi construído, de propósito.** Ele mostrava "19,5 pp de diferença na retenção" — e um arco é um medidor, que só é forma correta para **razão contra um limite**. Diferença em pontos percentuais não tem máximo, então o arco teria que inventar um, e a proporção desenhada seria decoração fingindo de escala. A forma certa para esse número é figura de destaque (`headline` do `CardCabecalho`), que já existe. Se um dia aparecer razão com denominador de verdade (`31,8% usam 2+ módulos`), aí um medidor de trilho monocromático é legítimo — e o tipo dele tem que exigir o total, para não voltar a aceitar quantidade sem limite.
 - **Controles — `radix-ui` 1.6.7 (já instalado) traz o que falta**: `ToggleGroup` (segmentado), `Popover`, `ScrollArea`, `Progress`, `Slider`, `Collapsible`. Zero dependência nova.
-- **Forma da aba, moldura, seções, rail** — SVG inline e CSS. Nada disso pede biblioteca.
+- **Forma da aba, seções, rail** — SVG inline e CSS. Nada disso pede biblioteca.
 - **Animação** — `motion` já está, e `ChartReveal` já é a porta de entrada.
 - ⚠️ **Uma pendência de produto, não técnica: a busca global do header.** Se for paleta de comando de verdade (Cmd+K, atravessa cliente/formação/solução), o caminho é `cmdk` (+~14kB, padrão do shadcn). Se for filtro da tela atual, não precisa de nada. **Decisão do Mateus** — não adicionar `cmdk` antes dela.
 

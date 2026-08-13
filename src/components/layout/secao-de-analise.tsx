@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
  * seção diz "estes três respondem a mesma coisa" antes de qualquer título ser
  * lido.
  *
- * A superfície é `--secao`, um degrau ABAIXO da moldura. É contra-intuitivo —
+ * A superfície é `--secao`, um degrau ABAIXO da página. É contra-intuitivo —
  * o instinto é elevar o que agrupa — mas elevar a seção a colocaria no mesmo
  * plano dos cards brancos que ela contém, e aí ela deixaria de ser fundo e
  * viraria mais um objeto. Recuando, ela vira o chão em que os cards pousam.

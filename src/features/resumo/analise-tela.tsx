@@ -171,7 +171,7 @@ export function AnaliseDaTela({
       SEM card. A leitura escrita é o DOCUMENTO da tela, não um bloco dentro
       dela — envolvê-la numa moldura branca a rebaixa ao mesmo nível de um
       gráfico e ainda cobra dois paddings (o do card e o do conteúdo) de uma
-      coluna que só precisa de texto. Aqui ela pousa direto na moldura e usa a
+      coluna que só precisa de texto. Aqui ela pousa direto na página e usa a
       largura inteira.
 
       Duas colunas a partir de lg: os achados à esquerda, numa medida de leitura

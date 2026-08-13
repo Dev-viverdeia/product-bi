@@ -58,13 +58,12 @@ const RECORTES_DEMO = [
 
 /*
   Os quatro degraus, na ordem em que aparecem na tela. Referenciam a UTILITY
-  (`bg-moldura`) e não o valor: o showcase existe para exercitar o token, então
+  (`bg-secao`) e não o valor: o showcase existe para exercitar o token, então
   se um degrau sumir do tema o quadrado fica transparente e o defeito aparece
   aqui antes de aparecer em produto.
 */
 const SUPERFICIES = [
-  { nome: 'página', classe: 'bg-background', papel: 'margem em volta da moldura' },
-  { nome: 'moldura', classe: 'bg-moldura', papel: 'o quadro — e a cor da aba ativa' },
+  { nome: 'página', classe: 'bg-background', papel: 'o fundo — e a cor da aba ativa' },
   { nome: 'seção', classe: 'bg-secao', papel: 'agrupa cards da mesma pergunta' },
   { nome: 'cromo · card', classe: 'bg-card', papel: 'barra, rail e card — o único branco' },
 ] as const
@@ -191,7 +190,7 @@ export function DesignPage() {
       </KpiGrid>
 
       {/* A seção é o degrau de hierarquia entre a tela e o card. Aqui ela é
-          também a prova da rampa: o cinza dela precisa se distinguir da moldura
+          também a prova da rampa: o cinza dela precisa se distinguir da página
           atrás e dos cards brancos dentro, nos dois temas. */}
       <SecaoDeAnalise
         titulo="Fundação do layout"
@@ -227,9 +226,9 @@ export function DesignPage() {
           <TabelaCard
             icon={LayersIcon}
             title="Rampa de superfícies"
-            headline="4"
+            headline="3"
             headlineLabel="degraus, do fundo ao cromo"
-            description="A aba ativa da barra é pintada com a cor da moldura. Se moldura e cromo chegarem perto demais, ela desaparece — por isso o piso é medido, não escolhido no olho."
+            description="A aba ativa da barra é pintada com a cor da página. Se página e cromo chegarem perto demais, ela desaparece — por isso o piso é medido, não escolhido no olho."
           >
             <ul className="space-y-2">
               {SUPERFICIES.map((superficie) => (

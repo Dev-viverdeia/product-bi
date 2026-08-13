@@ -45,7 +45,7 @@ function ItemDoRail({ item }: { item: NavItem }) {
 }
 
 /**
- * Rail de navegação: só ícone, altura inteira, dentro da moldura.
+ * Rail de navegação: só ícone, coluna à esquerda do conteúdo.
  *
  * A navegação voltou para o lado, revertendo a decisão de 06/ago — e o que
  * estava errado ali era a *sidebar*, não o *lado*. Aquela era ícone **mais

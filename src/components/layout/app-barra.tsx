@@ -225,7 +225,7 @@ export function AbasCompactas({ className }: { className?: string }) {
  *
  * Branca nos dois temas (no escuro, o degrau do card). Era navy até 13/ago e
  * deixou de ser por uma razão estrutural, não estética: a aba ativa virou um
- * canal da cor da moldura atravessando o cromo, e com a barra navy o canal
+ * canal da cor da página atravessando o cromo, e com a barra navy o canal
  * precisaria ser navy também — aí ele não se funde com a tela clara abaixo.
  *
  * Carrega marca, abas do módulo e as ações do app. **A busca global ainda não
