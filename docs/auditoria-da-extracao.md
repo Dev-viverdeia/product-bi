@@ -18,6 +18,7 @@ Método: contar os dois lados na mesma consulta. O FDW expõe `plataforma.*` e
 | Watermark / frescor | ✅ rodando, última carga há minutos |
 | Arquivo de navegação | ✅ funcionando por desenho |
 | **Propagação de exclusão nos fatos da plataforma** | ❌ quebrada → ✅ **CORRIGIDA em 13/08** |
+| **Fidelidade de VALOR coluna a coluna** | ❌ 34 linhas erradas → ✅ **CORRIGIDA em 13/08** |
 
 ---
 
@@ -136,15 +137,58 @@ join com a dim, contra 148.744 × 148.115 antes.
 2. `marts.contar_linhas_de_apagados()` — deve devolver zero. Qualquer valor acima
    é o passo falhando em silêncio, que é exatamente como o problema nasceu.
 
-## 5. O que ainda não foi auditado
+## 5. Fidelidade de valor — auditada, com defeito achado
+
+Juntando por `id` e comparando **coluna a coluna**, não só a contagem:
+
+| espelho | linhas comparadas | divergentes |
+| --- | ---: | ---: |
+| `fact_progresso_aula` | 148.115 | 0 |
+| `fact_certificado` | 10.422 | 0 |
+| `fact_nps_aula` | 17.763 | 0 |
+| `fact_evento` | 340.503 | 0 |
+| `fact_pageview` | 363.728 | 0 |
+| `fact_progresso_solucao` | 56.896 | **31** |
+| `fact_convite` | 32.510 | **3** |
+
+### O watermark não via toda mudança
+
+As 34 divergências **não eram defasagem**. Todas as 31 de solução tinham
+`completed_at` POSTERIOR a `last_activity`, e todas com `last_activity` atrás do
+watermark — ou seja, mudaram antes do último sync e mesmo assim não vieram.
+
+A causa: **a plataforma grava `is_completed`/`completed_at` sem tocar em
+`last_activity`, e grava `used_at` sem tocar em `updated_at`.** O sync lê
+incremental por essas colunas, então a mudança fica invisível para sempre: o
+watermark já passou daquele ponto e nunca volta.
+
+É a mesma família do defeito de exclusão — **o incremental só enxerga o que a
+origem se lembra de carimbar**. Eram 31 conclusões de solução reais, todas entre
+07 e 13/08/2026, faltando numa métrica central do produto.
+
+### A correção (migration `20260813210000`)
+
+Duas frentes, de propósito:
+
+1. **Fechar a chave incremental** com `greatest(...)` sobre todas as colunas que
+   mudam — resolve o que foi descoberto, em 30 min em vez de um dia.
+2. **`etl.reconciliar_valores()`**, no pg_cron diário às 04:20 BRT — pega o que
+   não foi descoberto e o que a plataforma inventar depois. Não apaga nada, só
+   atualiza linha existente nos dois lados, então origem vazia produz zero
+   atualizações em vez de estrago. É por isso que este passo não precisa da guarda
+   de sanidade que `propagar_exclusoes` exige.
+
+**Resultado:** 35 linhas corrigidas. Re-auditoria depois: **237.605 linhas
+comparadas, zero divergência.**
+
+## 6. O que ainda não foi auditado
 
 Registrado para não passar por verificado:
 
-- **Fidelidade de VALOR**, não só de contagem. Confirmei que o número de linhas
-  bate; não confirmei coluna a coluna que o conteúdo bate. O risco real aqui é
-  transformação silenciosa no sync (um `coalesce`, um cast, um filtro).
 - **`fact_navegacao`**, que é derivada (sessão, ordem na sessão, próxima tela) e
-  não tem contrapartida direta na origem para reconciliar por contagem.
+  não tem contrapartida direta na origem para reconciliar.
 - **A régua `e_cliente`** aplicada por RPC. Sei que a dim carrega o campo; não
   auditei se todas as RPCs o usam.
+- **As colunas fora do núcleo** de cada fato — comparei as que sustentam métrica
+  (chave, data, flag, valor), não toda coluna espelhada.
 - **`analytics`** — por decisão do Mateus, fica com ele na plataforma.
