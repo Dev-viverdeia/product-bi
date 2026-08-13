@@ -4,7 +4,6 @@ import { AlertCircleIcon, ArrowRightIcon } from 'lucide-react'
 
 import { PARAM_ABA } from '@/components/layout/aba-do-modulo'
 import { StatusPill, type TomDeStatus } from '@/components/ui-marca/status-pill'
-import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Periodo } from '@/lib/periodo'
 import { formatDateShort, formatInt } from '@/lib/format'
@@ -168,109 +167,112 @@ export function AnaliseDaTela({
   const apuracao = !achados.isLoading && !achados.isError
 
   return (
-    <Card className="glass-card">
-      {/*
-        Duas colunas a partir de lg: os achados à esquerda, numa medida de
-        leitura fixa, e o aparato à direita — o que não dá para afirmar e como
-        se apurou. A separação não é só de espaço: um é o conteúdo, o outro é a
-        prestação de contas, e misturá-los na mesma coluna faz o leitor
-        atravessar régua para chegar ao próximo achado. Abaixo de lg empilha, e
-        o aparato vai para o fim, que é onde ele pertence quando não cabe ao
-        lado.
-      */}
-      <CardContent className="grid gap-10 py-2 lg:grid-cols-[minmax(0,68ch)_minmax(0,1fr)] lg:gap-14">
-        <div className="space-y-8">
-          <header className="space-y-1">
-            <h2 className="text-xl font-medium tracking-tight">O que os dados dizem</h2>
-            <p className="text-muted-foreground text-sm">{escopo}</p>
-          </header>
+    /*
+      SEM card. A leitura escrita é o DOCUMENTO da tela, não um bloco dentro
+      dela — envolvê-la numa moldura branca a rebaixa ao mesmo nível de um
+      gráfico e ainda cobra dois paddings (o do card e o do conteúdo) de uma
+      coluna que só precisa de texto. Aqui ela pousa direto na moldura e usa a
+      largura inteira.
 
-          {achados.isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-5 w-72 rounded-md" />
-            <Skeleton className="h-4 w-full rounded-md" />
-            <Skeleton className="h-4 w-5/6 rounded-md" />
-            <Skeleton className="h-16 w-full rounded-md" />
-          </div>
-        ) : achados.isError ? (
-          <p className="text-muted-foreground flex items-center gap-2 text-[15px]">
-            <AlertCircleIcon className="size-4 shrink-0" aria-hidden />
-            Não foi possível avaliar as regras desta tela.
-          </p>
-        ) : visiveis.length === 0 ? (
-          <div className="space-y-3">
-            <p className="text-[15px] leading-relaxed font-medium">
-              Nada fora do padrão neste recorte.
-            </p>
-            <p className="text-muted-foreground text-[15px] leading-relaxed">
-              {avaliadas === 1
-                ? 'A regra desta tela foi avaliada'
-                : `As ${formatInt(avaliadas)} regras desta tela foram avaliadas`}{' '}
-              e nenhuma cruzou o limiar. Isto não é um atestado de que está tudo bem: a
-              leitura cobre as perguntas que alguém previu, e só essas. Elas estão
-              listadas em{' '}
-              <Link to="/regras" className="underline underline-offset-4">
-                regras do resumo
-              </Link>
-              .
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {visiveis.map((achado, i) => (
-              <Achado key={achado.regra} achado={achado} ordem={i + 1} />
-            ))}
-          </div>
-        )}
+      Duas colunas a partir de lg: os achados à esquerda, numa medida de leitura
+      fixa, e o aparato à direita — o que não dá para afirmar e como se apurou.
+      A separação não é só de espaço: um é o conteúdo, o outro é a prestação de
+      contas, e misturá-los na mesma coluna faz o leitor atravessar régua para
+      chegar ao próximo achado. Abaixo de lg empilha, e o aparato vai para o
+      fim, que é onde ele pertence quando não cabe ao lado.
+    */
+    <div className="grid gap-10 lg:grid-cols-[minmax(0,68ch)_minmax(0,1fr)] lg:gap-16">
+      <div className="space-y-8">
+        <header className="space-y-1">
+          <h2 className="text-xl font-medium tracking-tight">O que os dados dizem</h2>
+          <p className="text-muted-foreground text-sm">{escopo}</p>
+        </header>
+
+        {achados.isLoading ? (
+        <div className="space-y-4">
+          <Skeleton className="h-5 w-72 rounded-md" />
+          <Skeleton className="h-4 w-full rounded-md" />
+          <Skeleton className="h-4 w-5/6 rounded-md" />
+          <Skeleton className="h-16 w-full rounded-md" />
         </div>
+      ) : achados.isError ? (
+        <p className="text-muted-foreground flex items-center gap-2 text-[15px]">
+          <AlertCircleIcon className="size-4 shrink-0" aria-hidden />
+          Não foi possível avaliar as regras desta tela.
+        </p>
+      ) : visiveis.length === 0 ? (
+        <div className="space-y-3">
+          <p className="text-[15px] leading-relaxed font-medium">
+            Nada fora do padrão neste recorte.
+          </p>
+          <p className="text-muted-foreground text-[15px] leading-relaxed">
+            {avaliadas === 1
+              ? 'A regra desta tela foi avaliada'
+              : `As ${formatInt(avaliadas)} regras desta tela foram avaliadas`}{' '}
+            e nenhuma cruzou o limiar. Isto não é um atestado de que está tudo bem: a
+            leitura cobre as perguntas que alguém previu, e só essas. Elas estão
+            listadas em{' '}
+            <Link to="/regras" className="underline underline-offset-4">
+              regras do resumo
+            </Link>
+            .
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {visiveis.map((achado, i) => (
+            <Achado key={achado.regra} achado={achado} ordem={i + 1} />
+          ))}
+        </div>
+      )}
+      </div>
 
-        <aside className="space-y-8 lg:pt-14">
-        {suprimidos.length > 0 && apuracao ? (
-          <section className="space-y-2">
-            <h3 className="text-base font-medium tracking-tight">O que não dá para afirmar</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              {suprimidos.length === 1
-                ? 'Uma pergunta foi avaliada e não produziu resposta sustentada.'
-                : `${formatInt(suprimidos.length)} perguntas foram avaliadas e não produziram resposta sustentada.`}{' '}
-              Ficam aqui em vez de sumir: onde o dado não sustenta, a tela declara.
-            </p>
-            <ul className="mt-3 space-y-2">
-              {suprimidos.map((s) => (
-                <li key={s.regra} className="text-sm leading-relaxed">
-                  <span className="font-medium">{s.titulo}</span>
-                  <span className="text-muted-foreground"> — {s.motivo}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
+      <aside className="space-y-8 lg:pt-14">
+      {suprimidos.length > 0 && apuracao ? (
+        <section className="space-y-2">
+          <h3 className="text-base font-medium tracking-tight">O que não dá para afirmar</h3>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            {suprimidos.length === 1
+              ? 'Uma pergunta foi avaliada e não produziu resposta sustentada.'
+              : `${formatInt(suprimidos.length)} perguntas foram avaliadas e não produziram resposta sustentada.`}{' '}
+            Ficam aqui em vez de sumir: onde o dado não sustenta, a tela declara.
+          </p>
+          <ul className="mt-3 space-y-2">
+            {suprimidos.map((s) => (
+              <li key={s.regra} className="text-sm leading-relaxed">
+                <span className="font-medium">{s.titulo}</span>
+                <span className="text-muted-foreground"> — {s.motivo}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
-        {apuracao ? (
-          <section className="space-y-2">
-            <h3 className="text-base font-medium tracking-tight">Como isto foi apurado</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Nenhuma frase acima foi escrita na hora. Cada uma vem de um gabarito
-              versionado no banco, preenchido com os mesmos números que os gráficos da aba
-              ao lado desenham — não há uma segunda conta em lugar nenhum. Percentual só
-              aparece com pelo menos {formatInt(AMOSTRA_MINIMA)} clientes no denominador, e
-              diferença entre dois grupos só vira achado quando passa de dois erros padrão
-              da própria estimativa.
-            </p>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Nesta carga, {formatInt(avaliadas)}{' '}
-              {avaliadas === 1 ? 'regra foi avaliada' : 'regras foram avaliadas'}:{' '}
-              {formatInt(visiveis.length)} em tela, {formatInt(suprimidos.length)} sem
-              lastro
-              {abaixoDoCorte > 0 ? `, ${formatInt(abaixoDoCorte)} abaixo do corte` : ''}.{' '}
-              <Link to="/regras" className="underline underline-offset-4">
-                Ver o catálogo completo
-              </Link>
-              .
-            </p>
-          </section>
-        ) : null}
-        </aside>
-      </CardContent>
-    </Card>
+      {apuracao ? (
+        <section className="space-y-2">
+          <h3 className="text-base font-medium tracking-tight">Como isto foi apurado</h3>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Nenhuma frase acima foi escrita na hora. Cada uma vem de um gabarito
+            versionado no banco, preenchido com os mesmos números que os gráficos da aba
+            ao lado desenham — não há uma segunda conta em lugar nenhum. Percentual só
+            aparece com pelo menos {formatInt(AMOSTRA_MINIMA)} clientes no denominador, e
+            diferença entre dois grupos só vira achado quando passa de dois erros padrão
+            da própria estimativa.
+          </p>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Nesta carga, {formatInt(avaliadas)}{' '}
+            {avaliadas === 1 ? 'regra foi avaliada' : 'regras foram avaliadas'}:{' '}
+            {formatInt(visiveis.length)} em tela, {formatInt(suprimidos.length)} sem
+            lastro
+            {abaixoDoCorte > 0 ? `, ${formatInt(abaixoDoCorte)} abaixo do corte` : ''}.{' '}
+            <Link to="/regras" className="underline underline-offset-4">
+              Ver o catálogo completo
+            </Link>
+            .
+          </p>
+        </section>
+      ) : null}
+      </aside>
+    </div>
   )
 }
