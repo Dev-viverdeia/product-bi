@@ -181,14 +181,43 @@ Duas frentes, de propósito:
 **Resultado:** 35 linhas corrigidas. Re-auditoria depois: **237.605 linhas
 comparadas, zero divergência.**
 
-## 6. O que ainda não foi auditado
+## 6. A régua `e_cliente` na camada de leitura — defeito quantificado
+
+Auditado em 13/08 e **este é de outra camada**: o dado bruto está certo, quem não
+está é a RPC que o lê.
+
+Das 108 funções `bi_*`, 59 tocam fato de grão-cliente e **14 não mencionam
+`e_cliente`**. Investigando o que cada uma lê:
+
+- **8 são falso positivo** — leem `marts.fact_navegacao`, que **já nasce
+  filtrada** (377.541 linhas brutas = 377.541 com a régua, 100%). O filtro está
+  embutido na construção do fato.
+- **Zero leem `fact_pageview` cru**, que seria o pior caso (13,7% de não-cliente).
+- **6 leem outros fatos sem a régua**, e aí o desvio é real:
+
+| fato | inflado por não-cliente |
+| --- | ---: |
+| `fact_progresso_aula` | 2,3% |
+| `fact_progresso_solucao` | 8,6% |
+| `fact_evento` | 11,4% |
+| `fact_consultor_thread` | **30,8%** |
+
+⚠️ **Quase um terço do uso do Consultor é admin/interno/teste** — o time testa a
+própria ferramenta de IA. `bi_ia_modo_de_entrada` e `bi_ia_profundidade_conversa`
+leem esses fatos sem a régua, então os números da tela de IA estão inflados nessa
+ordem de grandeza.
+
+`bi_saude_rastreio` está na lista e **é exceção legítima**: ela mede saúde de
+instrumentação, e filtrar por cliente esconderia justamente o rastreio quebrado
+que só aparece no uso interno.
+
+## 7. O que ainda não foi auditado
 
 Registrado para não passar por verificado:
 
-- **`fact_navegacao`**, que é derivada (sessão, ordem na sessão, próxima tela) e
-  não tem contrapartida direta na origem para reconciliar.
-- **A régua `e_cliente`** aplicada por RPC. Sei que a dim carrega o campo; não
-  auditei se todas as RPCs o usam.
+- **`fact_navegacao`** não tem contrapartida direta na origem para reconciliar
+  linha a linha (é derivada: sessão, ordem na sessão, próxima tela). O que foi
+  verificado é que a régua está embutida nela.
 - **As colunas fora do núcleo** de cada fato — comparei as que sustentam métrica
   (chave, data, flag, valor), não toda coluna espelhada.
 - **`analytics`** — por decisão do Mateus, fica com ele na plataforma.
