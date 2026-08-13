@@ -181,10 +181,10 @@ Duas frentes, de propósito:
 **Resultado:** 35 linhas corrigidas. Re-auditoria depois: **237.605 linhas
 comparadas, zero divergência.**
 
-## 6. A régua `e_cliente` na camada de leitura — defeito quantificado
+## 6. A régua `e_cliente` na camada de leitura — corrigido em 13/08
 
 Auditado em 13/08 e **este é de outra camada**: o dado bruto está certo, quem não
-está é a RPC que o lê.
+estava é a RPC que o lê. As cinco foram corrigidas (migration `20260813213000`).
 
 Das 108 funções `bi_*`, 59 tocam fato de grão-cliente e **14 não mencionam
 `e_cliente`**. Investigando o que cada uma lê:
@@ -209,7 +209,34 @@ ordem de grandeza.
 
 `bi_saude_rastreio` está na lista e **é exceção legítima**: ela mede saúde de
 instrumentação, e filtrar por cliente esconderia justamente o rastreio quebrado
-que só aparece no uso interno.
+que só aparece no uso interno. Ficou declarada em `comment on function`.
+
+### O efeito não foi cosmético
+
+Em `bi_ia_profundidade_conversa` o total caiu de **9.507 para 6.580** conversas —
+e a **ordem das faixas mudou**:
+
+| faixa | antes | depois |
+| --- | ---: | ---: |
+| Cinco a dez | 29,5% (1º) | 29,2% (1º) |
+| Três a quatro | 27,7% (2º) | 24,7% (2º) |
+| **Parou na 1ª mensagem** | **15,6% (3º)** | **13,4% (5º)** |
+| **Duas mensagens** | **14,4% (4º)** | **17,5% (3º)** |
+| Mais de dez | 11,0% (5º) | 13,5% (4º) |
+
+A tela contava o teste do time como comportamento de cliente, e isso **invertia a
+leitura de onde a conversa morre**: "parou na primeira mensagem" parecia o
+terceiro maior problema e é o quinto.
+
+Em `bi_ia_modo_de_entrada` o efeito foi menor e não mudou a direção: chat caiu de
+47,7% para 46,1% de volta, planejamento de 37,8% para 36,5% — a vantagem do chat
+segue, com quase a mesma distância.
+
+⚠️ A migration termina purgando `insights.achado_cache` das quatro telas
+afetadas. O conjunto de regras não entra na chave do cache, então sem a purga a
+tela serviria o texto antigo sem erro nenhum, citando um número que o card ao
+lado não mostra mais. Verificado depois: o motor recalcula as quatro sem erro,
+15 achados, nenhum suprimido.
 
 ## 7. O que ainda não foi auditado
 
