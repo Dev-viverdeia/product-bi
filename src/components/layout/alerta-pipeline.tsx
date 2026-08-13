@@ -62,7 +62,9 @@ export function AlertaPipelineView({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="text-nav-foreground focus-visible:ring-nav-foreground/60 flex h-9 items-center gap-1.5 rounded-full bg-white/10 px-3 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/16 focus-visible:ring-2 focus-visible:outline-none"
+        /* Preenchimento em token e não em `bg-white/10`: aquele alfa existia
+           para funcionar sobre a barra navy e é invisível sobre cromo branco. */
+        className="bg-controle text-foreground focus-visible:ring-ring hover:bg-secondary flex h-11 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:outline-none"
         aria-label={
           emFalha
             ? 'Não foi possível verificar se os dados estão atualizados'

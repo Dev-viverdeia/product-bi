@@ -150,12 +150,12 @@ src/
   app/          providers + router
   components/
     charts/     kit de gráficos
-    layout/     shell autenticado: app-layout, bento.tsx, nav-items.ts,
-                alerta-pipeline. Em migração para o shell novo (rail + barra
-                com aba-canal) — ver "Layout do produto"
-    filters/    período, segmento e os hooks de URL que os guardam
-    tabela/     tabela-longa.tsx (lista nominal com busca e paginação)
-    ui-marca/   peças da marca fora do shadcn (status-pill)
+    layout/     shell: app-layout (moldura), app-barra + aba-canal, app-rail,
+                cabecalho-de-modulo, secao-de-analise, bento, nav-items
+    filters/    período e segmento — controles de recorte da tela
+    tabela/     tabela-longa (lista paginada) e lista-de-acao (quem contatar)
+    ui-marca/   peças da marca fora do shadcn: card-cabecalho, status-pill,
+                controle-segmentado, frescor-do-dado
     ui/         shadcn — gerado por CLI, fora do lint, não editar à mão
   features/<x>/ módulos com estado/lógica própria
   lib/          env.ts (validado com Zod), supabase.ts, utils.ts
@@ -169,28 +169,36 @@ Módulo novo: página em `pages/` ou `features/` → rota em `src/app/router.tsx
 
 Refeito a partir de um mockup de referência que o Mateus trouxe, com **fidelidade como requisito declarado**. Os números abaixo saíram de medição de pixel na imagem, não de estimativa: cinco tentativas foram recusadas por eu estar interpretando a referência em vez de medi-la. Mockup navegável e aprovado: **`docs/mockup-layout.html`**.
 
-> **Estado: o mockup está aprovado, a migração para React não começou.** As peças marcadas *(a construir)* ainda não existem em `src/`. Enquanto não existirem, a fonte da verdade da forma é o mockup.
+> **Estado: a fundação está construída e validada; as PÁGINAS ainda não foram migradas.** O shell, a rampa de superfícies e as peças novas estão em `src/` e vivem no showcase `/design`. As dez telas ainda desenham o próprio cabeçalho e ainda não usam `CabecalhoDeModulo` nem `SecaoDeAnalise` — é a fase seguinte, e ela depende do catálogo de análises.
 
 **Quatro superfícies, nesta ordem: página → moldura → seção → card.**
 
+Tokens em `src/index.css`, camada 1 (`--via-superficie-*`) → camada 2 (`--moldura`, `--secao`, `--controle`, `--background`) → `@theme inline` (`bg-moldura`, `bg-secao`, `bg-controle`).
+
 | camada | claro | escuro | quem usa |
 | --- | --- | --- | --- |
-| página | `#dde1e9` | `#05090f` | fundo do documento, fora da moldura |
-| moldura | `#edf0f5` | `#0a1120` | interior do quadro **e a cor da aba ativa** |
-| seção | `#e4e8ef` | `#0f1828` | contêiner que agrupa cards |
-| card / cromo | `#ffffff` | `#18233c` | barra, rail e card — o único branco |
+| página | `#dcdde0` | `#060a13` | `--background`; só aparece como margem em volta da moldura |
+| seção | `#e5e6e9` | `#0f1728` | contêiner que agrupa cards da mesma pergunta |
+| moldura | `#edeef1` | `#0a1120` | interior do quadro **e a cor da aba ativa** |
+| controle | `#e9eaee` | `#1a2440` | pílula de aba inativa, trilho do segmentado, tile de ícone |
+| card / cromo | `#ffffff` | `#131c30` | barra, rail e card — o único branco |
 
-- ⚠️ **O piso de ~6% de distância entre moldura e cromo é funcional, não estético.** A aba ativa é pintada com a cor da moldura; com os dois a 3% de distância (foi o caso com `#f5f6f9`) a aba simplesmente não aparece e o header inteiro perde o sentido. Conferir por amostragem de pixel, não no olho.
+- ⚠️ **O piso entre moldura e cromo é funcional, não estético, e tem critério DIFERENTE por tema.** A aba ativa é pintada com a cor da moldura; com os dois a 3% de distância (foi o caso com `#f5f6f9`) a aba simplesmente não aparece e o header inteiro perde o sentido.
+  - claro: **≥ 6% de luminância absoluta** — hoje 6,7%.
+  - escuro: **≥ 1,5× de razão de luminância** — hoje 1,66×.
+  - Aplicar a régua do claro no escuro reprovaria um par que funciona (4,3% absolutos); aplicar a do escuro no claro aprovaria um par invisível (branco contra moldura é 1,07×). Em nível baixo o olho lê razão; em nível alto lê diferença. Conferir por medição, não no olho.
+- **As cores do mockup NÃO entraram cruas.** Elas tinham spread de canal 12 (a diferença entre o maior e o menor canal RGB), e o DS exige neutro — a escala de cinzas dele é fria por construção e, no tamanho de uma página, isso lê como lavanda. Os valores acima mantêm as mesmas luminâncias com spread 4.
+- ⚠️ **O `--card` do escuro (`#131c30`) não pode mudar.** A rampa de dataviz do tema escuro foi validada pelo script da skill contra essa superfície exata. Foi por isso que a moldura do escuro desceu em vez de o cromo subir: mexer no card invalidaria a validação de contraste e visão de cor sem ninguém perceber.
 - No escuro a ordem se inverte — a moldura é a mais escura e o cromo sobe. Os valores do escuro são escolhidos, **não são o claro invertido**: inverter dá cinza sujo.
 - **Raios: a escala canônica do DS basta.** moldura `2xl` 40 · seção `xl` 28 · card `lg` 20 · tile `md` 14 · pílula e circular `full`. O mockup nasceu com 34/30/26/24/18; encaixar na escala não mudou nada visualmente, e é o que permite o layout virar token em vez de número solto.
 
 **A navegação voltou para o lado, e a reversão tem motivo medido.** O CLAUDE.md dizia "navegação no topo, a sidebar foi removida — não reintroduzir". O que estava errado era a *sidebar*, não o *lado*: ela era ícone **+ rótulo**, e a barra horizontal que a substituiu somava 1.189px de rótulo em dez módulos, só cabendo a partir de `xl`. O rail de agora é **só ícone, 68px**, então não disputa largura com os gráficos — e as abas do módulo saíram da página para dentro da barra, que é o que devolve a banda vertical que a sidebar antiga custava. Não reintroduzir **sidebar com rótulo**; o rail de ícone é a decisão vigente.
 
-- `AppRail` *(a construir)* — rail vertical branco, só ícone, agrupado por `GRUPOS_DE_NAV`, ferramentas no rodapé. **O tooltip É o rótulo** — sem ele o rail vira adivinhação, então sem delay.
-- `AppBarra` *(a construir)* — uma barra branca só: marca · aba ativa · abas inativas · busca · frescor · tema · conta. Substitui `app-header.tsx` (navy) e absorve `modulo-tabs.tsx`.
-- `AppMoldura` *(a construir)* — o quadro cinza que contém barra e conteúdo.
+- `AppRail` (`app-rail.tsx`) — rail vertical branco, só ícone, agrupado por `GRUPOS_DE_NAV`, ferramentas no rodapé. **O tooltip É o rótulo** — sem ele o rail vira adivinhação, então sem delay.
+- `AppBarra` (`app-barra.tsx`) — uma barra branca só: marca · aba ativa · abas inativas · busca · frescor · tema · conta. Substitui `app-header.tsx` (navy) e absorve `modulo-tabs.tsx`.
+- A moldura vive no `AppLayout` — o quadro cinza que contém barra e conteúdo.
 
-#### `AbaCanal` — a aba ativa (a construir)
+#### `AbaCanal` — a aba ativa (`aba-canal.tsx`)
 
 A peça que define o layout inteiro. É um **canal da cor da moldura que atravessa a barra branca de cima a baixo e continua na tela**. Não é uma língua pendurada para fora da barra: a barra termina reta, e o que dá a sensação de "descer e virar tela" é a continuidade da cor mais o alargamento em S das laterais.
 
@@ -210,10 +218,10 @@ A peça que define o layout inteiro. É um **canal da cor da moldura que atraves
 
 **título → controles → KPIs → seções.**
 
-- **Os controles ficam no PÉ do bloco de título** (`margin-top:auto`), alinhados com o rodapé do painel da direita. Encostados no subtítulo deixam um buraco embaixo — foi defeito real da primeira versão desta tela.
-- `ControleSegmentado` *(a construir)* — período (7/30/90) e recortes curtos. **Um trilho só**, com o escolhido em branco sólido: o contorno é do trilho, não de cada opção, senão viram três botões concorrendo. Radix `ToggleGroup`.
-- `FrescorDoDado` *(a construir)* — "sincronizado há X". Não é enfeite: sem ele o leitor não sabe se "últimos 30 dias" terminam hoje ou no dia em que o pipeline parou. É a mesma pergunta que `marts.data_referencia()` responde no banco.
-- `SecaoDeAnalise` *(a construir)* — **contêiner cinza que agrupa cards que respondem à mesma pergunta**, com cabeçalho próprio (título + controle da seção + ações). É a peça que faltava: sem ela a página é uma pilha de cards sem hierarquia, e é ela que o catálogo de análises vai preencher.
+- **Os controles ficam no PÉ do bloco de título** (`CabecalhoDeModulo`, `mt-auto`), alinhados com o rodapé do painel da direita. Encostados no subtítulo deixam um buraco embaixo — foi defeito real da primeira versão desta tela.
+- `ControleSegmentado` (`ui-marca/`) — período (7/30/90) e recortes curtos. **Um trilho só**, com o escolhido em branco sólido: o contorno é do trilho, não de cada opção, senão viram três botões concorrendo. Radix `ToggleGroup`.
+- `FrescorDoDado` (`ui-marca/`) — "sincronizado há X". Não é enfeite: sem ele o leitor não sabe se "últimos 30 dias" terminam hoje ou no dia em que o pipeline parou. É a mesma pergunta que `marts.data_referencia()` responde no banco.
+- `SecaoDeAnalise` (`layout/`) — **contêiner cinza que agrupa cards que respondem à mesma pergunta**, com cabeçalho próprio (título + controle da seção + ações). É a peça que faltava: sem ela a página é uma pilha de cards sem hierarquia, e é ela que o catálogo de análises vai preencher.
 - **Mosaico dentro da seção**: o `BentoGrid` de 12 colunas com **um único gap** continua valendo, agora aninhado na seção em vez de solto na página. `BentoItem` aceita `span` e `rows`; card preenche a altura via `[&>*]:h-full` na primitiva — não repetir nas páginas.
 - **Nunca pendurar `flex-wrap` direto no `BentoItem`**: todo filho direto herda o `h-full` do mosaico e, quando o flex quebra linha (mobile), o filho inflado estoura por cima do bloco de baixo. Foi defeito real medido em 7 telas (128–148px de sobreposição em 375px).
 
@@ -221,15 +229,25 @@ A peça que define o layout inteiro. É um **canal da cor da moldura que atraves
 
 Levantado contra o mockup inteiro, peça por peça:
 
-- **Gráficos — Recharts cobre tudo, e o que ele faz mal já é SVG/CSS na mão.** Heatmap é grid CSS (Recharts não tem célula de calendário decente) e o arco de diferença do painel é ~40 linhas de SVG com ticks — `RadialBarChart` desenha arco liso, e forçar tick vira gambiarra. Manter na mão é o certo: fica orientado a token e passa pelo validador da skill `dataviz`. **Não adicionar lib de gauge, nem de heatmap, nem trocar Recharts.**
+- **Gráficos — Recharts cobre tudo, e o que ele faz mal já é SVG/CSS na mão.** Heatmap é grid CSS, porque Recharts não tem célula de calendário decente. Manter na mão é o certo: fica orientado a token e passa pelo validador da skill `dataviz`. **Não adicionar lib de gauge, nem de heatmap, nem trocar Recharts.**
+  - ⚠️ **O arco do mockup não foi construído, de propósito.** Ele mostrava "19,5 pp de diferença na retenção" — e um arco é um medidor, que só é forma correta para **razão contra um limite**. Diferença em pontos percentuais não tem máximo, então o arco teria que inventar um, e a proporção desenhada seria decoração fingindo de escala. A forma certa para esse número é figura de destaque (`headline` do `CardCabecalho`), que já existe. Se um dia aparecer razão com denominador de verdade (`31,8% usam 2+ módulos`), aí um medidor de trilho monocromático é legítimo — e o tipo dele tem que exigir o total, para não voltar a aceitar quantidade sem limite.
 - **Controles — `radix-ui` 1.6.7 (já instalado) traz o que falta**: `ToggleGroup` (segmentado), `Popover`, `ScrollArea`, `Progress`, `Slider`, `Collapsible`. Zero dependência nova.
 - **Forma da aba, moldura, seções, rail** — SVG inline e CSS. Nada disso pede biblioteca.
 - **Animação** — `motion` já está, e `ChartReveal` já é a porta de entrada.
 - ⚠️ **Uma pendência de produto, não técnica: a busca global do header.** Se for paleta de comando de verdade (Cmd+K, atravessa cliente/formação/solução), o caminho é `cmdk` (+~14kB, padrão do shadcn). Se for filtro da tela atual, não precisa de nada. **Decisão do Mateus** — não adicionar `cmdk` antes dela.
 
-#### O que sai
+#### Peças novas e o que saiu
 
-`app-header.tsx` (barra navy) e `modulo-tabs.tsx` — as abas passam a viver na barra. `BentoCabecalho` é substituído pelo bloco de título + controles.
+Novas: `aba-canal.tsx` · `app-barra.tsx` · `app-rail.tsx` · `aba-do-modulo.ts` (estado da aba, lido da URL) · `cabecalho-de-modulo.tsx` · `secao-de-analise.tsx` · `ui-marca/controle-segmentado.tsx` · `ui-marca/frescor-do-dado.tsx` · `tabela/lista-de-acao.tsx` · `lib/periodo.ts`.
+
+Reformadas: `KpiCard` ganhou tile de ícone e uma casca única para os quatro estados — antes o tile de erro montava a própria casca, encolhia, e a fileira de KPIs ficava desalinhada justamente na tela em que algo deu errado.
+
+Saiu: `app-header.tsx` (a barra navy). O `ModuloTabs` perdeu a `TabsList` e ficou só com o painel; `BentoCabecalho` sai quando as páginas migrarem para `CabecalhoDeModulo`.
+
+⚠️ **Duas armadilhas de composição travadas no CI** (`contrato-de-shell.test.ts`), as duas silenciosas:
+
+1. **`className` de função dentro de gatilho `asChild`.** O `Slot` do Radix concatena o className do gatilho com o do filho, e concatenar string com função escreve a FONTE da função no atributo `class`. O `NavLink` nunca chega a chamá-la: nenhum erro, nenhum aviso, e o item ativo fica idêntico aos outros. Nasceu assim no `AppRail` e só apareceu quando a cor de fundo foi medida no navegador — a olho, doze discos cinza parecem doze discos cinza. A saída é `useMatch` e `className` string.
+2. **`TabsList` de volta no `ModuloTabs`.** Daria duas fileiras de abas na tela, e como as duas leem o mesmo `?aba=` elas concordariam entre si — pareceria decisão de layout, não defeito.
 
 ### Regras de módulo que atravessam o layout
 

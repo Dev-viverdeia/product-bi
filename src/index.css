@@ -38,14 +38,37 @@
   --via-gray-800: #1d2939;
   --via-gray-900: #101828;
 
-  /* Canvas da aplicação — cinza quase branco.
-     Não é decoração: é o que faz o card branco existir como objeto elevado em
-     vez de se dissolver no fundo. O card se destaca por BORDA FINA E SOMBRA,
-     não por contraste de fundo — por isso o canvas é claro e não cinza médio.
-     Neutro de propósito: a escala de cinzas do DS é fria por construção (no
+  /* ---------------------------------------------------------------
+     SUPERFÍCIES DO PRODUTO — quatro degraus, do fundo para o cromo:
+     página → moldura → seção → card.
+
+     Não é decoração. A aba ativa da barra é pintada com a cor da MOLDURA e
+     atravessa o cromo branco até se fundir com a tela; se moldura e cromo
+     ficarem perto demais, a aba desaparece e o header inteiro perde o sentido.
+     Aconteceu: com #f5f6f9 (3% do branco) a aba sumiu.
+
+     O piso é funcional e tem CRITÉRIO DIFERENTE POR TEMA — no claro o olho lê
+     diferença absoluta, no escuro lê razão:
+
+       claro   ≥ 6% de luminância absoluta entre moldura e cromo   (aqui: 6,7%)
+       escuro  ≥ 1,5× de razão de luminância                       (aqui: 1,66×)
+
+     Aplicar a régua do claro no escuro reprovaria um par que funciona (4,3%
+     absolutos), e aplicar a do escuro no claro aprovaria um par invisível
+     (1,07× é o branco contra a moldura). Conferir por medição, não no olho.
+     Luminâncias no claro (0–255): 221 · 230 · 238 · 255.
+
+     Neutros de propósito. A escala de cinzas do DS é fria por construção (no
      gray-300 o azul fica 13 pontos acima do vermelho) e, no tamanho de uma
-     página inteira, isso lê como lavanda. Aqui os canais ficam a 3. */
-  --via-canvas: #f4f5f7;
+     página inteira, isso lê como lavanda. O mockup de referência nasceu com
+     spread de canal 12; aqui cada degrau fica em 4. */
+  --via-superficie-pagina: #dcdde0;
+  --via-superficie-moldura: #edeef1;
+  --via-superficie-secao: #e5e6e9;
+  /* Preenchimento de controle recessivo DENTRO do cromo branco — pílula de aba
+     inativa, trilho do segmentado, campo de busca. Precisa de degrau próprio:
+     --muted (#f0f2f5) fica a 5% do branco e a pílula quase não aparece. */
+  --via-superficie-controle: #e9eaee;
 
   /* Hairline do card sobre o canvas claro: com o fundo quase branco, é a borda
      que separa o card, não a diferença de luminância. */
@@ -71,6 +94,19 @@
 }
 
 .dark {
+  /* No escuro a ordem se inverte: a moldura é o degrau mais ESCURO e o cromo
+     sobe. Os valores são escolhidos, não são o claro invertido — inverter uma
+     escala fria dá cinza sujo.
+
+     O cromo do escuro é o mesmo `--card` (#131c30) de sempre, de propósito: a
+     rampa de dataviz do tema escuro foi validada pelo script da skill contra
+     essa superfície exata. Mexer nela invalidaria a validação de contraste e
+     visão de cor sem ninguém perceber. */
+  --via-superficie-pagina: #060a13;
+  --via-superficie-moldura: #0a1120;
+  --via-superficie-secao: #0f1728;
+  --via-superficie-controle: #1a2440;
+
   /* No escuro a sombra precisa ser preta e mais densa pra existir */
   --via-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
   --via-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.34), 0 1px 2px rgba(0, 0, 0, 0.24);
@@ -86,9 +122,21 @@
 :root {
   --radius: 14px; /* md do DS — botão, input, card pequeno */
 
-  /* Canvas quase branco, card branco: a separação vem da BORDA e da sombra.
-     Ver --via-canvas na camada 1. */
-  --background: var(--via-canvas);
+  /* Geometria da barra e da aba-canal — medida na referência, não estimada.
+     Os três valores são acoplados: o ombro é um SVG de viewBox 80×78 esticado
+     pela altura da barra, e o miolo posiciona o degrau em pixel. Mudar a altura
+     da barra sem mudar o recuo desalinha a emenda entre ombro e miolo. */
+  --barra-altura: 78px;
+  --aba-abertura: 80px;
+  --aba-recuo: 7px;
+
+  /* `--background` é a PÁGINA — o degrau que aparece só como margem em volta da
+     moldura. O card continua branco, e agora a separação vem da rampa inteira,
+     não só da borda. Ver as superfícies na camada 1. */
+  --background: var(--via-superficie-pagina);
+  --moldura: var(--via-superficie-moldura);
+  --secao: var(--via-superficie-secao);
+  --controle: var(--via-superficie-controle);
   --foreground: var(--via-navy);
   --card: #ffffff;
   --card-foreground: var(--via-navy);
@@ -110,13 +158,17 @@
   --input: rgba(10, 31, 59, 0.16); /* borda de controle, navy-tint */
   --ring: rgba(10, 31, 59, 0.35);
 
-  /* Barra de navegação — par próprio, não reaproveita --primary.
-     --primary inverte no dark (vira quase-branco), o que daria uma barra clara
-     justamente no tema escuro. A barra é escura nos DOIS temas: é a âncora de
-     marca no topo da página clara, e no escuro vira superfície elevada sobre o
-     canvas para não sumir. Navy aqui é componente, não fundo de página. */
-  --nav-surface: var(--via-navy);
-  --nav-foreground: #ffffff;
+  /* Cromo da navegação — barra e rail. Par próprio, não reaproveita --card,
+     porque nomeia um papel: se um dia a barra precisar divergir do card, muda
+     aqui e em nenhum outro lugar.
+
+     ⚠️ Era navy nos dois temas até 13/ago. Deixou de ser quando a aba ativa
+     virou um canal da cor da moldura atravessando o cromo: com a barra navy o
+     canal precisaria ser navy também, e aí ele não se funde com a tela clara.
+     Barra branca é a regra zero light-first levada até o fim — o navy recua
+     para tinta, disco da marca e `.brand-card`. */
+  --nav-surface: #ffffff;
+  --nav-foreground: var(--via-navy);
 
   /* Dataviz · rampa monocromática (5 passos com separação real de valor).
      Para segmentos/stacked/categorias dentro da família navy. */
@@ -157,7 +209,10 @@
 }
 
 .dark {
-  --background: #0b1220; /* canvas warm dark */
+  --background: var(--via-superficie-pagina);
+  --moldura: var(--via-superficie-moldura);
+  --secao: var(--via-superficie-secao);
+  --controle: var(--via-superficie-controle);
   --foreground: #f4f6fa;
   --card: #131c30;
   --card-foreground: #f4f6fa;
@@ -179,9 +234,8 @@
   --input: rgba(255, 255, 255, 0.18);
   --ring: rgba(255, 255, 255, 0.45);
 
-  /* No escuro a barra não pode ser navy: o canvas já é #0b1220 e ela sumiria.
-     Vira superfície elevada — mesmo degrau do popover. */
-  --nav-surface: #1b273f;
+  /* No escuro o cromo é o mesmo degrau do card — a moldura é que desce. */
+  --nav-surface: var(--card);
   --nav-foreground: #f4f6fa;
 
   /* Dataviz dark · rampa clara, visível sobre navy escuro */
@@ -234,6 +288,9 @@
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-moldura: var(--moldura);
+  --color-secao: var(--secao);
+  --color-controle: var(--controle);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -347,6 +404,17 @@
    Receitas canônicas do Viver de IA DS ("glass on light surfaces").
    ============================================================= */
 @layer components {
+  /* Miolo da aba-canal: cinza a partir do degrau, transparente acima dele.
+     Em CSS e não em style inline porque o degrau é o mesmo token que o ombro
+     SVG usa — se um dia mudar, muda num lugar só. */
+  .aba-canal-miolo {
+    background: linear-gradient(
+      to bottom,
+      transparent var(--aba-recuo),
+      var(--color-moldura) var(--aba-recuo)
+    );
+  }
+
   /* A página precisa de atmosfera — sem ela o vidro não tem o que refletir */
   .page-atmosphere {
     background:

@@ -15,7 +15,8 @@ import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/charts'
-import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
+import { PeriodoFiltro } from '@/components/filters/periodo-filtro'
+import type { Periodo } from '@/lib/periodo'
 import {
   Table,
   TableBody,

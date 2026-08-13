@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import type { Periodo } from '@/components/filters/periodo-filtro'
+import type { Periodo } from '@/lib/periodo'
 import { rpc } from '@/lib/rpc'
 import { supabase } from '@/lib/supabase'
 

@@ -1,34 +1,23 @@
-import { Button } from '@/components/ui/button'
+import { ControleSegmentado } from '@/components/ui-marca/controle-segmentado'
+import { PERIODOS, type Periodo } from '@/lib/periodo'
 
-export type Periodo = 7 | 30 | 90
-
-const OPCOES: { valor: Periodo; rotulo: string }[] = [
-  { valor: 7, rotulo: '7 dias' },
-  { valor: 30, rotulo: '30 dias' },
-  { valor: 90, rotulo: '90 dias' },
-]
-
-/** Filtro de período — uma linha, acima dos gráficos; escopa a página inteira. */
+/** Janela de análise da tela inteira. Segmentado: três opções cabem na tela. */
 export function PeriodoFiltro({
   valor,
   onChange,
+  className,
 }: {
   valor: Periodo
   onChange: (periodo: Periodo) => void
+  className?: string
 }) {
   return (
-    <div role="group" aria-label="Período de análise" className="flex gap-1">
-      {OPCOES.map((opcao) => (
-        <Button
-          key={opcao.valor}
-          size="sm"
-          variant={valor === opcao.valor ? 'secondary' : 'ghost'}
-          aria-pressed={valor === opcao.valor}
-          onClick={() => onChange(opcao.valor)}
-        >
-          {opcao.rotulo}
-        </Button>
-      ))}
-    </div>
+    <ControleSegmentado
+      rotulo="Período de análise"
+      valor={String(valor)}
+      opcoes={PERIODOS}
+      onChange={(proximo) => onChange(Number(proximo) as Periodo)}
+      className={className}
+    />
   )
 }

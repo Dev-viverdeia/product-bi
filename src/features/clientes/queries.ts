@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import type { Periodo } from '@/components/filters/periodo-filtro'
+import type { Periodo } from '@/lib/periodo'
 import { LIMITE_LISTA, rpc } from '@/lib/rpc'
 import { argsSegmento, type Plano, type Recorte } from '@/lib/segmento'
 import { supabase } from '@/lib/supabase'

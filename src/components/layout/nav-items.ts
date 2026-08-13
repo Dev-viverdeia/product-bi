@@ -275,3 +275,18 @@ export const navFerramentas: NavItem[] = [
 export function abasDaRota(rota: string): AbaDoModulo[] {
   return navItems.find((item) => item.to === rota)?.abas ?? []
 }
+
+/**
+ * Módulo da rota atual — quem a barra do topo está descrevendo.
+ *
+ * As ferramentas entram na busca porque também têm barra (com marca e ações),
+ * só não têm abas. Sem elas, `/design` e `/regras` apareceriam como se
+ * estivessem fora do app.
+ */
+export function moduloDaRota(pathname: string): NavItem | undefined {
+  return (
+    navItems.find((item) =>
+      item.matchPrefix ? pathname.startsWith(item.to) : pathname === item.to,
+    ) ?? navFerramentas.find((item) => pathname.startsWith(item.to))
+  )
+}

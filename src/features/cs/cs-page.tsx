@@ -13,7 +13,8 @@ import {
 } from 'lucide-react'
 
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid, TimeSeriesChart } from '@/components/charts'
-import { PeriodoFiltro, type Periodo } from '@/components/filters/periodo-filtro'
+import { PeriodoFiltro } from '@/components/filters/periodo-filtro'
+import type { Periodo } from '@/lib/periodo'
 import { BentoCabecalho, BentoGrid, BentoItem } from '@/components/layout/bento'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { TabelaCard } from '@/components/tabela/tabela-card'

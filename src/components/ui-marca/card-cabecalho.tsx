@@ -69,7 +69,12 @@ export function CardCabecalho({
         ) : null}
       </div>
 
-      <div className="shrink-0">
+      {/* `max-w-full` junto do `shrink-0`: sozinho, o shrink-0 proíbe encolher
+          MAS não impede exceder a linha, então uma action larga (grupo de
+          botões, seletor de tela) estourava a página no mobile mesmo com o
+          flex-wrap do pai — ele quebrava a linha e a linha nova continuava larga
+          demais. Medido em 375px: 397px de action dentro de 325px de card. */}
+      <div className="max-w-full shrink-0">
         {action ??
           (description ? (
             <Tooltip>
