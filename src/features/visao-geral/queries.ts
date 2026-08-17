@@ -93,12 +93,3 @@ export function useSaudeRastreio() {
     queryFn: async () => (await rpc(supabase.rpc('bi_saude_rastreio'))) ?? [],
   })
 }
-
-export function useUltimaSincronizacao() {
-  return useQuery({
-    queryKey: ['bi', 'ultima-sincronizacao'],
-    // o pipeline roda a cada 30 min — manter o carimbo fresco
-    refetchInterval: 5 * 60 * 1000,
-    queryFn: async () => await rpc(supabase.rpc('bi_ultima_sincronizacao')),
-  })
-}
