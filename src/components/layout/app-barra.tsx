@@ -52,7 +52,7 @@ function MenuUsuario() {
         className="focus-visible:ring-ring rounded-full focus-visible:ring-2 focus-visible:outline-none"
         aria-label="Abrir menu da conta"
       >
-        <Avatar className="size-11">
+        <Avatar className="size-10">
           <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
             {iniciais(nome)}
           </AvatarFallback>
@@ -163,7 +163,7 @@ function AbasNaBarra({ rota }: { rota: string }) {
             role="tab"
             aria-selected={false}
             onClick={() => trocar(aba.valor)}
-            className="bg-controle text-muted-foreground hover:text-foreground focus-visible:ring-ring my-auto ml-2.5 flex h-12 shrink-0 items-center gap-2.5 rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className="bg-controle text-muted-foreground hover:text-foreground focus-visible:ring-ring my-auto ml-2 flex h-10 shrink-0 items-center gap-2.5 rounded-full px-4 text-[15px] font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             {rotulo}
           </button>
@@ -239,24 +239,24 @@ export function AppBarra() {
   const modulo = moduloDaRota(pathname)
 
   return (
-    <header className="bg-nav-surface mb-5 flex h-[var(--barra-altura)] items-center gap-2 rounded-2xl pr-3.5 shadow-md">
+    <header className="bg-nav-surface mb-4 flex h-[var(--barra-altura)] items-center gap-2 rounded-2xl pr-3 shadow-md">
       <NavegacaoEmGaveta />
 
       <Link
         to={comSegmento('/', params)}
-        className="focus-visible:ring-ring flex shrink-0 items-center gap-3.5 rounded-full py-1 pr-4 pl-3.5 focus-visible:ring-2 focus-visible:outline-none"
+        className="focus-visible:ring-ring flex shrink-0 items-center gap-3 rounded-full py-1 pr-3.5 pl-3 focus-visible:ring-2 focus-visible:outline-none"
       >
-        <span className="bg-primary text-primary-foreground flex size-12 shrink-0 items-center justify-center rounded-full">
-          <BarChart3Icon className="size-5" strokeWidth={1.75} />
+        <span className="bg-primary text-primary-foreground flex size-10 shrink-0 items-center justify-center rounded-full">
+          <BarChart3Icon className="size-[18px]" strokeWidth={1.75} />
         </span>
-        <span className="hidden text-xl font-semibold tracking-tight sm:inline">Product BI</span>
+        <span className="hidden text-lg font-semibold tracking-tight sm:inline">Product BI</span>
       </Link>
 
       {modulo ? <AbasNaBarra rota={modulo.to} /> : null}
 
       <div className="ml-auto flex shrink-0 items-center gap-2">
         <AlertaPipeline />
-        <ThemeToggle className="border-border size-11 rounded-full border" />
+        <ThemeToggle className="border-border size-10 rounded-full border" />
         <MenuUsuario />
       </div>
     </header>

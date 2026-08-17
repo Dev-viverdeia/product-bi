@@ -6,11 +6,16 @@ import { cn } from '@/lib/utils'
   Coordenadas do ombro, no sistema do viewBox.
 
   A largura é reescalada pelo CSS (`w-[--aba-abertura]` + `preserveAspectRatio`
-  desligado), então estes números são proporção, não pixel. A altura 78 e o
+  desligado), então estes números são proporção, não pixel. A altura 64 e o
   recuo 7 espelham `--barra-altura` e `--aba-recuo`: é o acoplamento declarado
   no token, e por isso os três valores vivem juntos lá.
+
+  O que os prende é a RAZÃO: o ombro é esticado até a altura da barra, então o
+  degrau dele cai em `RECUO / ALTURA` da altura real. O miolo põe o degrau em
+  `--aba-recuo` pixels. Os dois só coincidem enquanto estes números forem os
+  mesmos dos tokens — mudar a barra e esquecer daqui abre a emenda.
 */
-const ALTURA = 78
+const ALTURA = 64
 const RECUO = 7
 const MEIO = 40 // controle da cúbica — metade da abertura, nos dois pontos
 

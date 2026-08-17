@@ -204,7 +204,7 @@ Tokens em `src/index.css`, camada 1 (`--via-superficie-*`) → camada 2 (`--back
 
 - `AppRail` (`app-rail.tsx`) — rail vertical branco, só ícone, agrupado por `GRUPOS_DE_NAV`, ferramentas no rodapé. **O tooltip É o rótulo** — sem ele o rail vira adivinhação, então sem delay.
 - `AppBarra` (`app-barra.tsx`) — uma barra branca só: marca · aba ativa · abas inativas · busca · frescor · tema · conta. Substitui `app-header.tsx` (navy) e absorve `modulo-tabs.tsx`.
-- `AppLayout` — calha lateral, largura máxima e nada mais entre o conteúdo e a borda da tela. Sem moldura.
+- `AppLayout` — calha lateral, largura máxima e nada mais entre o conteúdo e a borda da tela. Sem moldura. **A calha é estreita de propósito**: 12px a partir de `md` (era 20px) e 16px de folga entre rail e conteúdo (era 20px). Ela não separa nada — rail e cards já têm raio e sombra próprios — e cada pixel dela sai da largura que os gráficos disputam.
 
 #### `AbaCanal` — a aba ativa (`aba-canal.tsx`)
 
@@ -212,12 +212,13 @@ A peça que define o layout inteiro. É um **canal da cor da página que atraves
 
 | medida | valor | de onde veio |
 | --- | --- | --- |
-| altura da barra | 78px | referência, y 54→132 |
+| altura da barra | **64px** | a referência media 78px (y 54→132); baixou por decisão do Mateus em 17/ago, para devolver altura à tela |
 | topo da aba | 7px abaixo do topo da barra | a faixa branca que a mantém *dentro* da barra |
 | alargamento por lado | 80px | referência, 180px no topo → 340px na base |
 | projeção abaixo da barra | **0** | a barra termina reta |
 | tangente nas duas pontas | horizontal | é o que faz a curva entrar sem quina |
 
+- ⚠️ **Altura da barra e recuo da aba mudam SEMPRE juntos, em dois arquivos.** O ombro é um SVG de viewBox `80×ALTURA` esticado até a altura real da barra, então o degrau dele cai em `RECUO/ALTURA` da altura — enquanto o miolo põe o degrau em `--aba-recuo` **pixels**. Os dois só coincidem enquanto as constantes de `aba-canal.tsx` repetirem os tokens de `index.css`. Mudar `--barra-altura` e esquecer do viewBox abre a emenda entre ombro e miolo, e o defeito é sutil o bastante para passar batido.
 - **Três peças — ombro · miolo · ombro** — para a aba acompanhar qualquer rótulo. O miolo é retângulo (entre os ombros a largura é constante); os ombros são **SVG**, porque a forma é uma cúbica de verdade. `radial-gradient` só faz quarto de círculo e me traiu duas vezes seguidas nesta peça.
 - **O alargamento ocupa largura de verdade**, sem margem negativa. Tentei abrir a aba por cima da vizinhança e o ombro comeu o "BI" da marca e a borda da pílula seguinte. Na referência a folga é real: ~85px de cada lado. É o preço da curva e entra no orçamento de largura do header.
 - Funciona nos dois temas por construção, sem regra nova: a aba usa a cor da página, então no escuro ela é a mais escura e a barra é que sobe.

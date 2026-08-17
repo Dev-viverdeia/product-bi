@@ -127,11 +127,16 @@
 :root {
   --radius: 14px; /* md do DS — botão, input, card pequeno */
 
-  /* Geometria da barra e da aba-canal — medida na referência, não estimada.
-     Os três valores são acoplados: o ombro é um SVG de viewBox 80×78 esticado
-     pela altura da barra, e o miolo posiciona o degrau em pixel. Mudar a altura
-     da barra sem mudar o recuo desalinha a emenda entre ombro e miolo. */
-  --barra-altura: 78px;
+  /* Geometria da barra e da aba-canal.
+     Os três valores são acoplados: o ombro é um SVG de viewBox 80×64 esticado
+     pela altura da barra, e o miolo posiciona o degrau em PIXEL. O viewBox tem
+     de repetir estes dois números — se a altura mudar aqui e não lá, o degrau
+     proporcional do ombro deixa de cair nos mesmos 7px do miolo e a emenda
+     abre. Por isso os três vivem juntos.
+     A referência media 78px; 64px é decisão do Mateus (17/ago) para devolver
+     altura à tela. O recuo continua em 7px — é a faixa branca que mantém a aba
+     DENTRO da barra, e encolhê-la junto a faria sumir. */
+  --barra-altura: 64px;
   --aba-abertura: 80px;
   --aba-recuo: 7px;
 
