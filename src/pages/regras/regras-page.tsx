@@ -1,15 +1,28 @@
 import { useMemo } from 'react'
 import { ListChecksIcon } from 'lucide-react'
 
-import { BentoCabecalho, BentoGrid, BentoItem } from '@/components/layout/bento'
+import { navItems } from '@/components/layout/nav-items'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatInt } from '@/lib/format'
 import { useRegras } from '@/features/resumo/queries'
 
-const NOME_DA_TELA: Record<string, string> = {
-  'visao-geral': 'Visão geral',
-  clientes: 'Clientes & Retenção',
+/**
+ * O nome da tela sai de `nav-items.ts`, não de um mapa próprio.
+ *
+ * Havia aqui um objeto com duas entradas — `visao-geral` e `clientes` — de
+ * quando o motor cobria só as duas telas piloto. As sete que entraram depois
+ * apareciam com o slug cru no título do card ("formacoes", "ia", "jornada"),
+ * e ninguém notou porque a página não quebra: ela só fica feia e desalinhada
+ * do resto do app. Derivando da fonte única, tela nova aparece nomeada sem
+ * ninguém lembrar de voltar aqui.
+ *
+ * A única tradução que sobra é a da Visão geral, cuja rota é `/` e por isso
+ * não deriva do slug.
+ */
+function nomeDaTela(tela: string) {
+  const rota = tela === 'visao-geral' ? '/' : `/${tela}`
+  return navItems.find((item) => item.to === rota)?.title ?? tela
 }
 
 /**
@@ -34,22 +47,26 @@ export function RegrasPage() {
   }, [lista])
 
   return (
-    <BentoGrid>
-      <BentoCabecalho>
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Regras do resumo</h2>
-          <p className="text-muted-foreground text-sm">
-            O que o bloco de direcionamento sabe perguntar · quando ele fica em silêncio, é
-            porque nenhuma destas cruzou o limiar — não porque está tudo bem
-          </p>
-        </div>
-      </BentoCabecalho>
+    // Ferramenta interna, não módulo de produto: fica fora do `CabecalhoDeModulo`
+    // de propósito. Ele carrega o `FrescorDoDado`, e carimbar "dados até tal dia"
+    // num catálogo de perguntas diria que a régua é do dado quando ela é do
+    // limiar — que vive na migration e não muda com a carga.
+    <div className="space-y-4">
+      <header>
+        <h1 className="text-3xl font-semibold tracking-tight md:text-[2.5rem] md:leading-[1.06]">
+          Regras do resumo
+        </h1>
+        <p className="text-muted-foreground mt-3 max-w-[68ch] text-[15px] leading-relaxed">
+          O que o bloco de direcionamento sabe perguntar · quando ele fica em silêncio, é porque
+          nenhuma destas cruzou o limiar — não porque está tudo bem
+        </p>
+      </header>
 
       {porTela.map(([tela, lista]) => (
-        <BentoItem key={tela} span={12}>
+        <div key={tela}>
           <TabelaCard
             icon={ListChecksIcon}
-            title={NOME_DA_TELA[tela] ?? tela}
+            title={nomeDaTela(tela)}
             headline={lista ? formatInt(lista.length) : '—'}
             headlineLabel="perguntas avaliadas a cada carga"
             description="O limiar de cada regra vive na migration, não em tela editável: o ciclo lento é o recurso, porque impede afrouxar a régua na semana em que o bloco ficou vazio."
@@ -82,8 +99,8 @@ export function RegrasPage() {
               </TableBody>
             </Table>
           </TabelaCard>
-        </BentoItem>
+        </div>
       ))}
-    </BentoGrid>
+    </div>
   )
 }

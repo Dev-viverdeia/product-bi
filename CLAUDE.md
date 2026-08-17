@@ -177,7 +177,9 @@ Módulo novo: página em `pages/` ou `features/` → rota em `src/app/router.tsx
 
 Refeito a partir de um mockup de referência que o Mateus trouxe, com **fidelidade como requisito declarado**. Os números abaixo saíram de medição de pixel na imagem, não de estimativa: cinco tentativas foram recusadas por eu estar interpretando a referência em vez de medi-la. Mockup navegável e aprovado: **`docs/mockup-layout.html`**.
 
-> **Estado: a fundação está construída e validada; as PÁGINAS ainda não foram migradas.** O shell, a rampa de superfícies e as peças novas estão em `src/` e vivem no showcase `/design`. As dez telas ainda desenham o próprio cabeçalho e ainda não usam `CabecalhoDeModulo` nem `SecaoDeAnalise` — é a fase seguinte, e ela depende do catálogo de análises.
+> **Estado (17/ago): as dez telas estão migradas.** Todas usam `CabecalhoDeModulo` — título e régua saem de `nav-items.ts`, a página não os reescreve — com os KPIs fora do mosaico e os cards agrupados em `SecaoDeAnalise` por pergunta. `/regras` ficou de fora do `CabecalhoDeModulo` de propósito: é ferramenta, e o `FrescorDoDado` que ele carrega carimbaria "dados até tal dia" num catálogo cuja régua é o limiar, não a carga.
+>
+> ⚠️ **Mover a régua para `nav-items.ts` FEZ ELA ENCOLHER em três telas**, e isso é o defeito a vigiar em toda tela nova: o que estava no subtítulo escrito à mão e não estava no `nav-items` some da tela sem erro nenhum. Jornada perdeu "rotas com identificador são agrupadas em padrão" (a única pista de que `/formacao/abc` e `/formacao/def` são a mesma linha do raio-x); Receita perdeu "faturas deduplicadas", que é a regra de contagem; e Entrada revelou uma contradição que já existia — o `nav-items` dizia "safra fechada de 30 dias" enquanto o card chama a RPC com o período do topo. Os três foram corrigidos na fonte. **Ao migrar ou criar tela, comparar o subtítulo antigo com a `regua` do `nav-items` cláusula por cláusula.**
 
 **Três superfícies, nesta ordem: página → seção → card.**
 
@@ -252,7 +254,7 @@ Novas: `aba-canal.tsx` · `app-barra.tsx` · `app-rail.tsx` · `aba-do-modulo.ts
 
 Reformadas: `KpiCard` ganhou tile de ícone e uma casca única para os quatro estados — antes o tile de erro montava a própria casca, encolhia, e a fileira de KPIs ficava desalinhada justamente na tela em que algo deu errado.
 
-Saiu: `app-header.tsx` (a barra navy). O `ModuloTabs` perdeu a `TabsList` e ficou só com o painel; `BentoCabecalho` sai quando as páginas migrarem para `CabecalhoDeModulo`.
+Saiu: `app-header.tsx` (a barra navy) e o `BentoCabecalho`, removido em 17/ago quando a última página deixou de usá-lo — cabeçalho de módulo agora é só o `CabecalhoDeModulo`. O `ModuloTabs` perdeu a `TabsList` e ficou só com o painel.
 
 ⚠️ **Duas armadilhas de composição travadas no CI** (`contrato-de-shell.test.ts`), as duas silenciosas:
 
