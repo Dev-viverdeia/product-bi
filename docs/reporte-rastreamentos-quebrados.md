@@ -142,3 +142,32 @@ alta, e a correção provavelmente ressuscita as três de uma vez.
 
 Se ajudar, o BI consegue confirmar em minutos se a correção funcionou: basta
 olhar se as tabelas voltaram a receber linhas.
+
+---
+
+## Adendo — reconferência em 17/08/2026
+
+O corpo acima é a carta de 07/08 e fica como está. Esta é a releitura de dez
+dias depois, direto na origem: **cinco dos seis continuam parados, e um voltou
+sozinho.**
+
+| Rastreamento | Estado em 17/08 |
+| --- | --- |
+| `hubla_webhooks` — parou em 19/04 | ⛔ continua · 3.533 linhas, última 19/04/2026 |
+| `webhook_logs` — parou em 19/04 | ⛔ continua · 11 linhas, última 19/04/2026 |
+| `invite_deliveries` — parou em 19/04 | ⛔ continua · 7.723 linhas, última 19/04/2026 |
+| `solution_started` — parou em 23/06 | ⛔ continua · 17.891 eventos, último 23/06. `solution_viewed` (136.697) e `solution_completed` (2.151) seguem ativos — só o meio do funil morreu |
+| `referral_events` — parou em 11/03 | ⛔ continua · 8.533 linhas, última 11/03/2026 |
+| `email_queue` — parou em 08/05 | ✅ **voltou** · 5.164 linhas, última 17/08/2026. Ficou sem nenhuma linha em junho e julho e voltou em agosto com 1.317 |
+
+**A Prioridade 1 segue intacta** — as três de 19/04 não se mexeram, e a hipótese
+de causa única continua valendo.
+
+Dois itens novos, que não estavam na carta e valem entrar se ela for reenviada:
+
+- **`learning_lesson_nps` parou em 29/07/2026** (17.912 linhas). Conferido que é a
+  coleta na origem, não o nosso pipeline: o FDW está de pé e o sync roda com zero
+  linha nova porque não há linha nova lá.
+- **`fact_progresso_aula` grava só conclusão** — `pct = 100` em 98,6% das linhas.
+  Isso esvazia qualquer métrica de "% de conclusão de aula", que é pergunta
+  central do produto: não dá para saber onde o aluno parou, só se ele terminou.

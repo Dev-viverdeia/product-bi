@@ -35,7 +35,7 @@ coleção de gráficos.
 | 8. Jornada & Telas (profundidade) | ✅ Entregue |
 | 9. Receita & Renovação | ✅ Entregue |
 | 10. Saúde da plataforma (backend/banco/cyber) | ⏸️ Adiada por decisão do Mateus — só depois do BI |
-| CS — dashboard executivo (2ª fonte: Pulse) | ✅ **No ar em 12/ago**: 8 marts carregados (73.314 linhas), sync a cada 30 min, tela lendo dado real. Falta a escada de profundidade e as pendências do Mateus |
+| CS — dashboard executivo (2ª fonte: Pulse) | ✅ **No ar em 12/ago**: **9 marts carregados (95.781 linhas)**, sync a cada 30 min, tela lendo dado real. Falta a escada de profundidade e as pendências do Mateus |
 
 ### Auditoria roadmap × tela (11/ago/2026)
 
@@ -46,19 +46,22 @@ nenhuma**. Ficam registradas aqui até cada linha virar entrega.
 
 | # | Onde | Pergunta do roadmap | Realidade na tela | Trava |
 | --- | --- | --- | --- | --- |
-| 1 | Transversal | recorte por persona/plano nas métricas centrais (obrigatório) | o único filtro do app é o de período | nenhuma — `papel` e `plano` já estão em `marts.dim_usuario` |
+| 1 | Transversal | recorte por persona/plano nas métricas centrais (obrigatório) | ✅ fase A entregue: `SegmentoFiltro` (`?papel=`/`?plano=`) em Visão Geral e Clientes | faltam as fases B e C (Entrada, Formações, Soluções · IA, Jornada, Receita, Organizações) |
 | 2 | E3 | funil de entrada com "entregue" e "aberto" | funil no ar tem 4 etapas; faltam as 2 de e-mail | rastreio de entrega parou na plataforma em abr/2026 |
-| 3 | E3 | onboarding: `time_per_step` e pontos de abandono | só a etapa atual de cada cliente | FDW parado |
-| 4 | E4 | NPS × retenção/conclusão | só o ranking de NPS por aula | FDW parado |
-| 5 | E5 | pedidos de implementação paga | mart criado e nunca sincronizado | FDW parado |
-| 6 | E6 | Consultor: tokens vs limite | não existe | FDW parado |
-| 7 | E6 | Builder: limite mensal atingido | não existe | FDW parado |
+| 3 | E3 | onboarding: `time_per_step` e pontos de abandono | só a etapa atual de cada cliente | nenhuma — `plataforma.onboarding_final` é foreign table e o FDW está de pé |
+| 4 | E4 | NPS × retenção/conclusão | só o ranking de NPS por aula | a coleta na origem: `learning_lesson_nps` parou em 29/07 (ver item H) |
+| 5 | E5 | pedidos de implementação paga | mart carregado com as 114 linhas; falta a tela | nenhuma |
+| 6 | E6 | Consultor: tokens vs limite | não existe | nenhuma — `plataforma.consultor_ia_token_usage` é foreign table |
+| 7 | E6 | Builder: limite mensal atingido | não existe | nenhuma — `builder_v2_step_generations` e `builder_v3_task_progress` são foreign tables |
 | 8 | E8 | rotina de uso por perfil | heatmap é global, sem recorte | nenhuma |
-| 9 | E9 | engajamento pré-renovação | não existe — `renewal_logs` nem é foreign table | FDW parado |
+| 9 | E9 | engajamento pré-renovação | não existe — `renewal_logs` nem é foreign table | importar `renewal_logs` (o FDW está de pé; ninguém importou a tabela) |
 
 Os itens 5 e 9 são as pendências 3 e 4 da auditoria de 08/ago, vistas do lado
-do roadmap. Os itens 1 e 8 não têm trava — são os únicos executáveis com o
-pipeline parado, e o 1 é o próximo passo acordado com o Mateus.
+do roadmap; o 5 fechou quando o pipeline voltou. **Com o FDW de pé desde
+12/ago, a coluna "Trava" perdeu o motivo comum**: sobram travas de origem (o
+NPS do item 4 parou de ser coletado) e de import (o `renewal_logs` do item 9).
+O item 1 foi entregue na fase A do recorte persona/plano — `SegmentoFiltro`
+está no ar em Visão Geral e Clientes.
 
 Matéria-prima já mapeada que nenhuma tela consome: `invite_deliveries` e
 `invite_delivery_events` (item 2), `onboarding_final` (item 3 e o
@@ -463,10 +466,19 @@ diagnósticos — nenhum comparativo, nenhum prescritivo.
   mart, atividade nos 30 dias até o último dia com dado — para o comportamento
   não ser lido depois do resultado.
 
-As três funções **não aceitam período**: `marts.fact_navegacao` cobre 03/07 a
-08/08/2026 e mais nada, porque a plataforma purga navegação com mais de 30 dias
-todo domingo. Esse intervalo *é* a janela, e cada card declara de quando fala —
-inclusive a semana de 03–09/07, da qual este mart é a única cópia que existe.
+As três funções **não aceitam período**: `marts.fact_navegacao` cobre o que a
+purga dominical da plataforma deixou entrar no mart, e esse intervalo *é* a
+janela — cada card declara de quando fala.
+
+⚠️ **O arquivo é `marts.fact_pageview`, não `fact_navegacao`.** A navegação é
+**derivada** do pageview e **reconstruída a cada sync**: `etl.sync_fact_navegacao`
+faz `delete from marts.fact_navegacao where data_brt >= hoje - 45 dias` e
+reinsere. Ela não guarda nada além dessa janela móvel — em 17/08 o corte cai
+exatamente em 03/07, então **a semana de 03–09/07 sai de `fact_navegacao` a
+partir de 18/08**. A cópia que sobrevive é `fact_pageview`: 474.831 linhas de
+03/07 a 17/08, das quais **73.296 são da semana de 03–09/07 que a origem já não
+tem** (`public.analytics` da plataforma: zero linha naquele intervalo). Análise
+que precise daquela semana lê `fact_pageview`.
 
 **Receita fica de fora da escada por ora** (decisão do Mateus, 12/ago). Faz
 sentido: a tela mede uma fonte que parou de registrar pagamento há 112 dias
@@ -546,9 +558,12 @@ Três resultados que mudam o plano, todos reconferidos no banco:
    `proposta-fase-2-profundidade.md` §4.
 2. **Nove das dez telas reprovam na escada de profundidade** — o parque tem 78
    cards descritivos contra 4 diagnósticos.
-3. **O BI virou arquivo sem saber.** A purga dominical da plataforma já apagou
-   os pageviews de 03–09/07/2026; eles só existem no nosso mart. A purga de
-   navegação está inativa hoje, a de notificações está ativa.
+3. **O BI virou arquivo sem saber.** A purga dominical da plataforma apagou os
+   pageviews de 03–09/07/2026 em 09/08 (73.479 linhas numa execução); eles só
+   existem em **`marts.fact_pageview`** — não em `fact_navegacao`, que é
+   derivada e só guarda 45 dias. A purga de navegação está inativa hoje. As de
+   notificações estão **agendadas mas falham em toda execução** desde 19/07
+   (`permission denied for function`), então 546.616 notificações seguem vivas.
 
 **Descoberta que destravou o mapeamento:** o MCP alcança os três bancos direto,
 sem depender do `postgres_fdw`. O pipeline parado bloqueia a carga dos marts,
@@ -562,24 +577,24 @@ gravidade, não de esforço.
 | # | Pendência | Onde | Precisa de |
 | --- | --- | --- | --- |
 | A | **112 dias sem pagamento registrado.** A Receita descreve um rastreamento parado, não um negócio parado. A tela declara, mas o dado não volta sozinho | Receita | decisão do Mateus: reconectar a fonte, apontar para o `via_hub` quando ele estiver populado, ou congelar a tela de vez |
-| B | **Escada de profundidade não subiu nas oito telas novas.** A aba de análise entrou, mas os cards não declaram `nivel` — elas seguem fora de `TELAS_NA_REGUA` | 8 telas | trabalho de gráfico, uma tela por vez (é a fase seguinte) |
+| B | ~~**Escada de profundidade não subiu nas oito telas novas.**~~ **Fechada.** As oito telas estão em `TELAS_NA_REGUA` e declaram `nivel` em **todos os cards, 63 no total** — Clientes 10/10 · Entrada 8/8 · Formações 8/8 · IA 8/8 · Jornada 8/8 · Organizações 7/7 · Soluções 7/7 · Visão Geral 7/7. Ficam de fora **Receita** (5 cards) e **CS** (12 cards), as duas por decisão declarada, não por dívida esquecida (§6.9 e pendência T·c) | 8 telas | ✅ |
 | C | ~~**`org_time_morto` ficou órfã.**~~ **Destravada em 12/ago**: o card "Onde estão as contas, e onde está a gente" publica o total — 738 de 1.911 contas ativas sem ninguém aparecendo (38,6%). A regra pode voltar lendo `bi_orgs_distribuicao_engajamento` | Organizações | entra no lote de reescrita do catálogo (itens K e M) |
 | D | **Duas réguas de "% saída" na mesma tela.** `bi_pontos_saida.pct_da_tela` (29,6% para `/team-management`) e `bi_raio_x_telas.pct_saida` (36,5% para a mesma tela) medem coisas diferentes. Hoje cada card declara a sua | Jornada | alinhar nomes, ou aceitar as duas e manter a declaração explícita |
 | E | **Severidade oscila no corte.** Muita regra cai entre 1,2 e 1,6, e o corte de `atenção` está em 1,5 — variação mínima de dado troca o rótulo entre "atenção" e "observação" | motor | decidir se a régua de severidade muda ou se o rótulo deixa de ser gradiente |
 | F | **Piso de rastreamento chumbado em `VALUES`.** `bi_churn_modulos` carrega a lista de quando cada módulo passou a ser medido; módulo novo fica invisível para `cli_mortalidade` até alguém lembrar de atualizar | Clientes | virar tabela, ou ganhar teste que reprove módulo ausente da lista |
 | G | **Janela de `cli_comprador` duplicada.** O 120/30 vive no calculador e em `bi_retencao_comprador`; mudar num e não no outro faz a frase mentir sem erro nenhum | Clientes | a RPC devolver a própria régua como coluna |
-| H | **NPS de aula parou em 29/07.** Nenhuma regra de Formações lê NPS, de propósito | Formações | conferir se a coleta na origem parou ou se é o pipeline |
-| I | **As seis RPCs de Jornada ainda ancoram em `now()`.** Dívida declarada; nenhuma das quatro regras compara períodos, então pipeline atrasado encurta a janela sem inverter sinal | Jornada | entra no lote geral das ~43 funções com `now()` |
+| H | **NPS de aula parou em 29/07 — é a coleta na origem, não o pipeline.** Conferido em 17/08 direto na plataforma: `learning_lesson_nps` tem 17.912 linhas e a última é de **29/07/2026**, com o FDW de pé e `fact_nps_aula` sincronizando normalmente (0 linhas novas porque não há linha nova lá). Nenhuma regra de Formações lê NPS, de propósito | Formações | perguntar ao time da plataforma por que a coleta parou |
+| I | **As seis RPCs de Jornada ainda ancoram em `now()`** — confirmado em 17/08: `bi_fluxo_da_tela`, `bi_jornada_kpis`, `bi_pontos_saida`, `bi_portas_entrada`, `bi_profundidade_sessao` e `bi_raio_x_telas`. Dívida declarada; nenhuma das quatro regras compara períodos, então pipeline atrasado encurta a janela sem inverter sinal | Jornada | entra no lote geral das **22 funções de produto** com `now()` |
 | J | **`card-retencao-papel` ficou sem regra.** É o card que `cli_gap_papel` apontava antes de ser aposentada. O card segue correto e útil | Clientes | nada urgente — anotado para não parecer esquecimento |
 | K | **Os três cards novos de Entrada não têm regra no motor.** A aba de análise ainda fala das cinco perguntas antigas; o corte comprador × convidado na porta e o efeito do onboarding não aparecem no texto | Entrada | reescrever o catálogo da tela depois que todas subirem a escada, para não mexer duas vezes |
-| P | **O repo não reconstrói o banco.** `supabase/migrations` tem 64 arquivos; `supabase_migrations.schema_migrations` tem 72 entradas. Renomeei 26 arquivos para a versão realmente aplicada (o timestamp do arquivo era o que eu escrevia, não o do apply), mas sobram **10 arquivos sem entrada no banco** — quatro deles porque um arquivo virou 2–3 entradas ao ser aplicado em pedaços via MCP — e **18 entradas sem arquivo**. Enquanto isso durar, `supabase db push` é inseguro | infra | reconciliar antes de qualquer merge para a `main`; parte é dívida anterior a 11/ago |
+| P | **O repo não reconstrói o banco.** Medido em 17/08: `supabase/migrations` tem **87 arquivos**; `supabase_migrations.schema_migrations` tem **97 entradas** — a distância de 10 não fechou, só andou junto. Renomeei 26 arquivos para a versão realmente aplicada (o timestamp do arquivo era o que eu escrevia, não o do apply), mas sobram **10 arquivos sem entrada no banco** — quatro deles porque um arquivo virou 2–3 entradas ao ser aplicado em pedaços via MCP — e **18 entradas sem arquivo**. Enquanto isso durar, `supabase db push` é inseguro | infra | reconciliar antes de qualquer merge para a `main`; parte é dívida anterior a 11/ago |
 | V | ~~**`cliente_status_diario` guarda só 4 dias.**~~ **Resolvido em 13/ago, e a minha hipótese estava errada.** A tabela **acumula** — nasceu em 10/08, a função que escreve nela não tem delete e nenhum job purga (verificado pelo time do Pulse). Nada estava se perdendo. O contrato ganhou a 9ª view e o mart `marts.fact_cs_status_diario` carrega incremental por dia, com releitura dos dois últimos. Perguntar antes de afirmar evitou um pedido urgente que não era urgente | CS | ✅ |
 | W | **Duas tabelas de CS fora do contrato, com valor e com data de morte.** `client_upsell_opportunities` (9.582 oportunidades com produto e status, **parou em 09/07/2026**) e `whatsapp_conversation_intent` (11.302 classificações de intenção e urgência, **parou em 19/03/2026**). A segunda parece feature abandonada; a primeira parou há um mês e vale perguntar se migrou de lugar | CS | perguntar ao Pulse antes de pedir espelho |
-| U | **Pipeline da plataforma: causa confirmada, é o allow list.** Provoquei a conexão ao vivo em 12/ago e o erro completo é `FATAL: (EADDRNOTALLOWED) address not in tenant allow_list: {54, 232, 250, 105}`. Não é credencial nem tenant do pooler — é o IP de saída do BI fora das network restrictions do projeto da plataforma. **Terceira ocorrência do mesmo IP caindo da lista**: vale perguntar ao time da plataforma se a lista é gerida por IaC que sobrescreve mudança manual, senão isto volta | infra | pedido ao time da plataforma |
+| U | ~~**Pipeline da plataforma: causa confirmada, é o allow list.**~~ **Resolvido em 12/ago às 22:32 UTC.** A causa foi confirmada ao vivo — `FATAL: (EADDRNOTALLOWED) address not in tenant allow_list: {54, 232, 250, 105}`, o IP de saída do BI fora das network restrictions da plataforma, não credencial nem tenant do pooler. Com a reinclusão o cano voltou no mesmo minuto: **5 dias corridos sem uma falha** (13–17/08, 1.440 execuções por dia, 0 falhas) e `marts.data_referencia()` = a data de hoje. Fica registrado que foi a **terceira ocorrência do mesmo IP caindo da lista** e que o IP de saída não é dedicado — a pergunta ao time da plataforma sobre IaC sobrescrevendo mudança manual continua valendo, porque o sintoma se repete | infra | ✅ (monitorar a 4ª ocorrência) |
 | T | **CS: três acabamentos abertos.** (a) `saude_cs` grava `finalizado_em` anterior a `iniciado_em` — cosmético, mas é a linha que alguém lê quando o canário dispara; (b) `bi_cs_disparos_mensal` é dirigida por `fact_cs_envio`, então mês com campanha e sem log some da série (42 campanhas sem log); (c) os 13 cards de CS não declaram `nivel` nem `id` — a tela está fora da escada e sem âncora para o motor de achados | CS | entra junto com as pendências do Mateus |
 | S | **Atribuição de `atendimento_tickets` depende do Pulse — `retencao` não.** Medido em 12/ago: o workaround que o time do Pulse sugeriu para `retencao` (ligar a `pipeline_cards` por `empresa_hash`) resolve **205 de 232 (88,4%)** com org única, 6 ambíguos, 21 sem org — derivamos do nosso lado, sem pedir nada. Já `atendimento_tickets` traz só `contato_hash` (telefone), e `marts.dim_usuario` **não espelha telefone**: não há caminho nosso. Aceito o que eles ofereceram (match por telefone normalizado, só o unívoco, ~81%) | CS | resposta enviada ao Pulse |
-| R | **CS: conexão de pé, import bloqueado por 2 grants** (12/ago). O mapping foi criado pelo Mateus e o cano funciona — lido `bi_pulse.disparos_campanhas` pelo FDW, 1.780 linhas frescas. O host estava errado (`aws-0` → `aws-1`, corrigido e versionado). Falta o time do Pulse dar `grant execute` em `bi_pulse.hash_pii` (usada por 7 das 8 views) e em `public.wa_phone_key` (usada por `retencao`). Só `disparos_campanhas` funciona hoje | CS | pedido aberto |
-| Q | **Atribuição de CS: resolvida em 3 das 5 views** (12/ago). O time do Pulse expôs `organization_id` em `pipeline_cards` (75,2%), `pipeline_movimentos` (80,4%) e `cancelamentos` (83,8%) — verificado ao vivo. Fizeram melhor que o pedido: em vez de liberar `bi.empresa` para o nosso role, embrulharam a busca em `public.bi_empresa_org_id(uuid) returns uuid` SECURITY DEFINER. O role ganhou a chave **sem** ganhar acesso a razão social, e-mail ou telefone — segue lendo 8 objetos e zero dos 414 de `public`. Coluna adicionada no fim da view, para não quebrar `select *` de quem já consome. **Falta**: `atendimento_tickets` (2.499) e `retencao` (232) seguem sem qualquer ligação com empresa; a resposta do time sobre elas veio cortada na mensagem | CS | pedir a parte truncada da resposta |
+| R | ~~**CS: conexão de pé, import bloqueado por 2 grants**~~ **Resolvido.** Os dois `grant execute` saíram — `bi_pulse.hash_pii` (usada por 7 das 8 views) e `public.wa_phone_key` (usada por `retencao`). Medido em 17/08: **as 9 foreign tables de `pulse` leem**, e os 9 marts de CS estão carregados com **95.781 linhas** (`retencao` 261 · `atendimento_tickets` 2.645 · `pipeline_cards` 6.557 · `cancelamentos` 296 · `disparos_campanhas` 1.970 · `cliente_status_diario` 20.937). O host errado (`aws-0` → `aws-1`) segue corrigido e versionado | CS | ✅ |
+| Q | **Atribuição de CS: resolvida em 3 das 5 views** (12/ago). O time do Pulse expôs `organization_id` em `pipeline_cards` (75,2%), `pipeline_movimentos` (80,4%) e `cancelamentos` (83,8%) — verificado ao vivo. Fizeram melhor que o pedido: em vez de liberar `bi.empresa` para o nosso role, embrulharam a busca em `public.bi_empresa_org_id(uuid) returns uuid` SECURITY DEFINER. O role ganhou a chave **sem** ganhar acesso a razão social, e-mail ou telefone — segue lendo 8 objetos e zero dos 414 de `public`. Coluna adicionada no fim da view, para não quebrar `select *` de quem já consome. **Resolvida também em `atendimento_tickets`** (medido 17/08): o time entregou `organization_id` + `organization_id_origem` na view, cobrindo **1.984 de 2.645 tickets (75,0%)**, todos por `telefone_unico` — o match por telefone normalizado unívoco que o item S registra como aceito. Sobram 661 sem org e 1.308 orgs distintas atribuídas. **Falta só `retencao`** (261 linhas), que segue com `empresa_hash`/`id_via` e sem `organization_id` — o caminho ali é o workaround do item S, derivado do nosso lado. ⚠️ **A coluna nova não chega ao BI ainda**: `pulse.atendimento_tickets` foi importada antes dela e a definição da foreign table está velha — precisa de `import foreign schema ... limit to (atendimento_tickets)` para a coluna aparecer | CS | reimportar a foreign table; `retencao` pelo caminho do item S |
 | O | **Lista nomeada não passa por `private.is_admin()`.** O contrato de PII no CLAUDE.md diz que lista com nome e e-mail fica atrás de `is_admin()`; `public.bi_clientes_em_risco` já devolvia nome e e-mail para qualquer autenticado, e a lista nova de IA seguiu o mesmo modelo — divergir só na nova criaria duas regras para o mesmo dado | IA · Clientes | decisão do Mateus: apertar as duas ou registrar que o contrato vale por "quem tem conta no BI" |
 | M | **Os cards novos de Formações também não têm regra no motor** — mesma situação de Entrada (item K). O texto da aba ainda fala das quatro perguntas antigas | Formações | mesmo lote de reescrita do catálogo |
 | N | **Uma linha da tela de CS foi corrigida fora do combinado.** O headline de atendentes tinha o mesmo defeito do "0 enquanto carrega" e o teste novo reprovava o build; corrigi só essa linha, sem tocar em nada do que está pendente com o Mateus | CS | ciente — nenhuma decisão de CS foi antecipada |
@@ -594,19 +609,20 @@ entregues; estes são os pontos que a auditoria abriu e ainda não fecharam.
 | --- | --- | --- | --- |
 | 1 | Pageviews por solução via `slug` (a origem não preenche `analytics.solution_id`) | 5 | ✅ resolvida |
 | 2 | `dim_usuario` não removia quem foi deletado na plataforma | — | ✅ resolvida |
-| 3 | Espelhar `implementation_requests` (114) — "pedidos de implementação paga" ficou sem cobertura | 5 | **agravada (12/ago)**: `marts.fact_pedido_implementacao` existe e está **vazia**. Tabela vazia é pior que ausente — um join devolve nada em silêncio e parece resposta |
+| 3 | Espelhar `implementation_requests` (114) — "pedidos de implementação paga" ficou sem cobertura | 5 | ✅ **resolvida**: com o pipeline de volta, `marts.fact_pedido_implementacao` carregou as **114 linhas — o mesmo total da origem `plataforma.implementation_requests`**, sem perda. O mart deixou de ser tabela vazia; falta só a tela consumir |
 | 4 | Engajamento pré-renovação — sem RPC; depende de inventariar `renewal_logs` | 9 | aberta — item 9 da auditoria de 11/ago |
 | 5 | "Onde a implementação trava" não é monotônico — lido como funil, confunde | 5 | passada visual |
 
 **Nota de infraestrutura**: a restrição de rede do projeto da plataforma já
-parou o pipeline duas vezes. A primeira (19h) foi porque o allow list só tinha
-`72.60.154.220/32` e o BI sai por `54.232.250.105` — resolvida. Em 08/ago o
-`54.232.250.105/32` saiu de novo do allow list: pipeline parado desde então
-("could not connect to server plataforma_srv"; 240 falhas até 11/ago), números
-da plataforma congelados em 08/ago e o alerta no topo do app declarando a
-parada. Reinclusão pedida ao time da plataforma em 11/ago. O IP de saída do BI
-não é dedicado e pode mudar em manutenção do Supabase — o sintoma se repete e o
-alerta avisa em até 30 min.
+parou o pipeline duas vezes, e as duas voltaram. A primeira (19h) foi porque o
+allow list só tinha `72.60.154.220/32` e o BI sai por `54.232.250.105`. Em
+08/ago o `54.232.250.105/32` saiu de novo da lista e o pipeline ficou parado de
+08/08 a 12/08 ("could not connect to server plataforma_srv"; **4.006 falhas no
+total**, com 11/ago inteiro sem um único sucesso). **A reinclusão surtiu efeito
+em 12/08 às 22:32 UTC** e desde 13/08 são 1.440 execuções por dia com zero
+falhas. O IP de saída do BI não é dedicado e pode mudar em manutenção do
+Supabase — o sintoma se repete e o alerta avisa em até 30 min. Esta foi a
+terceira ocorrência; vale o pedido do item U ao time da plataforma.
 
 ## Notas de régua (valem para tudo)
 
