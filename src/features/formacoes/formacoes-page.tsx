@@ -2,14 +2,21 @@ import { useMemo, useState } from 'react'
 import {
   AwardIcon,
   BookOpenIcon,
+  CheckCheckIcon,
   DoorOpenIcon,
   GraduationCapIcon,
+  HourglassIcon,
+  LibraryIcon,
+  MessageSquareIcon,
+  RouteIcon,
   StarIcon,
   TimerIcon,
   TrendingDownIcon,
 } from 'lucide-react'
-import { BentoCabecalho, BentoGrid, BentoItem } from '@/components/layout/bento'
+import { BentoItem } from '@/components/layout/bento'
+import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
+import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
@@ -112,376 +119,401 @@ export function FormacoesPage() {
 
   return (
     <div className="space-y-4">
+      {/* Título, régua e controles saem de `nav-items.ts` — a página não
+          reescreve a própria régua. O frescor do dado anda junto dos controles. */}
+      <CabecalhoDeModulo controles={<PeriodoFiltro valor={periodo} onChange={setPeriodo} />} />
+
       {/* Fora das abas: contexto do módulo inteiro. Trocar de aba não pode
           custar o número de referência nem obrigar a reajustar o período. */}
-      <BentoGrid>
-        <BentoCabecalho>
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Formações</h2>
-            <p className="text-muted-foreground text-sm">
-              Uso, jornada do aluno, duração ideal de aula e qualidade percebida
-            </p>
-          </div>
-          <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
-        </BentoCabecalho>
-
-        <BentoItem span={12}>
-          <KpiGrid>
-            <KpiCard
-              label="Alunos ativos"
-              value={kpis.data?.alunos_ativos ?? null}
-              format={formatInt}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-            <KpiCard
-              label="Aulas concluídas"
-              value={kpis.data?.aulas_concluidas ?? null}
-              format={formatInt}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-            <KpiCard
-              label="Certificados emitidos"
-              value={kpis.data?.certificados ?? null}
-              format={formatInt}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-            <KpiCard
-              label="NPS médio das aulas"
-              value={kpis.data?.nps_medio ?? null}
-              format={formatDecimal}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-          </KpiGrid>
-        </BentoItem>
-      </BentoGrid>
+      <KpiGrid>
+        <KpiCard
+          label="Alunos ativos"
+          value={kpis.data?.alunos_ativos ?? null}
+          format={formatInt}
+          isLoading={kpis.isLoading}
+          isError={kpis.isError}
+        />
+        <KpiCard
+          label="Aulas concluídas"
+          value={kpis.data?.aulas_concluidas ?? null}
+          format={formatInt}
+          isLoading={kpis.isLoading}
+          isError={kpis.isError}
+        />
+        <KpiCard
+          label="Certificados emitidos"
+          value={kpis.data?.certificados ?? null}
+          format={formatInt}
+          isLoading={kpis.isLoading}
+          isError={kpis.isError}
+        />
+        <KpiCard
+          label="NPS médio das aulas"
+          value={kpis.data?.nps_medio ?? null}
+          format={formatDecimal}
+          isLoading={kpis.isLoading}
+          isError={kpis.isError}
+        />
+      </KpiGrid>
 
       <ModuloTabs
         rota="/formacoes"
         conteudos={{
           analise: <AnaliseDaTela tela="formacoes" periodo={periodo} />,
           uso: (
-            <BentoGrid>
-              <BentoItem span={6}>
-                <TabelaCard
-                  nivel="descritivo"
-                  id="card-uso-formacoes"
-                  icon={GraduationCapIcon}
-                  title="Uso por formação"
-                  headline={uso.data ? formatInt(uso.data.length) : '—'}
-                  headlineLabel="formações com aluno no período"
-                  description="Alunos e aulas no período selecionado · histórico e conclusão desde o início · ordenado por alunos no período"
-                  isLoading={uso.isLoading}
-                  isError={uso.isError}
-                  onRetry={() => void uso.refetch()}
-                >
-                  <TabelaLonga
-                    linhas={uso.data ?? []}
-                    chave={(c) => String(c.curso)}
-                    buscarEm={(c) => [c.curso]}
-                    rotuloBusca="Buscar por formação"
-                    cabecalho={
-                      <TableRow>
-                        <TableHead>Formação</TableHead>
-                        <TableHead>Categoria</TableHead>
-                        <TableHead className="text-right">Alunos ({periodo}d)</TableHead>
-                        <TableHead className="text-right">Aulas ({periodo}d)</TableHead>
-                        <TableHead className="text-right">Alunos (hist.)</TableHead>
-                        <TableHead className="text-right">Certificados</TableHead>
-                        <TableHead className="text-right">Conclusão</TableHead>
-                      </TableRow>
-                    }
-                    renderLinha={(c) => (
-                      <TableRow>
-                        <TableCell className="max-w-64 truncate font-medium">{c.curso}</TableCell>
-                        <TableCell>{c.categoria ?? '—'}</TableCell>
-                        <TableCell className="num text-right">{formatInt(c.alunos)}</TableCell>
-                        <TableCell className="num text-right">{formatInt(c.aulas_concluidas)}</TableCell>
-                        <TableCell className="num text-right">{formatInt(c.alunos_historico)}</TableCell>
-                        <TableCell className="num text-right">{formatInt(c.certificados_historico)}</TableCell>
-                        <TableCell className="num text-right">
-                          {c.conclusao_historica != null ? formatPercent(c.conclusao_historica) : '—'}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  />
-                </TabelaCard>
-              </BentoItem>
+            <div className="space-y-4">
+              <SecaoDeAnalise
+                titulo="O que os alunos estão assistindo"
+                icone={LibraryIcon}
+                descricao="Os dois lados contam a mesma aula concluída e mudam só o agrupamento — por formação e por categoria de curso. A janela é que diverge: o gráfico e as colunas de período seguem o filtro do topo, enquanto histórico, certificados e conclusão da tabela correm desde o início e não se comparam com eles."
+              >
+                <BentoItem span={6}>
+                  <TabelaCard
+                    nivel="descritivo"
+                    id="card-uso-formacoes"
+                    icon={GraduationCapIcon}
+                    title="Uso por formação"
+                    headline={uso.data ? formatInt(uso.data.length) : '—'}
+                    headlineLabel="formações com aluno no período"
+                    description="Alunos e aulas no período selecionado · histórico e conclusão desde o início · ordenado por alunos no período"
+                    isLoading={uso.isLoading}
+                    isError={uso.isError}
+                    onRetry={() => void uso.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={uso.data ?? []}
+                      chave={(c) => String(c.curso)}
+                      buscarEm={(c) => [c.curso]}
+                      rotuloBusca="Buscar por formação"
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Formação</TableHead>
+                          <TableHead>Categoria</TableHead>
+                          <TableHead className="text-right">Alunos ({periodo}d)</TableHead>
+                          <TableHead className="text-right">Aulas ({periodo}d)</TableHead>
+                          <TableHead className="text-right">Alunos (hist.)</TableHead>
+                          <TableHead className="text-right">Certificados</TableHead>
+                          <TableHead className="text-right">Conclusão</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(c) => (
+                        <TableRow>
+                          <TableCell className="max-w-64 truncate font-medium">{c.curso}</TableCell>
+                          <TableCell>{c.categoria ?? '—'}</TableCell>
+                          <TableCell className="num text-right">{formatInt(c.alunos)}</TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(c.aulas_concluidas)}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(c.alunos_historico)}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(c.certificados_historico)}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {c.conclusao_historica != null
+                              ? formatPercent(c.conclusao_historica)
+                              : '—'}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
 
-              <BentoItem span={6}>
-                <ChartCard
-                  nivel="descritivo"
-                  icon={BookOpenIcon}
-                  title="Assuntos mais assistidos"
-                  headline={assuntoLider ? formatPercent(assuntoLider.parte) : '—'}
-                  headlineLabel={assuntoLider ? `em ${assuntoLider.categoria}` : undefined}
-                  description={`Aulas concluídas por categoria de curso · últimos ${periodo} dias`}
-                  isLoading={assuntos.isLoading}
-                  isError={assuntos.isError}
-                  onRetry={() => void assuntos.refetch()}
-                  isEmpty={assuntos.data?.length === 0}
-                >
-                  <CategoryBarChart
-                    layout="bar"
-                    label="Aulas concluídas"
-                    data={(assuntos.data ?? []).map((a) => ({
-                      category: a.categoria,
-                      value: a.aulas_concluidas,
-                    }))}
-                    valueFormatter={formatInt}
-                    className="h-[280px]"
-                  />
-                </ChartCard>
-              </BentoItem>
-            </BentoGrid>
+                <BentoItem span={6}>
+                  <ChartCard
+                    nivel="descritivo"
+                    icon={BookOpenIcon}
+                    title="Assuntos mais assistidos"
+                    headline={assuntoLider ? formatPercent(assuntoLider.parte) : '—'}
+                    headlineLabel={assuntoLider ? `em ${assuntoLider.categoria}` : undefined}
+                    description={`Aulas concluídas por categoria de curso · últimos ${periodo} dias`}
+                    isLoading={assuntos.isLoading}
+                    isError={assuntos.isError}
+                    onRetry={() => void assuntos.refetch()}
+                    isEmpty={assuntos.data?.length === 0}
+                  >
+                    <CategoryBarChart
+                      layout="bar"
+                      label="Aulas concluídas"
+                      data={(assuntos.data ?? []).map((a) => ({
+                        category: a.categoria,
+                        value: a.aulas_concluidas,
+                      }))}
+                      valueFormatter={formatInt}
+                      className="h-[280px]"
+                    />
+                  </ChartCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+            </div>
           ),
           conclusao: (
-            <BentoGrid>
-              <BentoItem span={8}>
-                <ChartCard
-                  tone="brand"
-                  nivel="diagnostico"
-                  id="card-duracao"
-                  icon={TimerIcon}
-                  title="Duração de aula que maximiza conclusão"
-                  headline={
-                    melhorDuracao?.taxa_media != null
-                      ? formatPercent(melhorDuracao.taxa_media)
-                      : '—'
-                  }
-                  headlineLabel={melhorDuracao ? `na faixa ${melhorDuracao.faixa}` : undefined}
-                  description="Taxa de conclusão normalizada por curso (conclusões da aula ÷ aula mais vista do mesmo curso) · só curso E aula publicados, com 50+ conclusões · faixa com menos de 10 aulas não vira média · a queda com a duração é real mas suave, e acima de 30 min não há aula publicada suficiente para afirmar — o precipício que esta tela mostrava vinha de 76 aulas longas em cursos não publicados"
-                  isLoading={duracao.isLoading}
-                  isError={duracao.isError}
-                  onRetry={() => void duracao.refetch()}
-                  isEmpty={duracao.data?.length === 0}
-                >
-                  <CategoryBarChart
-                    label="Taxa de conclusão"
-                    data={(duracao.data ?? []).map((d) => ({
-                      category: `${d.faixa} (${formatInt(d.aulas)} aulas)`,
-                      value: d.taxa_media ?? 0,
-                    }))}
-                    valueFormatter={formatPercent}
-                    className="h-[300px]"
-                  />
-                </ChartCard>
-              </BentoItem>
+            <div className="space-y-4">
+              <SecaoDeAnalise
+                titulo="O que decide se o aluno chega ao fim"
+                icone={CheckCheckIcon}
+                descricao="Os dois primeiros contam aula — taxa normalizada dentro do próprio curso, sobre todo o catálogo publicado, sem recorte de período. O terceiro troca de unidade e conta aluno, em coorte de 90+ dias desde a 1ª aula. Cada taxa tem denominador próprio: elas não se somam nem se comparam entre si."
+              >
+                <BentoItem span={8}>
+                  <ChartCard
+                    tone="brand"
+                    nivel="diagnostico"
+                    id="card-duracao"
+                    icon={TimerIcon}
+                    title="Duração de aula que maximiza conclusão"
+                    headline={
+                      melhorDuracao?.taxa_media != null
+                        ? formatPercent(melhorDuracao.taxa_media)
+                        : '—'
+                    }
+                    headlineLabel={melhorDuracao ? `na faixa ${melhorDuracao.faixa}` : undefined}
+                    description="Taxa de conclusão normalizada por curso (conclusões da aula ÷ aula mais vista do mesmo curso) · só curso E aula publicados, com 50+ conclusões · faixa com menos de 10 aulas não vira média · a queda com a duração é real mas suave, e acima de 30 min não há aula publicada suficiente para afirmar — o precipício que esta tela mostrava vinha de 76 aulas longas em cursos não publicados"
+                    isLoading={duracao.isLoading}
+                    isError={duracao.isError}
+                    onRetry={() => void duracao.refetch()}
+                    isEmpty={duracao.data?.length === 0}
+                  >
+                    <CategoryBarChart
+                      label="Taxa de conclusão"
+                      data={(duracao.data ?? []).map((d) => ({
+                        category: `${d.faixa} (${formatInt(d.aulas)} aulas)`,
+                        value: d.taxa_media ?? 0,
+                      }))}
+                      valueFormatter={formatPercent}
+                      className="h-[300px]"
+                    />
+                  </ChartCard>
+                </BentoItem>
 
-              <BentoItem span={4}>
-                <ChartCard
-                  nivel="diagnostico"
-                  id="card-dropoff"
-                  icon={TrendingDownIcon}
-                  title="Onde o aluno para no curso"
-                  headline={chegamAoFim != null ? formatPercent(chegamAoFim) : '—'}
-                  headlineLabel="chegam ao fim da grade"
-                  description="Sobrevivência média por posição da aula (conclusões ÷ 1ª aula do curso) · decis da grade"
-                  isLoading={dropoff.isLoading}
-                  isError={dropoff.isError}
-                  onRetry={() => void dropoff.refetch()}
-                  isEmpty={dropoff.data?.length === 0}
-                >
-                  <CategoryBarChart
-                    label="Sobrevivência"
-                    data={(dropoff.data ?? []).map((d) => ({
-                      category: `${d.decil * 10}%`,
-                      value: d.taxa_media ?? 0,
-                    }))}
-                    valueFormatter={formatPercent}
-                    className="h-[280px]"
-                  />
-                </ChartCard>
-              </BentoItem>
+                <BentoItem span={4}>
+                  <ChartCard
+                    nivel="diagnostico"
+                    id="card-dropoff"
+                    icon={TrendingDownIcon}
+                    title="Onde o aluno para no curso"
+                    headline={chegamAoFim != null ? formatPercent(chegamAoFim) : '—'}
+                    headlineLabel="chegam ao fim da grade"
+                    description="Sobrevivência média por posição da aula (conclusões ÷ 1ª aula do curso) · decis da grade"
+                    isLoading={dropoff.isLoading}
+                    isError={dropoff.isError}
+                    onRetry={() => void dropoff.refetch()}
+                    isEmpty={dropoff.data?.length === 0}
+                  >
+                    <CategoryBarChart
+                      label="Sobrevivência"
+                      data={(dropoff.data ?? []).map((d) => ({
+                        category: `${d.decil * 10}%`,
+                        value: d.taxa_media ?? 0,
+                      }))}
+                      valueFormatter={formatPercent}
+                      className="h-[280px]"
+                    />
+                  </ChartCard>
+                </BentoItem>
 
-              <BentoItem span={12}>
-                <TabelaCard
-                  nivel="comparativo"
-                  id="card-entrada-na-grade"
-                  icon={DoorOpenIcon}
-                  title="Quem começa pela primeira aula termina mais"
-                  headline={pelaPrimeira?.pct != null ? formatPercent(pelaPrimeira.pct) : '—'}
-                  headlineLabel={
-                    noMeioDaGrade?.pct != null
-                      ? `certificam, contra ${formatPercent(noMeioDaGrade.pct)} de quem entra no meio`
-                      : 'certificam ao abrir o curso pela primeira aula'
-                  }
-                  description={
-                    pelaPrimeira
-                      ? `Alunos com 90+ dias desde a 1ª aula daquele curso · margem de ${formatDecimal(pelaPrimeira.margem_pp)} pp — a diferença precisa passar disso para não ser ruído · entrar no meio também descreve quem já conhecia o assunto, e isso não sai daqui`
-                      : 'Alunos com 90+ dias desde a 1ª aula daquele curso'
-                  }
-                  isLoading={entradaGrade.isLoading}
-                  isError={entradaGrade.isError}
-                  onRetry={() => void entradaGrade.refetch()}
-                  linhasEsqueleto={2}
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Por onde abriu o curso</TableHead>
-                        <TableHead className="text-right">Alunos</TableHead>
-                        <TableHead className="text-right">Certificaram</TableHead>
-                        <TableHead className="text-right">Taxa</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(entradaGrade.data ?? []).map((e) => (
-                        <TableRow key={e.grupo}>
-                          <TableCell className="font-medium">{e.grupo}</TableCell>
-                          <TableCell className="num text-right">{formatInt(e.alunos)}</TableCell>
-                          <TableCell className="num text-right">
-                            {formatInt(e.certificaram)}
-                          </TableCell>
-                          <TableCell className="num text-right font-medium">
-                            {e.pct != null ? formatPercent(e.pct) : '—'}
-                          </TableCell>
+                <BentoItem span={12}>
+                  <TabelaCard
+                    nivel="comparativo"
+                    id="card-entrada-na-grade"
+                    icon={DoorOpenIcon}
+                    title="Quem começa pela primeira aula termina mais"
+                    headline={pelaPrimeira?.pct != null ? formatPercent(pelaPrimeira.pct) : '—'}
+                    headlineLabel={
+                      noMeioDaGrade?.pct != null
+                        ? `certificam, contra ${formatPercent(noMeioDaGrade.pct)} de quem entra no meio`
+                        : 'certificam ao abrir o curso pela primeira aula'
+                    }
+                    description={
+                      pelaPrimeira
+                        ? `Alunos com 90+ dias desde a 1ª aula daquele curso · margem de ${formatDecimal(pelaPrimeira.margem_pp)} pp — a diferença precisa passar disso para não ser ruído · entrar no meio também descreve quem já conhecia o assunto, e isso não sai daqui`
+                        : 'Alunos com 90+ dias desde a 1ª aula daquele curso'
+                    }
+                    isLoading={entradaGrade.isLoading}
+                    isError={entradaGrade.isError}
+                    onRetry={() => void entradaGrade.refetch()}
+                    linhasEsqueleto={2}
+                  >
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Por onde abriu o curso</TableHead>
+                          <TableHead className="text-right">Alunos</TableHead>
+                          <TableHead className="text-right">Certificaram</TableHead>
+                          <TableHead className="text-right">Taxa</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabelaCard>
-              </BentoItem>
-            </BentoGrid>
+                      </TableHeader>
+                      <TableBody>
+                        {(entradaGrade.data ?? []).map((e) => (
+                          <TableRow key={e.grupo}>
+                            <TableCell className="font-medium">{e.grupo}</TableCell>
+                            <TableCell className="num text-right">{formatInt(e.alunos)}</TableCell>
+                            <TableCell className="num text-right">
+                              {formatInt(e.certificaram)}
+                            </TableCell>
+                            <TableCell className="num text-right font-medium">
+                              {e.pct != null ? formatPercent(e.pct) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TabelaCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+            </div>
           ),
           qualidade: (
-            <BentoGrid>
-              <BentoItem span={12}>
-                <TabelaCard
-                  nivel="comparativo"
-                  id="card-efeito-certificado"
-                  icon={AwardIcon}
-                  title="O certificado prende, ou só marca quem já estava preso?"
-                  headline={
-                    comCertificado?.pct_ativo != null
-                      ? formatPercent(comCertificado.pct_ativo)
-                      : '—'
-                  }
-                  headlineLabel={
-                    semCertificado?.pct_ativo != null
-                      ? `de quem certificou agiu no último mês, contra ${formatPercent(semCertificado.pct_ativo)}`
-                      : 'de quem certificou agiu no último mês'
-                  }
-                  description={
-                    comCertificado
-                      ? `Clientes com 120+ dias de casa · os dois lados já estudaram, de propósito: sem isso a conta viraria "quem usa o produto × quem não usa" · margem de ${formatDecimal(comCertificado.margem_pp)} pp · associação, não causa — quem já ia ficar também termina mais`
-                      : 'Clientes com 120+ dias de casa que já estudaram'
-                  }
-                  isLoading={efeitoCert.isLoading}
-                  isError={efeitoCert.isError}
-                  onRetry={() => void efeitoCert.refetch()}
-                  linhasEsqueleto={2}
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Grupo</TableHead>
-                        <TableHead className="text-right">Clientes</TableHead>
-                        <TableHead className="text-right">Agiram nos 30d</TableHead>
-                        <TableHead className="text-right">Taxa</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(efeitoCert.data ?? []).map((e) => (
-                        <TableRow key={e.grupo}>
-                          <TableCell className="font-medium">{e.grupo}</TableCell>
-                          <TableCell className="num text-right">{formatInt(e.clientes)}</TableCell>
-                          <TableCell className="num text-right">{formatInt(e.ativos)}</TableCell>
-                          <TableCell className="num text-right font-medium">
-                            {e.pct_ativo != null ? formatPercent(e.pct_ativo) : '—'}
+            <div className="space-y-4">
+              <SecaoDeAnalise
+                titulo="Quanto tempo leva até o certificado, e o que vem depois"
+                icone={RouteIcon}
+                descricao="Um olha para trás — quanto tempo a formação leva de quem já certificou — e o outro para a frente, comparando certificados com quem estudou e parou antes. As bases são recortadas por critérios diferentes (formação com volume mínimo de certificados de um lado, cliente com 120+ dias de casa do outro), então nenhum dos dois números explica o outro."
+              >
+                <BentoItem span={6}>
+                  <TabelaCard
+                    nivel="comparativo"
+                    id="card-efeito-certificado"
+                    icon={AwardIcon}
+                    title="O certificado prende, ou só marca quem já estava preso?"
+                    headline={
+                      comCertificado?.pct_ativo != null
+                        ? formatPercent(comCertificado.pct_ativo)
+                        : '—'
+                    }
+                    headlineLabel={
+                      semCertificado?.pct_ativo != null
+                        ? `de quem certificou agiu no último mês, contra ${formatPercent(semCertificado.pct_ativo)}`
+                        : 'de quem certificou agiu no último mês'
+                    }
+                    description={
+                      comCertificado
+                        ? `Clientes com 120+ dias de casa · os dois lados já estudaram, de propósito: sem isso a conta viraria "quem usa o produto × quem não usa" · margem de ${formatDecimal(comCertificado.margem_pp)} pp · associação, não causa — quem já ia ficar também termina mais`
+                        : 'Clientes com 120+ dias de casa que já estudaram'
+                    }
+                    isLoading={efeitoCert.isLoading}
+                    isError={efeitoCert.isError}
+                    onRetry={() => void efeitoCert.refetch()}
+                    linhasEsqueleto={2}
+                  >
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Grupo</TableHead>
+                          <TableHead className="text-right">Clientes</TableHead>
+                          <TableHead className="text-right">Agiram nos 30d</TableHead>
+                          <TableHead className="text-right">Taxa</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(efeitoCert.data ?? []).map((e) => (
+                          <TableRow key={e.grupo}>
+                            <TableCell className="font-medium">{e.grupo}</TableCell>
+                            <TableCell className="num text-right">
+                              {formatInt(e.clientes)}
+                            </TableCell>
+                            <TableCell className="num text-right">{formatInt(e.ativos)}</TableCell>
+                            <TableCell className="num text-right font-medium">
+                              {e.pct_ativo != null ? formatPercent(e.pct_ativo) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TabelaCard>
+                </BentoItem>
+
+                <BentoItem span={6}>
+                  <TabelaCard
+                    nivel="descritivo"
+                    id="card-jornada"
+                    icon={HourglassIcon}
+                    title="Tempo até o certificado"
+                    headline={cursoMediano != null ? formatDecimal(cursoMediano) : '—'}
+                    headlineLabel="dias na formação mediana"
+                    description="Mediana de dias entre a 1ª aula iniciada e o certificado · cursos com 20+ certificados · 0 = concluído no mesmo dia · o número acima é a formação do meio da lista, não uma média"
+                    isLoading={jornada.isLoading}
+                    isError={jornada.isError}
+                    onRetry={() => void jornada.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={jornada.data ?? []}
+                      chave={(j) => String(j.curso)}
+                      buscarEm={(j) => [j.curso]}
+                      rotuloBusca="Buscar por formação"
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Formação</TableHead>
+                          <TableHead className="text-right">Certificados</TableHead>
+                          <TableHead className="text-right">Mediana (dias)</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(j) => (
+                        <TableRow>
+                          <TableCell className="max-w-56 truncate font-medium">{j.curso}</TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(j.certificados)}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {j.mediana_dias != null ? formatDecimal(j.mediana_dias) : '—'}
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabelaCard>
-              </BentoItem>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
+              </SecaoDeAnalise>
 
-              <BentoItem span={6}>
-                <TabelaCard
-                  nivel="descritivo"
-                  id="card-jornada"
-                  icon={AwardIcon}
-                  title="Tempo até o certificado"
-                  headline={cursoMediano != null ? formatDecimal(cursoMediano) : '—'}
-                  headlineLabel="dias na formação mediana"
-                  description="Mediana de dias entre a 1ª aula iniciada e o certificado · cursos com 20+ certificados · 0 = concluído no mesmo dia · o número acima é a formação do meio da lista, não uma média"
-                  isLoading={jornada.isLoading}
-                  isError={jornada.isError}
-                  onRetry={() => void jornada.refetch()}
-                >
-                  <TabelaLonga
-                    linhas={jornada.data ?? []}
-                    chave={(j) => String(j.curso)}
-                    buscarEm={(j) => [j.curso]}
-                    rotuloBusca="Buscar por formação"
-                    cabecalho={
-                      <TableRow>
-                        <TableHead>Formação</TableHead>
-                        <TableHead className="text-right">Certificados</TableHead>
-                        <TableHead className="text-right">Mediana (dias)</TableHead>
-                      </TableRow>
+              <SecaoDeAnalise
+                titulo="O que o aluno diz sobre a aula"
+                icone={MessageSquareIcon}
+                descricao="Única leitura do módulo que não sai de comportamento: é resposta declarada, e só de quem escolheu responder — quem abandonou o curso raramente responde, então a base já entra puxada para cima. A nota nasce na aula e sobe para o curso, de modo que uma aula ruim se dilui na média da formação."
+              >
+                <BentoItem span={12}>
+                  <TabelaCard
+                    nivel="prescritivo"
+                    icon={StarIcon}
+                    title="NPS por formação"
+                    headline={
+                      piorNps?.pct_detratores != null ? formatPercent(piorNps.pct_detratores) : '—'
                     }
-                    renderLinha={(j) => (
-                      <TableRow>
-                        <TableCell className="max-w-56 truncate font-medium">{j.curso}</TableCell>
-                        <TableCell className="num text-right">{formatInt(j.certificados)}</TableCell>
-                        <TableCell className="num text-right">
-                          {j.mediana_dias != null ? formatDecimal(j.mediana_dias) : '—'}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  />
-                </TabelaCard>
-
-              </BentoItem>
-
-              <BentoItem span={6}>
-                <TabelaCard
-                  nivel="prescritivo"
-                  icon={StarIcon}
-                  title="NPS por formação"
-                  headline={
-                    piorNps?.pct_detratores != null ? formatPercent(piorNps.pct_detratores) : '—'
-                  }
-                  headlineLabel="de detratores na pior formação"
-                  description="Escala 0–10 por aula, agregado por curso · 10+ respostas · média geral 9,5 tem viés de positividade — o sinal está nos detratores"
-                  isLoading={nps.isLoading}
-                  isError={nps.isError}
-                  onRetry={() => void nps.refetch()}
-                >
-                  <TabelaLonga
-                    linhas={nps.data ?? []}
-                    chave={(n) => String(n.curso)}
-                    buscarEm={(n) => [n.curso]}
-                    rotuloBusca="Buscar por formação"
-                    cabecalho={
-                      <TableRow>
-                        <TableHead>Formação</TableHead>
-                        <TableHead className="text-right">Respostas</TableHead>
-                        <TableHead className="text-right">Média</TableHead>
-                        <TableHead className="text-right">Detratores</TableHead>
-                      </TableRow>
-                    }
-                    renderLinha={(n) => (
-                      <TableRow>
-                        <TableCell className="max-w-56 truncate font-medium">{n.curso}</TableCell>
-                        <TableCell className="num text-right">{formatInt(n.respostas)}</TableCell>
-                        <TableCell className="num text-right">
-                          {n.media != null ? formatDecimal(n.media) : '—'}
-                        </TableCell>
-                        <TableCell className="num text-right">
-                          {n.pct_detratores != null ? formatPercent(n.pct_detratores) : '—'}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  />
-                </TabelaCard>
-              </BentoItem>
-            </BentoGrid>
+                    headlineLabel="de detratores na pior formação"
+                    description="Escala 0–10 por aula, agregado por curso · 10+ respostas · média geral 9,5 tem viés de positividade — o sinal está nos detratores"
+                    isLoading={nps.isLoading}
+                    isError={nps.isError}
+                    onRetry={() => void nps.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={nps.data ?? []}
+                      chave={(n) => String(n.curso)}
+                      buscarEm={(n) => [n.curso]}
+                      rotuloBusca="Buscar por formação"
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Formação</TableHead>
+                          <TableHead className="text-right">Respostas</TableHead>
+                          <TableHead className="text-right">Média</TableHead>
+                          <TableHead className="text-right">Detratores</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(n) => (
+                        <TableRow>
+                          <TableCell className="max-w-56 truncate font-medium">{n.curso}</TableCell>
+                          <TableCell className="num text-right">{formatInt(n.respostas)}</TableCell>
+                          <TableCell className="num text-right">
+                            {n.media != null ? formatDecimal(n.media) : '—'}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {n.pct_detratores != null ? formatPercent(n.pct_detratores) : '—'}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+            </div>
           ),
         }}
       />

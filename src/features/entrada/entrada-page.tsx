@@ -1,16 +1,23 @@
 import { useMemo, useState } from 'react'
 import {
   BugIcon,
+  DoorClosedIcon,
+  FunnelIcon,
+  HourglassIcon,
   ListChecksIcon,
   LogInIcon,
   MailCheckIcon,
+  MilestoneIcon,
+  NetworkIcon,
   RouteIcon,
   SlidersHorizontalIcon,
   TimerIcon,
   UserPlusIcon,
 } from 'lucide-react'
-import { BentoCabecalho, BentoGrid, BentoItem } from '@/components/layout/bento'
+import { BentoItem } from '@/components/layout/bento'
+import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
+import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
@@ -99,384 +106,405 @@ export function EntradaPage() {
 
   return (
     <div className="space-y-4">
+      {/* Título, régua e controles saem de `nav-items.ts` — a página não
+          reescreve a própria régua. O frescor do dado anda junto dos controles. */}
+      <CabecalhoDeModulo controles={<PeriodoFiltro valor={periodo} onChange={setPeriodo} />} />
+
       {/* Fora das abas: contexto do módulo inteiro. Trocar de aba não pode
           custar o número de referência nem obrigar a reajustar o período. */}
-      <BentoGrid>
-        <BentoCabecalho>
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Entrada & Crescimento</h2>
-            <p className="text-muted-foreground text-sm">
-              Funil por safra de convites criados no período · onboarding e erros na porta
-            </p>
-          </div>
-          <PeriodoFiltro valor={periodo} onChange={setPeriodo} />
-        </BentoCabecalho>
-
-        <BentoItem span={12}>
-          <KpiGrid>
-            <KpiCard
-              label="Convites criados"
-              value={kpis.data?.convites ?? null}
-              format={formatInt}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-            <KpiCard
-              label="Conversão convite → cadastro"
-              value={kpis.data?.conversao ?? null}
-              format={formatPercent}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-            <KpiCard
-              label="Onboarding concluído (dos cadastrados)"
-              value={kpis.data?.onboarding_pct ?? null}
-              format={formatPercent}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-            <KpiCard
-              label="Erros de login"
-              value={kpis.data?.erros_login ?? null}
-              format={formatInt}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-          </KpiGrid>
-        </BentoItem>
-      </BentoGrid>
+      <KpiGrid>
+        <KpiCard
+          label="Convites criados"
+          value={kpis.data?.convites ?? null}
+          format={formatInt}
+          isLoading={kpis.isLoading}
+          isError={kpis.isError}
+        />
+        <KpiCard
+          label="Conversão convite → cadastro"
+          value={kpis.data?.conversao ?? null}
+          format={formatPercent}
+          isLoading={kpis.isLoading}
+          isError={kpis.isError}
+        />
+        <KpiCard
+          label="Onboarding concluído (dos cadastrados)"
+          value={kpis.data?.onboarding_pct ?? null}
+          format={formatPercent}
+          isLoading={kpis.isLoading}
+          isError={kpis.isError}
+        />
+        <KpiCard
+          label="Erros de login"
+          value={kpis.data?.erros_login ?? null}
+          format={formatInt}
+          isLoading={kpis.isLoading}
+          isError={kpis.isError}
+        />
+      </KpiGrid>
 
       <ModuloTabs
         rota="/entrada"
         conteudos={{
           analise: <AnaliseDaTela tela="entrada" periodo={periodo} />,
           funil: (
-            <BentoGrid>
-              <BentoItem span={12}>
-                <TabelaCard
-                  nivel="diagnostico"
-                  id="card-funil-entrada"
-                  icon={SlidersHorizontalIcon}
-                  title="Funil de entrada"
-                  headline={
-                    chegamNaPrimeiraAcao != null ? formatPercent(chegamNaPrimeiraAcao) : '—'
-                  }
-                  headlineLabel="dos convites chegam à 1ª ação"
-                  description={`Safra: convites criados nos últimos ${periodo} dias, acompanhados até a 1ª ação · convites deletados fora · etapa de envio não aparece: o rastreamento de entrega da plataforma parou em abr/2026 (registrado para reporte)`}
-                  isLoading={funil.isLoading}
-                  isError={funil.isError}
-                  onRetry={() => void funil.refetch()}
-                  linhasEsqueleto={4}
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Etapa</TableHead>
-                        <TableHead className="text-right">Quantidade</TableHead>
-                        <TableHead className="text-right">% do início</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(funil.data ?? []).map((f) => (
-                        <TableRow key={f.etapa}>
-                          <TableCell className="font-medium">{f.etapa}</TableCell>
-                          <TableCell className="num text-right">{formatInt(f.quantidade)}</TableCell>
-                          <TableCell
-                            className="num text-right"
-                            style={fundoIntensidade(f.pct_do_inicio)}
-                          >
-                            {f.pct_do_inicio != null ? formatPercent(f.pct_do_inicio) : '—'}
-                          </TableCell>
+            <div className="space-y-4">
+              <SecaoDeAnalise
+                titulo="Quantos convites viram gente dentro da plataforma"
+                icone={FunnelIcon}
+                descricao="Os dois cards contam convites, não pessoas — convite recusado e cliente que nunca apareceu são fatos diferentes, e só o primeiro está aqui. A janela é o que os separa: o funil acompanha a safra do período escolhido, enquanto o aceite só admite convite com mais de 30 dias, para não registrar como recusa o que ainda pode ser aceito."
+              >
+                <BentoItem span={6}>
+                  <TabelaCard
+                    nivel="diagnostico"
+                    id="card-funil-entrada"
+                    icon={SlidersHorizontalIcon}
+                    title="Funil de entrada"
+                    headline={
+                      chegamNaPrimeiraAcao != null ? formatPercent(chegamNaPrimeiraAcao) : '—'
+                    }
+                    headlineLabel="dos convites chegam à 1ª ação"
+                    description={`Safra: convites criados nos últimos ${periodo} dias, acompanhados até a 1ª ação · convites deletados fora · etapa de envio não aparece: o rastreamento de entrega da plataforma parou em abr/2026 (registrado para reporte)`}
+                    isLoading={funil.isLoading}
+                    isError={funil.isError}
+                    onRetry={() => void funil.refetch()}
+                    linhasEsqueleto={4}
+                  >
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Etapa</TableHead>
+                          <TableHead className="text-right">Quantidade</TableHead>
+                          <TableHead className="text-right">% do início</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabelaCard>
-              </BentoItem>
+                      </TableHeader>
+                      <TableBody>
+                        {(funil.data ?? []).map((f) => (
+                          <TableRow key={f.etapa}>
+                            <TableCell className="font-medium">{f.etapa}</TableCell>
+                            <TableCell className="num text-right">
+                              {formatInt(f.quantidade)}
+                            </TableCell>
+                            <TableCell
+                              className="num text-right"
+                              style={fundoIntensidade(f.pct_do_inicio)}
+                            >
+                              {f.pct_do_inicio != null ? formatPercent(f.pct_do_inicio) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TabelaCard>
+                </BentoItem>
 
-              <BentoItem span={6}>
-                <TabelaCard
-                  nivel="comparativo"
-                  id="card-tempo-primeira-acao"
-                  icon={TimerIcon}
-                  title="Quem comprou age; quem foi convidado, não"
-                  headline={
-                    nuncaAgiu?.pct_convidado != null ? formatPercent(nuncaAgiu.pct_convidado) : '—'
-                  }
-                  headlineLabel="dos convidados nunca fizeram nada"
-                  description="Safra fechada: entrou entre 180 e 30 dias atrás, todos com a mesma janela para agir · comprador = dono da organização"
-                  isLoading={origem.isLoading}
-                  isError={origem.isError}
-                  onRetry={() => void origem.refetch()}
-                  linhasEsqueleto={4}
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Quando agiu pela 1ª vez</TableHead>
-                        <TableHead className="text-right">
-                          Comprador ({formatInt(nuncaAgiu?.base_comprador ?? 0)})
-                        </TableHead>
-                        <TableHead className="text-right">
-                          Convidado ({formatInt(nuncaAgiu?.base_convidado ?? 0)})
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(origem.data ?? []).map((o) => (
-                        <TableRow key={o.faixa}>
-                          <TableCell className="font-medium">{o.faixa}</TableCell>
-                          <TableCell
-                            className="num text-right"
-                            style={fundoIntensidade(o.pct_comprador)}
-                          >
-                            {o.pct_comprador != null ? formatPercent(o.pct_comprador) : '—'}
-                          </TableCell>
-                          <TableCell
-                            className="num text-right"
-                            style={fundoIntensidade(o.pct_convidado)}
-                          >
-                            {o.pct_convidado != null ? formatPercent(o.pct_convidado) : '—'}
-                          </TableCell>
+                <BentoItem span={6}>
+                  <ChartCard
+                    tone="brand"
+                    nivel="diagnostico"
+                    id="card-aceite-convite"
+                    icon={MailCheckIcon}
+                    title="O convite é aceito na hora, ou não é aceito"
+                    headline={convitesNunca?.pct != null ? formatPercent(convitesNunca.pct) : '—'}
+                    headlineLabel={
+                      convitesNunca
+                        ? `nunca aceitos · mediana de ${formatDecimal(convitesNunca.mediana_horas)}h para os aceitos`
+                        : undefined
+                    }
+                    description="Convites criados há mais de 30 dias, não deletados · “Nunca aceito” não separa ignorado de nunca enviado: o rastreamento de envio da plataforma parou em abr/2026"
+                    isLoading={aceite.isLoading}
+                    isError={aceite.isError}
+                    onRetry={() => void aceite.refetch()}
+                    isEmpty={aceite.data?.length === 0}
+                  >
+                    <CategoryBarChart
+                      layout="bar"
+                      label="Convites"
+                      data={(aceite.data ?? []).map((a) => ({
+                        category: a.faixa,
+                        value: a.pct ?? 0,
+                        nota: `${formatInt(a.convites)} convites`,
+                        // A barra de "nunca aceito" é o problema, não o resultado:
+                        // recua para o cinza para que as faixas de aceite, que são
+                        // o que se quer ler em conjunto, fiquem com a cor.
+                        mute: a.faixa === 'Nunca aceito',
+                      }))}
+                      valueFormatter={formatPercent}
+                      className="h-[300px]"
+                    />
+                  </ChartCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+
+              <SecaoDeAnalise
+                titulo="Depois de entrar, quanto tempo até a primeira ação"
+                icone={HourglassIcon}
+                descricao="Safra fechada e única, para que comprador e convidado tenham tido exatamente a mesma janela de oportunidade. É por isso que estes números não conversam com os da seção acima: lá a safra é a do período escolhido, e quem entrou ontem ainda conta como quem não agiu."
+              >
+                <BentoItem span={12}>
+                  <TabelaCard
+                    nivel="comparativo"
+                    id="card-tempo-primeira-acao"
+                    icon={TimerIcon}
+                    title="Quem comprou age; quem foi convidado, não"
+                    headline={
+                      nuncaAgiu?.pct_convidado != null ? formatPercent(nuncaAgiu.pct_convidado) : '—'
+                    }
+                    headlineLabel="dos convidados nunca fizeram nada"
+                    description="Safra fechada: entrou entre 180 e 30 dias atrás, todos com a mesma janela para agir · comprador = dono da organização"
+                    isLoading={origem.isLoading}
+                    isError={origem.isError}
+                    onRetry={() => void origem.refetch()}
+                    linhasEsqueleto={4}
+                  >
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Quando agiu pela 1ª vez</TableHead>
+                          <TableHead className="text-right">
+                            Comprador ({formatInt(nuncaAgiu?.base_comprador ?? 0)})
+                          </TableHead>
+                          <TableHead className="text-right">
+                            Convidado ({formatInt(nuncaAgiu?.base_convidado ?? 0)})
+                          </TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabelaCard>
-              </BentoItem>
-
-              <BentoItem span={6}>
-                <ChartCard
-                  tone="brand"
-                  nivel="diagnostico"
-                  id="card-aceite-convite"
-                  icon={MailCheckIcon}
-                  title="O convite é aceito na hora, ou não é aceito"
-                  headline={
-                    convitesNunca?.pct != null ? formatPercent(convitesNunca.pct) : '—'
-                  }
-                  headlineLabel={
-                    convitesNunca
-                      ? `nunca aceitos · mediana de ${formatDecimal(convitesNunca.mediana_horas)}h para os aceitos`
-                      : undefined
-                  }
-                  description="Convites criados há mais de 30 dias, não deletados · “Nunca aceito” não separa ignorado de nunca enviado: o rastreamento de envio da plataforma parou em abr/2026"
-                  isLoading={aceite.isLoading}
-                  isError={aceite.isError}
-                  onRetry={() => void aceite.refetch()}
-                  isEmpty={aceite.data?.length === 0}
-                >
-                  <CategoryBarChart
-                    layout="bar"
-                    label="Convites"
-                    data={(aceite.data ?? []).map((a) => ({
-                      category: a.faixa,
-                      value: a.pct ?? 0,
-                      nota: `${formatInt(a.convites)} convites`,
-                      // A barra de "nunca aceito" é o problema, não o resultado:
-                      // recua para o cinza para que as faixas de aceite, que são
-                      // o que se quer ler em conjunto, fiquem com a cor.
-                      mute: a.faixa === 'Nunca aceito',
-                    }))}
-                    valueFormatter={formatPercent}
-                    className="h-[300px]"
-                  />
-                </ChartCard>
-              </BentoItem>
-            </BentoGrid>
+                      </TableHeader>
+                      <TableBody>
+                        {(origem.data ?? []).map((o) => (
+                          <TableRow key={o.faixa}>
+                            <TableCell className="font-medium">{o.faixa}</TableCell>
+                            <TableCell
+                              className="num text-right"
+                              style={fundoIntensidade(o.pct_comprador)}
+                            >
+                              {o.pct_comprador != null ? formatPercent(o.pct_comprador) : '—'}
+                            </TableCell>
+                            <TableCell
+                              className="num text-right"
+                              style={fundoIntensidade(o.pct_convidado)}
+                            >
+                              {o.pct_convidado != null ? formatPercent(o.pct_convidado) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TabelaCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+            </div>
           ),
           onboarding: (
-            <BentoGrid>
-              <BentoItem span={6}>
-                <TabelaCard
-                  nivel="comparativo"
-                  id="card-efeito-onboarding"
-                  icon={RouteIcon}
-                  title="Quem não termina o onboarding não volta"
-                  headline={
-                    semOnboarding?.pct_ativo != null ? formatPercent(semOnboarding.pct_ativo) : '—'
-                  }
-                  headlineLabel="de quem parou no meio agiu no último mês"
-                  description="Clientes com 120+ dias de casa · associação, não causa: quem já ia sumir também não terminou o onboarding, e a ordem entre as duas coisas não sai deste card"
-                  isLoading={efeitoOnboarding.isLoading}
-                  isError={efeitoOnboarding.isError}
-                  onRetry={() => void efeitoOnboarding.refetch()}
-                  linhasEsqueleto={2}
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Grupo</TableHead>
-                        <TableHead className="text-right">Clientes</TableHead>
-                        <TableHead className="text-right">Agiram nos 30d</TableHead>
-                        <TableHead className="text-right">Taxa</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(efeitoOnboarding.data ?? []).map((e) => (
-                        <TableRow key={e.grupo}>
-                          <TableCell className="font-medium">{e.grupo}</TableCell>
-                          <TableCell className="num text-right">
-                            {formatInt(e.clientes)}
+            <div className="space-y-4">
+              <SecaoDeAnalise
+                titulo="O que acontece com quem não termina o onboarding"
+                icone={MilestoneIcon}
+                descricao="As bases não são as mesmas: a distribuição por etapa é a foto de todo mundo que ficou pelo caminho, hoje, e a comparação de retorno só admite quem tem 120+ dias de casa. Um card não fecha no outro — são recortes de tempo diferentes sobre a mesma etapa inacabada."
+              >
+                <BentoItem span={6}>
+                  <TabelaCard
+                    nivel="comparativo"
+                    id="card-efeito-onboarding"
+                    icon={RouteIcon}
+                    title="Quem não termina o onboarding não volta"
+                    headline={
+                      semOnboarding?.pct_ativo != null ? formatPercent(semOnboarding.pct_ativo) : '—'
+                    }
+                    headlineLabel="de quem parou no meio agiu no último mês"
+                    description="Clientes com 120+ dias de casa · associação, não causa: quem já ia sumir também não terminou o onboarding, e a ordem entre as duas coisas não sai deste card"
+                    isLoading={efeitoOnboarding.isLoading}
+                    isError={efeitoOnboarding.isError}
+                    onRetry={() => void efeitoOnboarding.refetch()}
+                    linhasEsqueleto={2}
+                  >
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Grupo</TableHead>
+                          <TableHead className="text-right">Clientes</TableHead>
+                          <TableHead className="text-right">Agiram nos 30d</TableHead>
+                          <TableHead className="text-right">Taxa</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(efeitoOnboarding.data ?? []).map((e) => (
+                          <TableRow key={e.grupo}>
+                            <TableCell className="font-medium">{e.grupo}</TableCell>
+                            <TableCell className="num text-right">
+                              {formatInt(e.clientes)}
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {formatInt(e.ativos)}
+                            </TableCell>
+                            <TableCell className="num text-right font-medium">
+                              {e.pct_ativo != null ? formatPercent(e.pct_ativo) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TabelaCard>
+                </BentoItem>
+
+                <BentoItem span={6}>
+                  <ChartCard
+                    nivel="descritivo"
+                    id="card-onboarding-abandono"
+                    icon={ListChecksIcon}
+                    title="Onde os incompletos param"
+                    headline={formatInt(incompletos)}
+                    headlineLabel="não concluíram o onboarding"
+                    description="Distribuição por etapa atual de quem não concluiu · o número que estava aqui era escrito à mão e estava errado (dizia 89,5% quando a régua e_cliente dá 92,5%); percentual só entra vindo do banco"
+                    isLoading={onboarding.isLoading}
+                    isError={onboarding.isError}
+                    onRetry={() => void onboarding.refetch()}
+                    isEmpty={onboarding.data?.length === 0}
+                  >
+                    <CategoryBarChart
+                      label="Clientes"
+                      data={(onboarding.data ?? []).map((o) => ({
+                        category: `Etapa ${o.step_atual}`,
+                        value: o.clientes,
+                      }))}
+                      valueFormatter={formatInt}
+                      className="h-[300px]"
+                    />
+                  </ChartCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+
+              <SecaoDeAnalise
+                titulo="Quem traz gente nova para dentro"
+                icone={NetworkIcon}
+                descricao="Único bloco da tela que olha para quem convida, e não para quem foi convidado — e o único que ignora o seletor de período: os números valem desde o começo, então o topo da lista se move devagar e não reage ao filtro do cabeçalho."
+              >
+                <BentoItem span={12}>
+                  <TabelaCard
+                    nivel="descritivo"
+                    id="card-masters-convites"
+                    icon={UserPlusIcon}
+                    title="Masters × convites"
+                    headline={
+                      mastersResumo.data
+                        ? formatPercent(mastersResumo.data.pct_convidam ?? 0)
+                        : '—'
+                    }
+                    headlineLabel="dos masters já convidaram alguém"
+                    description={
+                      mastersResumo.data
+                        ? `${formatInt(mastersResumo.data.masters_total)} masters, dos quais ${formatInt(mastersResumo.data.masters_convidaram)} já convidaram · conversão dos convites de masters: ${formatPercent(mastersResumo.data.conversao_convites ?? 0)} · histórico completo`
+                        : 'Quem traz gente para dentro — histórico completo'
+                    }
+                    isLoading={mastersTop.isLoading}
+                    isError={mastersTop.isError}
+                    onRetry={() => void mastersTop.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={mastersTop.data ?? []}
+                      limiteDaFonte={LIMITE_LISTA}
+                      chave={(m) => String(m.email)}
+                      buscarEm={(m) => [m.nome, m.email]}
+                      rotuloBusca="Buscar por nome ou e-mail"
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Master</TableHead>
+                          <TableHead>Organização</TableHead>
+                          <TableHead className="text-right">Convites</TableHead>
+                          <TableHead className="text-right">Usados</TableHead>
+                          <TableHead className="text-right">Conversão</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(m) => (
+                        <TableRow>
+                          <TableCell>
+                            <div className="font-medium">{m.nome ?? '—'}</div>
+                            <div className="text-muted-foreground text-xs">{m.email}</div>
                           </TableCell>
+                          <TableCell>{m.organizacao ?? '—'}</TableCell>
+                          <TableCell className="num text-right">{formatInt(m.convites)}</TableCell>
+                          <TableCell className="num text-right">{formatInt(m.usados)}</TableCell>
                           <TableCell className="num text-right">
-                            {formatInt(e.ativos)}
-                          </TableCell>
-                          <TableCell className="num text-right font-medium">
-                            {e.pct_ativo != null ? formatPercent(e.pct_ativo) : '—'}
+                            {m.conversao != null ? formatPercent(m.conversao) : '—'}
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabelaCard>
-              </BentoItem>
-
-              <BentoItem span={6}>
-                <ChartCard
-                  nivel="descritivo"
-                  id="card-onboarding-abandono"
-                  icon={ListChecksIcon}
-                  title="Onde os incompletos param"
-                  headline={formatInt(incompletos)}
-                  headlineLabel="não concluíram o onboarding"
-                  description="Distribuição por etapa atual de quem não concluiu · o número que estava aqui era escrito à mão e estava errado (dizia 89,5% quando a régua e_cliente dá 92,5%); percentual só entra vindo do banco"
-                  isLoading={onboarding.isLoading}
-                  isError={onboarding.isError}
-                  onRetry={() => void onboarding.refetch()}
-                  isEmpty={onboarding.data?.length === 0}
-                >
-                  <CategoryBarChart
-                    label="Clientes"
-                    data={(onboarding.data ?? []).map((o) => ({
-                      category: `Etapa ${o.step_atual}`,
-                      value: o.clientes,
-                    }))}
-                    valueFormatter={formatInt}
-                    className="h-[300px]"
-                  />
-                </ChartCard>
-              </BentoItem>
-
-              <BentoItem span={12}>
-                <TabelaCard
-                  nivel="descritivo"
-                  id="card-masters-convites"
-                  icon={UserPlusIcon}
-                  title="Masters × convites"
-                  headline={
-                    mastersResumo.data
-                      ? formatPercent(mastersResumo.data.pct_convidam ?? 0)
-                      : '—'
-                  }
-                  headlineLabel="dos masters já convidaram alguém"
-                  description={
-                    mastersResumo.data
-                      ? `${formatInt(mastersResumo.data.masters_total)} masters, dos quais ${formatInt(mastersResumo.data.masters_convidaram)} já convidaram · conversão dos convites de masters: ${formatPercent(mastersResumo.data.conversao_convites ?? 0)} · histórico completo`
-                      : 'Quem traz gente para dentro — histórico completo'
-                  }
-                  isLoading={mastersTop.isLoading}
-                  isError={mastersTop.isError}
-                  onRetry={() => void mastersTop.refetch()}
-                >
-                  <TabelaLonga
-                    linhas={mastersTop.data ?? []}
-                    limiteDaFonte={LIMITE_LISTA}
-                    chave={(m) => String(m.email)}
-                    buscarEm={(m) => [m.nome, m.email]}
-                    rotuloBusca="Buscar por nome ou e-mail"
-                    cabecalho={
-                      <TableRow>
-                        <TableHead>Master</TableHead>
-                        <TableHead>Organização</TableHead>
-                        <TableHead className="text-right">Convites</TableHead>
-                        <TableHead className="text-right">Usados</TableHead>
-                        <TableHead className="text-right">Conversão</TableHead>
-                      </TableRow>
-                    }
-                    renderLinha={(m) => (
-                      <TableRow>
-                        <TableCell>
-                          <div className="font-medium">{m.nome ?? '—'}</div>
-                          <div className="text-muted-foreground text-xs">{m.email}</div>
-                        </TableCell>
-                        <TableCell>{m.organizacao ?? '—'}</TableCell>
-                        <TableCell className="num text-right">{formatInt(m.convites)}</TableCell>
-                        <TableCell className="num text-right">{formatInt(m.usados)}</TableCell>
-                        <TableCell className="num text-right">
-                          {m.conversao != null ? formatPercent(m.conversao) : '—'}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  />
-                </TabelaCard>
-              </BentoItem>
-            </BentoGrid>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+            </div>
           ),
           porta: (
-            <BentoGrid>
-              <BentoItem span={6}>
-                <ChartCard
-                  nivel="descritivo"
-                  id="card-erros-login"
-                  icon={LogInIcon}
-                  title="Erros de login por categoria"
-                  headline={erroDominante ? formatPercent(erroDominante.parte) : '—'}
-                  headlineLabel={erroDominante ? `em ${erroDominante.categoria}` : undefined}
-                  description={`auth_error_telemetry · últimos ${periodo} dias · invalid_credentials = senha errada (esperado); investigar FALLBACK`}
-                  isLoading={errosLogin.isLoading}
-                  isError={errosLogin.isError}
-                  onRetry={() => void errosLogin.refetch()}
-                  isEmpty={errosLogin.data?.length === 0}
-                >
-                  <CategoryBarChart
-                    layout="bar"
-                    label="Ocorrências"
-                    data={(errosLogin.data ?? []).map((e) => ({
-                      category: e.categoria,
-                      value: e.ocorrencias,
-                    }))}
-                    valueFormatter={formatInt}
-                    className="h-[300px]"
-                  />
-                </ChartCard>
+            <div className="space-y-4">
+              <SecaoDeAnalise
+                titulo="Onde o cliente esbarra antes de conseguir usar"
+                icone={DoorClosedIcon}
+                descricao="Duas telemetrias distintas, que não se somam: uma registra a tentativa de entrar que falhou, a outra o erro de JavaScript numa tela já aberta. As duas contam ocorrências, não pessoas — o mesmo cliente insistindo aparece várias vezes, então volume alto pode ser muita gente ou uma só."
+              >
+                <BentoItem span={6}>
+                  <ChartCard
+                    nivel="descritivo"
+                    id="card-erros-login"
+                    icon={LogInIcon}
+                    title="Erros de login por categoria"
+                    headline={erroDominante ? formatPercent(erroDominante.parte) : '—'}
+                    headlineLabel={erroDominante ? `em ${erroDominante.categoria}` : undefined}
+                    description={`auth_error_telemetry · últimos ${periodo} dias · invalid_credentials = senha errada (esperado); investigar FALLBACK`}
+                    isLoading={errosLogin.isLoading}
+                    isError={errosLogin.isError}
+                    onRetry={() => void errosLogin.refetch()}
+                    isEmpty={errosLogin.data?.length === 0}
+                  >
+                    <CategoryBarChart
+                      layout="bar"
+                      label="Ocorrências"
+                      data={(errosLogin.data ?? []).map((e) => ({
+                        category: e.categoria,
+                        value: e.ocorrencias,
+                      }))}
+                      valueFormatter={formatInt}
+                      className="h-[300px]"
+                    />
+                  </ChartCard>
+                </BentoItem>
 
-              </BentoItem>
-
-              <BentoItem span={6}>
-                <TabelaCard
-                  nivel="prescritivo"
-                  icon={BugIcon}
-                  title="Erros de JavaScript por tela"
-                  headline={piorTela ? formatInt(piorTela.ocorrencias) : '—'}
-                  headlineLabel={piorTela ? `na pior tela (${piorTela.tela})` : undefined}
-                  description={`client_error_logs · últimos ${periodo} dias · onde o cliente sofre`}
-                  isLoading={errosTela.isLoading}
-                  isError={errosTela.isError}
-                  onRetry={() => void errosTela.refetch()}
-                >
-                  <TabelaLonga
-                    linhas={errosTela.data ?? []}
-                    limiteDaFonte={LIMITE_LISTA}
-                    chave={(e) => String(e.tela)}
-                    buscarEm={(e) => [e.tela]}
-                    rotuloBusca="Buscar por tela"
-                    cabecalho={
-                      <TableRow>
-                        <TableHead>Tela</TableHead>
-                        <TableHead className="text-right">Ocorrências</TableHead>
-                      </TableRow>
-                    }
-                    renderLinha={(e) => (
-                      <TableRow>
-                        <TableCell className="font-mono text-xs">{e.tela}</TableCell>
-                        <TableCell className="num text-right">{formatInt(e.ocorrencias)}</TableCell>
-                      </TableRow>
-                    )}
-                  />
-                </TabelaCard>
-              </BentoItem>
-            </BentoGrid>
+                <BentoItem span={6}>
+                  <TabelaCard
+                    nivel="prescritivo"
+                    icon={BugIcon}
+                    title="Erros de JavaScript por tela"
+                    headline={piorTela ? formatInt(piorTela.ocorrencias) : '—'}
+                    headlineLabel={piorTela ? `na pior tela (${piorTela.tela})` : undefined}
+                    description={`client_error_logs · últimos ${periodo} dias · onde o cliente sofre`}
+                    isLoading={errosTela.isLoading}
+                    isError={errosTela.isError}
+                    onRetry={() => void errosTela.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={errosTela.data ?? []}
+                      limiteDaFonte={LIMITE_LISTA}
+                      chave={(e) => String(e.tela)}
+                      buscarEm={(e) => [e.tela]}
+                      rotuloBusca="Buscar por tela"
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Tela</TableHead>
+                          <TableHead className="text-right">Ocorrências</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(e) => (
+                        <TableRow>
+                          <TableCell className="font-mono text-xs">{e.tela}</TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(e.ocorrencias)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+            </div>
           ),
         }}
       />

@@ -1,9 +1,19 @@
 import { useMemo } from 'react'
-import { CreditCardIcon, LineChartIcon, SproutIcon, WalletIcon } from 'lucide-react'
+import {
+  BanknoteIcon,
+  CreditCardIcon,
+  LayersIcon,
+  LineChartIcon,
+  SproutIcon,
+  TriangleAlertIcon,
+  WalletIcon,
+} from 'lucide-react'
 
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid, TimeSeriesChart } from '@/components/charts'
-import { BentoGrid, BentoItem } from '@/components/layout/bento'
+import { BentoItem } from '@/components/layout/bento'
+import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
+import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
@@ -69,280 +79,301 @@ export function ReceitaPage() {
 
   return (
     <div className="space-y-4">
-      {/* Fora das abas: contexto do módulo inteiro. Trocar de aba não pode
-          custar o número de referência nem obrigar a reajustar o período. */}
-      <BentoGrid>
-        <BentoItem span={12}>
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Receita & Renovação</h2>
-            <p className="text-muted-foreground text-sm">
-              Receita reconhecida a partir dos webhooks de pagamento (Hubla), com faturas
-              deduplicadas
-            </p>
-          </div>
-        </BentoItem>
+      {/* Título e régua saem de `nav-items.ts` — a página não reescreve a
+          própria régua. Esta tela não tem período nem recorte: nada a controlar. */}
+      <CabecalhoDeModulo />
 
-        <BentoItem span={12}>
-          {/* Limitações são parte do dado: ficam visíveis, não em nota de rodapé */}
-          <Card className="border-destructive/40">
-            <CardHeader>
-              <CardTitle className="text-base">Leia antes de usar estes números</CardTitle>
-              <CardDescription className="space-y-1.5">
-                <span className="block">
-                  <strong>A fonte parou.</strong> O último webhook de pagamento recebido pela
-                  plataforma é de{' '}
-                  {dadosAte ? formatDateShort(dadosAte) : 'abr/2026'} — esta tela mostra o
-                  histórico até essa data e <strong>não reflete a receita de hoje</strong>.
-                </span>
-                <span className="block">
-                  <strong>A view de receita da plataforma está incorreta.</strong> A
-                  <code className="bg-muted mx-1 rounded px-1 py-0.5 text-xs">bi_receita_hubla</code>
-                  lê um caminho de JSON que não existe no payload real, então retorna vazio.
-                  Aqui usamos o caminho correto — os dois números não vão bater.
-                </span>
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </BentoItem>
+      {/* Limitações são parte do dado: ficam visíveis, fora das abas, não em
+          nota de rodapé. Valem para os gráficos e para a leitura escrita. */}
+      <Card className="border-destructive/40">
+        <CardHeader>
+          <CardTitle className="text-base">Leia antes de usar estes números</CardTitle>
+          <CardDescription className="space-y-1.5">
+            <span className="block">
+              <strong>A fonte parou.</strong> O último webhook de pagamento recebido pela plataforma
+              é de {dadosAte ? formatDateShort(dadosAte) : 'abr/2026'} — esta tela mostra o
+              histórico até essa data e <strong>não reflete a receita de hoje</strong>.
+            </span>
+            <span className="block">
+              <strong>A view de receita da plataforma está incorreta.</strong> A
+              <code className="bg-muted mx-1 rounded px-1 py-0.5 text-xs">bi_receita_hubla</code>
+              lê um caminho de JSON que não existe no payload real, então retorna vazio. Aqui usamos
+              o caminho correto — os dois números não vão bater.
+            </span>
+          </CardDescription>
+        </CardHeader>
+      </Card>
 
-        <BentoItem span={12}>
-          <KpiGrid>
-            <KpiCard
-              label="Receita reconhecida"
-              value={kpis.data?.receita_brl ?? null}
-              format={formatCurrencyCompact}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-            <KpiCard
-              label="Faturas pagas"
-              value={kpis.data?.faturas ?? null}
-              format={formatInt}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-            <KpiCard
-              label="Compradores"
-              value={kpis.data?.compradores ?? null}
-              format={formatInt}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-            <KpiCard
-              label="Ticket mediano"
-              value={kpis.data?.ticket_mediano ?? null}
-              format={formatCurrency}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-          </KpiGrid>
-        </BentoItem>
-      </BentoGrid>
+      {/* Fora das abas: contexto das duas. Trocar entre a leitura e os gráficos
+          não pode custar o número de referência. */}
+      <KpiGrid>
+        <KpiCard
+          label="Receita reconhecida"
+          value={kpis.data?.receita_brl ?? null}
+          format={formatCurrencyCompact}
+          isLoading={kpis.isLoading}
+          isError={kpis.isError}
+        />
+        <KpiCard
+          label="Faturas pagas"
+          value={kpis.data?.faturas ?? null}
+          format={formatInt}
+          isLoading={kpis.isLoading}
+          isError={kpis.isError}
+        />
+        <KpiCard
+          label="Compradores"
+          value={kpis.data?.compradores ?? null}
+          format={formatInt}
+          isLoading={kpis.isLoading}
+          isError={kpis.isError}
+        />
+        <KpiCard
+          label="Ticket mediano"
+          value={kpis.data?.ticket_mediano ?? null}
+          format={formatCurrency}
+          isLoading={kpis.isLoading}
+          isError={kpis.isError}
+        />
+      </KpiGrid>
 
       <ModuloTabs
         rota="/receita"
         conteudos={{
           analise: <AnaliseDaTela tela="receita" />,
           receita: (
-            <BentoGrid>
-              <BentoItem span={8}>
-                <ChartCard
-                  id="card-receita-mensal"
-                  tone="brand"
-                  icon={LineChartIcon}
-                  title="Receita por mês"
-                  headline={
-                    melhorMes?.receita_brl != null
-                      ? formatCurrencyCompact(melhorMes.receita_brl)
-                      : '—'
-                  }
-                  headlineLabel={melhorMes ? `no melhor mês (${formatMesAno(melhorMes.mes)})` : undefined}
-                  description="Faturas com pagamento aprovado · série encerra quando o rastreamento parou"
-                  isLoading={mensal.isLoading}
-                  isError={mensal.isError}
-                  onRetry={() => void mensal.refetch()}
-                  isEmpty={mensal.data?.length === 0}
-                >
-                  <TimeSeriesChart
-                    variant="area"
-                    data={(mensal.data ?? []).map((m) => ({ x: m.mes, receita: m.receita_brl ?? 0 }))}
-                    series={[{ dataKey: 'receita', label: 'Receita' }]}
-                    xTickFormatter={formatMesAno}
-                    valueFormatter={formatCurrencyCompact}
-                    className="h-[280px]"
-                  />
-                </ChartCard>
-              </BentoItem>
+            <div className="space-y-4">
+              <SecaoDeAnalise
+                titulo="Quanto entrou, e de quanta gente veio"
+                icone={BanknoteIcon}
+                descricao="Os dois cards saem da mesma série mensal de faturas aprovadas: um soma o valor, o outro conta pessoas distintas. Quando as duas curvas andam em ritmos diferentes, o que mudou foi o ticket, não o tamanho da base — e as duas terminam no mês do último webhook recebido."
+              >
+                <BentoItem span={6}>
+                  <ChartCard
+                    id="card-receita-mensal"
+                    tone="brand"
+                    icon={LineChartIcon}
+                    title="Receita por mês"
+                    headline={
+                      melhorMes?.receita_brl != null
+                        ? formatCurrencyCompact(melhorMes.receita_brl)
+                        : '—'
+                    }
+                    headlineLabel={
+                      melhorMes ? `no melhor mês (${formatMesAno(melhorMes.mes)})` : undefined
+                    }
+                    description="Faturas com pagamento aprovado · série encerra quando o rastreamento parou"
+                    isLoading={mensal.isLoading}
+                    isError={mensal.isError}
+                    onRetry={() => void mensal.refetch()}
+                    isEmpty={mensal.data?.length === 0}
+                  >
+                    <TimeSeriesChart
+                      variant="area"
+                      data={(mensal.data ?? []).map((m) => ({
+                        x: m.mes,
+                        receita: m.receita_brl ?? 0,
+                      }))}
+                      series={[{ dataKey: 'receita', label: 'Receita' }]}
+                      xTickFormatter={formatMesAno}
+                      valueFormatter={formatCurrencyCompact}
+                      className="h-[280px]"
+                    />
+                  </ChartCard>
+                </BentoItem>
 
-              <BentoItem span={4}>
-                <TabelaCard
-                  id="card-saude-cobranca"
-                  icon={CreditCardIcon}
-                  title="Saúde da cobrança"
-                  headline={
-                    piorEventoCobranca?.pct_do_pago != null
-                      ? formatPercent(piorEventoCobranca.pct_do_pago)
-                      : '—'
-                  }
-                  headlineLabel={
-                    piorEventoCobranca ? `do valor pago em ${piorEventoCobranca.evento}` : undefined
-                  }
-                  description="Falha de pagamento e reembolso comparados ao valor aprovado — dinheiro que tentou entrar e não entrou, ou entrou e voltou"
-                  isLoading={cobranca.isLoading}
-                  isError={cobranca.isError}
-                  onRetry={() => void cobranca.refetch()}
-                  linhasEsqueleto={4}
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Evento</TableHead>
-                        <TableHead className="text-right">Faturas</TableHead>
-                        <TableHead className="text-right">Valor</TableHead>
-                        <TableHead className="text-right">% do aprovado</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(cobranca.data ?? []).map((c) => (
-                        <TableRow key={c.evento}>
-                          <TableCell className="font-medium">{c.evento}</TableCell>
-                          <TableCell className="num text-right">{formatInt(c.faturas)}</TableCell>
-                          <TableCell className="num text-right">
-                            {c.valor_brl != null ? formatCurrency(c.valor_brl) : '—'}
-                          </TableCell>
-                          <TableCell className="num text-right font-medium">
-                            {c.pct_do_pago != null ? formatPercent(c.pct_do_pago) : '—'}
-                          </TableCell>
+                <BentoItem span={6}>
+                  <ChartCard
+                    id="card-compradores-mes"
+                    title="Compradores por mês"
+                    description="Pessoas distintas com fatura paga no mês"
+                    isLoading={mensal.isLoading}
+                    isError={mensal.isError}
+                    onRetry={() => void mensal.refetch()}
+                    isEmpty={mensal.data?.length === 0}
+                  >
+                    <CategoryBarChart
+                      label="Compradores"
+                      data={(mensal.data ?? []).map((m) => ({
+                        category: formatMesAno(m.mes),
+                        value: m.compradores,
+                      }))}
+                      valueFormatter={formatInt}
+                      className="h-[260px]"
+                    />
+                  </ChartCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+
+              <SecaoDeAnalise
+                titulo="Quanto do dinheiro cobrado não ficou"
+                icone={TriangleAlertIcon}
+                descricao="Aqui o denominador não é o mês, é o valor aprovado da série inteira — o percentual não se move ao trocar de aba nem acompanha a curva acima. Falha é dinheiro que nunca entrou; reembolso é dinheiro que entrou e voltou, e só os dois juntos explicam a distância entre o cobrado e o reconhecido."
+              >
+                <BentoItem span={12}>
+                  <TabelaCard
+                    id="card-saude-cobranca"
+                    icon={CreditCardIcon}
+                    title="Saúde da cobrança"
+                    headline={
+                      piorEventoCobranca?.pct_do_pago != null
+                        ? formatPercent(piorEventoCobranca.pct_do_pago)
+                        : '—'
+                    }
+                    headlineLabel={
+                      piorEventoCobranca
+                        ? `do valor pago em ${piorEventoCobranca.evento}`
+                        : undefined
+                    }
+                    description="Falha de pagamento e reembolso comparados ao valor aprovado — dinheiro que tentou entrar e não entrou, ou entrou e voltou"
+                    isLoading={cobranca.isLoading}
+                    isError={cobranca.isError}
+                    onRetry={() => void cobranca.refetch()}
+                    linhasEsqueleto={4}
+                  >
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Evento</TableHead>
+                          <TableHead className="text-right">Faturas</TableHead>
+                          <TableHead className="text-right">Valor</TableHead>
+                          <TableHead className="text-right">% do aprovado</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabelaCard>
-              </BentoItem>
-
-              <BentoItem span={12}>
-                <ChartCard
-                  id="card-compradores-mes"
-                  title="Compradores por mês"
-                  description="Pessoas distintas com fatura paga no mês"
-                  isLoading={mensal.isLoading}
-                  isError={mensal.isError}
-                  onRetry={() => void mensal.refetch()}
-                  isEmpty={mensal.data?.length === 0}
-                >
-                  <CategoryBarChart
-                    label="Compradores"
-                    data={(mensal.data ?? []).map((m) => ({
-                      category: formatMesAno(m.mes),
-                      value: m.compradores,
-                    }))}
-                    valueFormatter={formatInt}
-                    className="h-[260px]"
-                  />
-                </ChartCard>
-              </BentoItem>
-            </BentoGrid>
+                      </TableHeader>
+                      <TableBody>
+                        {(cobranca.data ?? []).map((c) => (
+                          <TableRow key={c.evento}>
+                            <TableCell className="font-medium">{c.evento}</TableCell>
+                            <TableCell className="num text-right">{formatInt(c.faturas)}</TableCell>
+                            <TableCell className="num text-right">
+                              {c.valor_brl != null ? formatCurrency(c.valor_brl) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right font-medium">
+                              {c.pct_do_pago != null ? formatPercent(c.pct_do_pago) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TabelaCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+            </div>
           ),
           safra: (
-            <BentoGrid>
-              <BentoItem span={6}>
-                <TabelaCard
-                  icon={SproutIcon}
-                  title="Receita por safra de entrada"
-                  headline={
-                    melhorSafra?.receita_por_cliente != null
-                      ? formatCurrency(melhorSafra.receita_por_cliente)
-                      : '—'
-                  }
-                  headlineLabel={
-                    melhorSafra ? `por cliente na melhor safra (${formatMesAno(melhorSafra.cohort_mes)})` : undefined
-                  }
-                  description="Clientes agrupados pelo mês em que entraram · receita por cliente considera toda a safra, inclusive quem nunca comprou"
-                  isLoading={ltv.isLoading}
-                  isError={ltv.isError}
-                  onRetry={() => void ltv.refetch()}
-                >
-                  <TabelaLonga
-                    linhas={ltv.data ?? []}
-                    chave={(l) => l.cohort_mes}
-                    buscarEm={(l) => [formatMesAno(l.cohort_mes)]}
-                    rotuloBusca="Buscar safra"
-                    vazio="Nenhuma safra com receita registrada."
-                    cabecalho={
-                      <TableRow>
-                        <TableHead>Safra</TableHead>
-                        <TableHead className="text-right">Clientes</TableHead>
-                        <TableHead className="text-right">Compradores</TableHead>
-                        <TableHead className="text-right">Receita</TableHead>
-                        <TableHead className="text-right">Receita por cliente</TableHead>
-                      </TableRow>
+            <div className="space-y-4">
+              <SecaoDeAnalise
+                titulo="O que cada grupo de cliente rendeu, e como ele usa"
+                icone={LayersIcon}
+                descricao="Os dois recortam a mesma base por chaves diferentes — mês de entrada e faixa de receita — e mostram média por grupo, então a coluna de clientes é o que diz se a média se sustenta. Os eixos de tempo divergem: a receita para no último webhook recebido, enquanto os dias ativos seguem contando o histórico inteiro de uso."
+              >
+                <BentoItem span={6}>
+                  <TabelaCard
+                    icon={SproutIcon}
+                    title="Receita por safra de entrada"
+                    headline={
+                      melhorSafra?.receita_por_cliente != null
+                        ? formatCurrency(melhorSafra.receita_por_cliente)
+                        : '—'
                     }
-                    renderLinha={(l) => (
-                      <TableRow>
-                        <TableCell className="font-medium">{formatMesAno(l.cohort_mes)}</TableCell>
-                        <TableCell className="num text-right">{formatInt(l.clientes)}</TableCell>
-                        <TableCell className="num text-right">{formatInt(l.compradores)}</TableCell>
-                        <TableCell className="num text-right">
-                          {l.receita_brl != null ? formatCurrency(l.receita_brl) : '—'}
-                        </TableCell>
-                        <TableCell className="num text-right">
-                          {l.receita_por_cliente != null
-                            ? formatCurrency(l.receita_por_cliente)
-                            : '—'}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  />
-                </TabelaCard>
-              </BentoItem>
-
-              <BentoItem span={6}>
-                <TabelaCard
-                  icon={WalletIcon}
-                  title="Quem paga mais usa mais?"
-                  headline={
-                    faixaTopo?.dias_ativos_medio != null
-                      ? formatDecimal(faixaTopo.dias_ativos_medio)
-                      : '—'
-                  }
-                  headlineLabel={faixaTopo ? `dias ativos na faixa ${faixaTopo.faixa}` : undefined}
-                  description="Clientes agrupados por receita total · dias ativos é histórico completo · amostra pequena em algumas faixas, leia com cautela"
-                  isLoading={usoReceita.isLoading}
-                  isError={usoReceita.isError}
-                  onRetry={() => void usoReceita.refetch()}
-                  linhasEsqueleto={3}
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Faixa de receita</TableHead>
-                        <TableHead className="text-right">Clientes</TableHead>
-                        <TableHead className="text-right">Receita média</TableHead>
-                        <TableHead className="text-right">Dias ativos</TableHead>
-                        <TableHead className="text-right">Ativos em 30d</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(usoReceita.data ?? []).map((u) => (
-                        <TableRow key={u.faixa}>
-                          <TableCell className="font-medium">{u.faixa}</TableCell>
-                          <TableCell className="num text-right">{formatInt(u.clientes)}</TableCell>
+                    headlineLabel={
+                      melhorSafra
+                        ? `por cliente na melhor safra (${formatMesAno(melhorSafra.cohort_mes)})`
+                        : undefined
+                    }
+                    description="Clientes agrupados pelo mês em que entraram · receita por cliente considera toda a safra, inclusive quem nunca comprou"
+                    isLoading={ltv.isLoading}
+                    isError={ltv.isError}
+                    onRetry={() => void ltv.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={ltv.data ?? []}
+                      chave={(l) => l.cohort_mes}
+                      buscarEm={(l) => [formatMesAno(l.cohort_mes)]}
+                      rotuloBusca="Buscar safra"
+                      vazio="Nenhuma safra com receita registrada."
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Safra</TableHead>
+                          <TableHead className="text-right">Clientes</TableHead>
+                          <TableHead className="text-right">Compradores</TableHead>
+                          <TableHead className="text-right">Receita</TableHead>
+                          <TableHead className="text-right">Receita por cliente</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(l) => (
+                        <TableRow>
+                          <TableCell className="font-medium">
+                            {formatMesAno(l.cohort_mes)}
+                          </TableCell>
+                          <TableCell className="num text-right">{formatInt(l.clientes)}</TableCell>
                           <TableCell className="num text-right">
-                            {u.receita_media != null ? formatCurrency(u.receita_media) : '—'}
+                            {formatInt(l.compradores)}
                           </TableCell>
                           <TableCell className="num text-right">
-                            {u.dias_ativos_medio != null ? formatDecimal(u.dias_ativos_medio) : '—'}
+                            {l.receita_brl != null ? formatCurrency(l.receita_brl) : '—'}
                           </TableCell>
                           <TableCell className="num text-right">
-                            {u.pct_ativos_30d != null ? formatPercent(u.pct_ativos_30d) : '—'}
+                            {l.receita_por_cliente != null
+                              ? formatCurrency(l.receita_por_cliente)
+                              : '—'}
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabelaCard>
-              </BentoItem>
-            </BentoGrid>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
+
+                <BentoItem span={6}>
+                  <TabelaCard
+                    icon={WalletIcon}
+                    title="Quem paga mais usa mais?"
+                    headline={
+                      faixaTopo?.dias_ativos_medio != null
+                        ? formatDecimal(faixaTopo.dias_ativos_medio)
+                        : '—'
+                    }
+                    headlineLabel={faixaTopo ? `dias ativos na faixa ${faixaTopo.faixa}` : undefined}
+                    description="Clientes agrupados por receita total · dias ativos é histórico completo · amostra pequena em algumas faixas, leia com cautela"
+                    isLoading={usoReceita.isLoading}
+                    isError={usoReceita.isError}
+                    onRetry={() => void usoReceita.refetch()}
+                    linhasEsqueleto={3}
+                  >
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Faixa de receita</TableHead>
+                          <TableHead className="text-right">Clientes</TableHead>
+                          <TableHead className="text-right">Receita média</TableHead>
+                          <TableHead className="text-right">Dias ativos</TableHead>
+                          <TableHead className="text-right">Ativos em 30d</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(usoReceita.data ?? []).map((u) => (
+                          <TableRow key={u.faixa}>
+                            <TableCell className="font-medium">{u.faixa}</TableCell>
+                            <TableCell className="num text-right">{formatInt(u.clientes)}</TableCell>
+                            <TableCell className="num text-right">
+                              {u.receita_media != null ? formatCurrency(u.receita_media) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {u.dias_ativos_medio != null
+                                ? formatDecimal(u.dias_ativos_medio)
+                                : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {u.pct_ativos_30d != null ? formatPercent(u.pct_ativos_30d) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TabelaCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+            </div>
           ),
         }}
       />

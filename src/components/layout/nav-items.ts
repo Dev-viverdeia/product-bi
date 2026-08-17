@@ -140,8 +140,11 @@ export const navItems: NavItem[] = [
     shortTitle: 'Entrada',
     to: '/entrada',
     grupo: 'quem',
+    // "safra fechada de 30 dias" esteve aqui e contradizia a tela: o funil chama
+    // a RPC com o período escolhido no topo, então quem seleciona 90 dias lia uma
+    // régua afirmando 30. A régua acompanha o controle, ou deixa de ser régua.
     regua:
-      'Convite, cadastro, onboarding e a primeira ação · safra fechada de 30 dias',
+      'Convite, cadastro, onboarding e a primeira ação · funil por safra de convites criados no período',
     temPeriodo: true,
     icon: UserPlusIcon,
     abas: [
@@ -207,8 +210,9 @@ export const navItems: NavItem[] = [
     regua:
       'Saúde dos times e valor contratado não consumido · time ativo = ação nos 30 dias até o último dia com dado',
     icon: Building2Icon,
-    // As duas abas separam formato, não assunto: o panorama continua inteiro num
-    // painel só. Fatiar o panorama por pergunta é que deixaria de ser panorama.
+    // As duas abas separam FORMATO, não assunto: fatiar o panorama em abas por
+    // tema é que deixaria de ser panorama. Dentro da aba de gráficos as perguntas
+    // se separam em seções — que é hierarquia de leitura, não outra navegação.
     abas: [
       { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
       { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
@@ -219,8 +223,11 @@ export const navItems: NavItem[] = [
     shortTitle: 'Jornada',
     to: '/jornada',
     grupo: 'uso',
+    // O agrupamento de rota é armadilha de leitura, não detalhe técnico: sem essa
+    // cláusula, o leitor não tem como saber que /formacao/abc e /formacao/def são
+    // a MESMA linha do raio-x. Ela morava no subtítulo da página e veio junto.
     regua:
-      'Raio-x de tela e fluxo de sessão · sessão = navegação com intervalo menor que 30 min',
+      'Raio-x de tela e fluxo de sessão · sessão = navegação com intervalo menor que 30 min · rotas com identificador são agrupadas em padrão',
     temPeriodo: true,
     icon: MapIcon,
     abas: [
@@ -234,8 +241,10 @@ export const navItems: NavItem[] = [
     shortTitle: 'Receita',
     to: '/receita',
     grupo: 'negocio',
+    // A deduplicação é a REGRA DE CONTAGEM, não trivia: sem ela o leitor não sabe
+    // que a mesma fatura reprocessada conta uma vez. Morava no subtítulo da página.
     regua:
-      'Receita, cobrança e safra · a série termina onde o rastreamento parou',
+      'Receita reconhecida dos webhooks de pagamento (Hubla), com faturas deduplicadas · a série termina onde o rastreamento parou',
     icon: ReceiptIcon,
     abas: [
       { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },

@@ -3,15 +3,20 @@ import {
   AlertTriangleIcon,
   ArmchairIcon,
   ArrowDownWideNarrowIcon,
+  Building2Icon,
+  ClipboardListIcon,
   CrownIcon,
+  NetworkIcon,
   PackageOpenIcon,
   ScaleIcon,
   UsersRoundIcon,
 } from 'lucide-react'
 
 import { CategoryBarChart, ChartCard, KpiCard, KpiGrid } from '@/components/charts'
-import { BentoGrid, BentoItem } from '@/components/layout/bento'
+import { BentoItem } from '@/components/layout/bento'
+import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
+import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 import { Badge } from '@/components/ui/badge'
@@ -104,59 +109,51 @@ export function OrganizacoesPage() {
 
   return (
     <div className="space-y-4">
+      {/* Título, régua e controles saem de `nav-items.ts` — a página não
+          reescreve a própria régua. Esta tela não oferece período nem recorte,
+          então o cabeçalho fica só com o frescor do dado. */}
+      <CabecalhoDeModulo />
+
       {/* Fora das abas: contexto das duas. Trocar entre a leitura e os gráficos
           não pode custar os números de referência da tela. */}
-      <BentoGrid>
-        <BentoItem span={12}>
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Organizações</h2>
-            <p className="text-muted-foreground text-sm">
-              Saúde dos times, efeito do master e valor contratado que não está sendo
-              consumido · time ativo = membros com ação nos 30 dias até o último dia com
-              dado
-            </p>
-          </div>
-        </BentoItem>
-
-        <BentoItem span={12} id="card-kpis">
-          <KpiGrid>
-            <KpiCard
-              label="Organizações ativas"
-              value={kpis.data?.orgs_ativas ?? null}
-              format={formatInt}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-            <KpiCard
-              label="Membros em organizações"
-              value={kpis.data?.membros_total ?? null}
-              format={formatInt}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-            <KpiCard
-              label="Time ativo (média)"
-              value={kpis.data?.pct_time_ativo_medio ?? null}
-              format={formatPercent}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-            <KpiCard
-              label="Orgs com master ativo"
-              value={kpis.data?.orgs_master_ativo ?? null}
-              format={formatPercent}
-              isLoading={kpis.isLoading}
-              isError={kpis.isError}
-            />
-          </KpiGrid>
-        </BentoItem>
-      </BentoGrid>
+      <div id="card-kpis">
+        <KpiGrid>
+          <KpiCard
+            label="Organizações ativas"
+            value={kpis.data?.orgs_ativas ?? null}
+            format={formatInt}
+            isLoading={kpis.isLoading}
+            isError={kpis.isError}
+          />
+          <KpiCard
+            label="Membros em organizações"
+            value={kpis.data?.membros_total ?? null}
+            format={formatInt}
+            isLoading={kpis.isLoading}
+            isError={kpis.isError}
+          />
+          <KpiCard
+            label="Time ativo (média)"
+            value={kpis.data?.pct_time_ativo_medio ?? null}
+            format={formatPercent}
+            isLoading={kpis.isLoading}
+            isError={kpis.isError}
+          />
+          <KpiCard
+            label="Orgs com master ativo"
+            value={kpis.data?.orgs_master_ativo ?? null}
+            format={formatPercent}
+            isLoading={kpis.isLoading}
+            isError={kpis.isError}
+          />
+        </KpiGrid>
+      </div>
 
       {/*
         As duas abas separam formato, não assunto: o panorama continua inteiro
-        num painel só. Fatiar o panorama por pergunta é que deixaria de ser
-        panorama — por isso aqui não existe a divisão por tema que os outros
-        módulos têm.
+        num painel só. Quem divide por pergunta são as seções dentro do painel,
+        não as abas — fatiar o panorama em abas por tema é que deixaria de ser
+        panorama.
 
         Sem período e sem recorte de propósito: esta tela não oferece os dois
         controles, e cada achado declara a própria janela no texto.
@@ -166,354 +163,372 @@ export function OrganizacoesPage() {
         conteudos={{
           analise: <AnaliseDaTela tela="organizacoes" />,
           graficos: (
-            <BentoGrid>
-              <BentoItem span={12}>
-                <TabelaCard
-                  nivel="diagnostico"
-                  id="card-distribuicao-engajamento"
-                  icon={ScaleIcon}
-                  title="Onde estão as contas, e onde está a gente"
-                  headline={
-                    semNinguem?.pct_orgs != null ? formatPercent(semNinguem.pct_orgs) : '—'
-                  }
-                  headlineLabel={
-                    semNinguem ? `das contas ativas não têm ninguém aparecendo` : undefined
-                  }
-                  description={
-                    faixaComMaisGente
-                      ? `Organizações ativas por fatia do time que apareceu nos 30 dias até o último dia com dado · as duas colunas de percentual apontam para faixas diferentes: a maior parte das CONTAS está zerada, e a maior parte das PESSOAS está em "${faixaComMaisGente.faixa}" · qual delas olhar depende de a decisão ser sobre cobrança ou sobre uso`
-                      : 'Organizações ativas por fatia do time que apareceu nos últimos 30 dias com dado'
-                  }
-                  isLoading={distribuicao.isLoading}
-                  isError={distribuicao.isError}
-                  onRetry={() => void distribuicao.refetch()}
-                  linhasEsqueleto={6}
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Fatia do time ativa</TableHead>
-                        <TableHead className="text-right">Organizações</TableHead>
-                        <TableHead className="text-right">% das contas</TableHead>
-                        <TableHead className="text-right">Pessoas</TableHead>
-                        <TableHead className="text-right">% das pessoas</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(distribuicao.data ?? []).map((d) => (
-                        <TableRow key={d.faixa}>
-                          <TableCell className="font-medium">{d.faixa}</TableCell>
-                          <TableCell className="num text-right">{formatInt(d.orgs)}</TableCell>
-                          <TableCell
-                            className="num text-right"
-                            style={fundoIntensidade(d.pct_orgs)}
-                          >
-                            {d.pct_orgs != null ? formatPercent(d.pct_orgs) : '—'}
-                          </TableCell>
-                          <TableCell className="num text-right">{formatInt(d.pessoas)}</TableCell>
-                          <TableCell
-                            className="num text-right"
-                            style={fundoIntensidade(d.pct_pessoas)}
-                          >
-                            {d.pct_pessoas != null ? formatPercent(d.pct_pessoas) : '—'}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabelaCard>
-              </BentoItem>
-
-              <BentoItem span={6}>
-                <TabelaCard
-                  nivel="comparativo"
-                  id="card-orgs-por-tamanho"
-                  icon={UsersRoundIcon}
-                  title="Quanto maior o time, menor a fatia que aparece"
-                  headline={orgsGrandes?.taxa != null ? formatPercent(orgsGrandes.taxa) : '—'}
-                  headlineLabel={
-                    orgsPequenas?.taxa != null
-                      ? `do time ativo acima de 20 pessoas, contra ${formatPercent(orgsPequenas.taxa)} até 5`
-                      : 'do time ativo nas organizações maiores'
-                  }
-                  description={
-                    orgsGrandes
-                      ? `Organizações ativas com pelo menos um membro · margem de ${formatDecimal(orgsGrandes.margem_pp)} pp entre as pontas · as duas contas aparecem de propósito: a taxa por pessoa e a média das organizações concordam, então o gradiente não é efeito de misturar conta de uma pessoa com conta de cem`
-                      : 'Organizações ativas com pelo menos um membro'
-                  }
-                  isLoading={porTamanho.isLoading}
-                  isError={porTamanho.isError}
-                  onRetry={() => void porTamanho.refetch()}
-                  linhasEsqueleto={3}
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Tamanho</TableHead>
-                        <TableHead className="text-right">Orgs</TableHead>
-                        <TableHead className="text-right">Pessoas</TableHead>
-                        <TableHead className="text-right">Taxa por pessoa</TableHead>
-                        <TableHead className="text-right">Média das orgs</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(porTamanho.data ?? []).map((t) => (
-                        <TableRow key={t.faixa}>
-                          <TableCell className="font-medium">{t.faixa}</TableCell>
-                          <TableCell className="num text-right">{formatInt(t.orgs)}</TableCell>
-                          <TableCell className="num text-right">{formatInt(t.pessoas)}</TableCell>
-                          <TableCell className="num text-right font-medium">
-                            {t.taxa != null ? formatPercent(t.taxa) : '—'}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground num text-right">
-                            {t.media_das_orgs != null ? formatPercent(t.media_das_orgs) : '—'}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabelaCard>
-              </BentoItem>
-
-              <BentoItem span={6}>
-                <TabelaCard
-                  nivel="diagnostico"
-                  id="card-quem-parou-primeiro"
-                  icon={ArrowDownWideNarrowIcon}
-                  title="Quando a conta esfria, quem parou primeiro?"
-                  headline={masterAntes?.pct != null ? formatPercent(masterAntes.pct) : '—'}
-                  headlineLabel={
-                    timeAntes?.pct != null
-                      ? `das vezes o master parou antes, contra ${formatPercent(timeAntes.pct)} do time`
-                      : 'das vezes o master parou antes do time'
-                  }
-                  description={
-                    masterAntes
-                      ? `Organizações cujo master está parado há 30+ dias, com histórico dos dois lados (${formatInt(masterAntes.base_com_historico)} contas) · ${formatInt(masterAntes.fora_sem_historico)} ficam de fora porque um dos lados nunca registrou ação: essas não esfriaram, nunca esquentaram · janela de 14 dias para não chamar de "antes" o que é a mesma semana · master que delegou o uso aparece aqui como parado sem ter abandonado`
-                      : 'Organizações cujo master está parado há 30+ dias, com histórico dos dois lados'
-                  }
-                  isLoading={sequencia.isLoading}
-                  isError={sequencia.isError}
-                  onRetry={() => void sequencia.refetch()}
-                  linhasEsqueleto={3}
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Quem registrou a última ação primeiro</TableHead>
-                        <TableHead className="text-right">Organizações</TableHead>
-                        <TableHead className="text-right">Fatia</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(sequencia.data ?? []).map((s) => (
-                        <TableRow key={s.quem}>
-                          <TableCell className="font-medium">{s.quem}</TableCell>
-                          <TableCell className="num text-right">{formatInt(s.orgs)}</TableCell>
-                          <TableCell
-                            className="num text-right font-medium"
-                            style={fundoIntensidade(s.pct)}
-                          >
-                            {s.pct != null ? formatPercent(s.pct) : '—'}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabelaCard>
-              </BentoItem>
-
-              <BentoItem span={6}>
-                <TabelaCard
-                  nivel="comparativo"
-                  id="card-efeito-master"
-                  icon={CrownIcon}
-                  title="O master engajado puxa o time?"
-                  headline={lift ? `${formatDecimal(lift)}×` : '—'}
-                  headlineLabel="mais time ativo com master ativo"
-                  description="Organizações ativas com 2+ membros · master ativo = teve ação nos 30 dias até o último dia com dado"
-                  isLoading={efeito.isLoading}
-                  isError={efeito.isError}
-                  onRetry={() => void efeito.refetch()}
-                  linhasEsqueleto={2}
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Grupo</TableHead>
-                        <TableHead className="text-right">Organizações</TableHead>
-                        <TableHead className="text-right">Membros</TableHead>
-                        <TableHead className="text-right">Time ativo (média)</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(efeito.data ?? []).map((e) => (
-                        <TableRow key={e.grupo}>
-                          <TableCell className="font-medium">{e.grupo}</TableCell>
-                          <TableCell className="num text-right">
-                            {formatInt(e.orgs)}
-                          </TableCell>
-                          <TableCell className="num text-right">
-                            {formatInt(e.membros)}
-                          </TableCell>
-                          <TableCell className="num text-right font-medium">
-                            {e.pct_time_ativo != null ? formatPercent(e.pct_time_ativo) : '—'}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabelaCard>
-              </BentoItem>
-
-              <BentoItem span={6}>
-                <TabelaCard
-                  nivel="prescritivo"
-                  icon={PackageOpenIcon}
-                  title="Valor contratado e não consumido"
-                  headline={
-                    maisDesperdicado?.pct_uso != null
-                      ? formatPercent(maisDesperdicado.pct_uso)
-                      : '—'
-                  }
-                  headlineLabel={
-                    maisDesperdicado
-                      ? `de uso no mais parado (${maisDesperdicado.item})`
-                      : undefined
-                  }
-                  description="Benefícios que a empresa entrega e o cliente não usa — churn silencioso e oportunidade de ativação por CS"
-                  isLoading={valor.isLoading}
-                  isError={valor.isError}
-                  onRetry={() => void valor.refetch()}
-                >
-                  <TabelaLonga
-                    linhas={valor.data ?? []}
-                    chave={(v) => v.item}
-                    buscarEm={(v) => [v.item]}
-                    rotuloBusca="Buscar benefício"
-                    vazio="Nenhum benefício disponível no período."
-                    cabecalho={
-                      <TableRow>
-                        <TableHead>Benefício</TableHead>
-                        <TableHead className="text-right">Disponível</TableHead>
-                        <TableHead className="text-right">Usado</TableHead>
-                        <TableHead className="text-right">% de uso</TableHead>
-                        <TableHead className="text-right">Beneficiários</TableHead>
-                      </TableRow>
+            <div className="space-y-4">
+              <SecaoDeAnalise
+                titulo="Quanto de cada conta está de fato dentro do produto"
+                icone={Building2Icon}
+                descricao="Três recortes da mesma base de contas, com denominadores que não se somam: a ocupação compara membros cadastrados com o limite contratado, enquanto os outros dois comparam quem teve ação nos 30 dias até o último dia com dado contra os membros que a conta já tem. Assento preenchido não é assento que aparece."
+              >
+                <BentoItem span={12}>
+                  <TabelaCard
+                    nivel="diagnostico"
+                    id="card-distribuicao-engajamento"
+                    icon={ScaleIcon}
+                    title="Onde estão as contas, e onde está a gente"
+                    headline={
+                      semNinguem?.pct_orgs != null ? formatPercent(semNinguem.pct_orgs) : '—'
                     }
-                    renderLinha={(v) => (
-                      <TableRow>
-                        <TableCell className="font-medium">{v.item}</TableCell>
-                        <TableCell className="num text-right">
-                          {formatInt(v.disponivel)}
-                        </TableCell>
-                        <TableCell className="num text-right">
-                          {formatInt(v.usado)}
-                        </TableCell>
-                        <TableCell className="num text-right font-medium">
-                          {v.pct_uso != null ? formatPercent(v.pct_uso) : '—'}
-                        </TableCell>
-                        <TableCell className="num text-right">
-                          {formatInt(v.beneficiarios)}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  />
-                </TabelaCard>
-              </BentoItem>
-
-              <BentoItem span={4}>
-                <ChartCard
-                  tone="brand"
-                  nivel="descritivo"
-                  icon={ArmchairIcon}
-                  title="Ocupação de assentos"
-                  headline={faixaLotacao ? formatPercent(faixaLotacao.parte) : '—'}
-                  headlineLabel={faixaLotacao ? `das orgs em ${faixaLotacao.faixa}` : undefined}
-                  description="Membros vs limite contratado · orgs lotadas são oportunidade de upsell; abaixo de 50%, risco de valor não percebido"
-                  isLoading={ocupacao.isLoading}
-                  isError={ocupacao.isError}
-                  onRetry={() => void ocupacao.refetch()}
-                  isEmpty={ocupacao.data?.length === 0}
-                >
-                  <CategoryBarChart
-                    layout="bar"
-                    label="Organizações"
-                    data={(ocupacao.data ?? []).map((o) => ({
-                      category: o.faixa,
-                      value: o.orgs,
-                    }))}
-                    valueFormatter={formatInt}
-                    className="h-[260px]"
-                  />
-                </ChartCard>
-              </BentoItem>
-
-              <BentoItem span={8}>
-                <TabelaCard
-                  nivel="prescritivo"
-                  icon={AlertTriangleIcon}
-                  title="Organizações em risco — time parado"
-                  headline={
-                    orgMaisParada?.pct_time_ativo != null
-                      ? formatPercent(orgMaisParada.pct_time_ativo)
-                      : '—'
-                  }
-                  headlineLabel={
-                    orgMaisParada
-                      ? `de time ativo na pior (${orgMaisParada.organizacao})`
-                      : undefined
-                  }
-                  description="Orgs ativas com 3+ membros, ordenadas pelo menor percentual de time ativo · lista para ação de CS"
-                  isLoading={risco.isLoading}
-                  isError={risco.isError}
-                  onRetry={() => void risco.refetch()}
-                >
-                  <TabelaLonga
-                    linhas={risco.data ?? []}
-                    chave={(r) => String(r.organizacao)}
-                    buscarEm={(r) => [r.organizacao]}
-                    rotuloBusca="Buscar por organização"
-                    cabecalho={
-                      <TableRow>
-                        <TableHead>Organização</TableHead>
-                        <TableHead>Plano</TableHead>
-                        <TableHead className="text-right">Membros</TableHead>
-                        <TableHead className="text-right">Ativos 30d</TableHead>
-                        <TableHead className="text-right">Time ativo</TableHead>
-                        <TableHead>Master</TableHead>
-                        <TableHead className="text-right">Assentos ociosos</TableHead>
-                      </TableRow>
+                    headlineLabel={
+                      semNinguem ? `das contas ativas não têm ninguém aparecendo` : undefined
                     }
-                    renderLinha={(r) => (
-                      <TableRow>
-                        <TableCell className="max-w-64 truncate font-medium">
-                          {r.organizacao}
-                        </TableCell>
-                        <TableCell>{r.plano ?? '—'}</TableCell>
-                        <TableCell className="num text-right">
-                          {formatInt(r.membros)}
-                        </TableCell>
-                        <TableCell className="num text-right">
-                          {formatInt(r.ativos_30d)}
-                        </TableCell>
-                        <TableCell className="num text-right">
-                          {r.pct_time_ativo != null ? formatPercent(r.pct_time_ativo) : '—'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={r.master_ativo ? 'secondary' : 'outline'}>
-                            {r.master_ativo ? 'Ativo' : 'Parado'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="num text-right">
-                          {formatInt(r.assentos_ociosos)}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  />
-                </TabelaCard>
-              </BentoItem>
-            </BentoGrid>
+                    description={
+                      faixaComMaisGente
+                        ? `Organizações ativas por fatia do time que apareceu nos 30 dias até o último dia com dado · as duas colunas de percentual apontam para faixas diferentes: a maior parte das CONTAS está zerada, e a maior parte das PESSOAS está em "${faixaComMaisGente.faixa}" · qual delas olhar depende de a decisão ser sobre cobrança ou sobre uso`
+                        : 'Organizações ativas por fatia do time que apareceu nos últimos 30 dias com dado'
+                    }
+                    isLoading={distribuicao.isLoading}
+                    isError={distribuicao.isError}
+                    onRetry={() => void distribuicao.refetch()}
+                    linhasEsqueleto={6}
+                  >
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Fatia do time ativa</TableHead>
+                          <TableHead className="text-right">Organizações</TableHead>
+                          <TableHead className="text-right">% das contas</TableHead>
+                          <TableHead className="text-right">Pessoas</TableHead>
+                          <TableHead className="text-right">% das pessoas</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(distribuicao.data ?? []).map((d) => (
+                          <TableRow key={d.faixa}>
+                            <TableCell className="font-medium">{d.faixa}</TableCell>
+                            <TableCell className="num text-right">{formatInt(d.orgs)}</TableCell>
+                            <TableCell
+                              className="num text-right"
+                              style={fundoIntensidade(d.pct_orgs)}
+                            >
+                              {d.pct_orgs != null ? formatPercent(d.pct_orgs) : '—'}
+                            </TableCell>
+                            <TableCell className="num text-right">{formatInt(d.pessoas)}</TableCell>
+                            <TableCell
+                              className="num text-right"
+                              style={fundoIntensidade(d.pct_pessoas)}
+                            >
+                              {d.pct_pessoas != null ? formatPercent(d.pct_pessoas) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TabelaCard>
+                </BentoItem>
+
+                <BentoItem span={8}>
+                  <TabelaCard
+                    nivel="comparativo"
+                    id="card-orgs-por-tamanho"
+                    icon={UsersRoundIcon}
+                    title="Quanto maior o time, menor a fatia que aparece"
+                    headline={orgsGrandes?.taxa != null ? formatPercent(orgsGrandes.taxa) : '—'}
+                    headlineLabel={
+                      orgsPequenas?.taxa != null
+                        ? `do time ativo acima de 20 pessoas, contra ${formatPercent(orgsPequenas.taxa)} até 5`
+                        : 'do time ativo nas organizações maiores'
+                    }
+                    description={
+                      orgsGrandes
+                        ? `Organizações ativas com pelo menos um membro · margem de ${formatDecimal(orgsGrandes.margem_pp)} pp entre as pontas · as duas contas aparecem de propósito: a taxa por pessoa e a média das organizações concordam, então o gradiente não é efeito de misturar conta de uma pessoa com conta de cem`
+                        : 'Organizações ativas com pelo menos um membro'
+                    }
+                    isLoading={porTamanho.isLoading}
+                    isError={porTamanho.isError}
+                    onRetry={() => void porTamanho.refetch()}
+                    linhasEsqueleto={3}
+                  >
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Tamanho</TableHead>
+                          <TableHead className="text-right">Orgs</TableHead>
+                          <TableHead className="text-right">Pessoas</TableHead>
+                          <TableHead className="text-right">Taxa por pessoa</TableHead>
+                          <TableHead className="text-right">Média das orgs</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(porTamanho.data ?? []).map((t) => (
+                          <TableRow key={t.faixa}>
+                            <TableCell className="font-medium">{t.faixa}</TableCell>
+                            <TableCell className="num text-right">{formatInt(t.orgs)}</TableCell>
+                            <TableCell className="num text-right">{formatInt(t.pessoas)}</TableCell>
+                            <TableCell className="num text-right font-medium">
+                              {t.taxa != null ? formatPercent(t.taxa) : '—'}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground num text-right">
+                              {t.media_das_orgs != null ? formatPercent(t.media_das_orgs) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TabelaCard>
+                </BentoItem>
+
+                <BentoItem span={4}>
+                  <ChartCard
+                    tone="brand"
+                    nivel="descritivo"
+                    icon={ArmchairIcon}
+                    title="Ocupação de assentos"
+                    headline={faixaLotacao ? formatPercent(faixaLotacao.parte) : '—'}
+                    headlineLabel={faixaLotacao ? `das orgs em ${faixaLotacao.faixa}` : undefined}
+                    description="Membros vs limite contratado · orgs lotadas são oportunidade de upsell; abaixo de 50%, risco de valor não percebido"
+                    isLoading={ocupacao.isLoading}
+                    isError={ocupacao.isError}
+                    onRetry={() => void ocupacao.refetch()}
+                    isEmpty={ocupacao.data?.length === 0}
+                  >
+                    <CategoryBarChart
+                      layout="bar"
+                      label="Organizações"
+                      data={(ocupacao.data ?? []).map((o) => ({
+                        category: o.faixa,
+                        value: o.orgs,
+                      }))}
+                      valueFormatter={formatInt}
+                      className="h-[260px]"
+                    />
+                  </ChartCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+
+              <SecaoDeAnalise
+                titulo="O master puxa o time, ou é o primeiro a sumir"
+                icone={NetworkIcon}
+                descricao="Os dois cards leem a mesma dupla master–time por ângulos opostos: um compara contas em que o master está ativo com contas em que ele parou, o outro entra só nas contas já esfriadas e pergunta quem parou antes. Os dois mostram associação, não causa — master ativo pode ser sintoma de conta saudável, e não o motivo dela."
+              >
+                <BentoItem span={6}>
+                  <TabelaCard
+                    nivel="comparativo"
+                    id="card-efeito-master"
+                    icon={CrownIcon}
+                    title="O master engajado puxa o time?"
+                    headline={lift ? `${formatDecimal(lift)}×` : '—'}
+                    headlineLabel="mais time ativo com master ativo"
+                    description="Organizações ativas com 2+ membros · master ativo = teve ação nos 30 dias até o último dia com dado"
+                    isLoading={efeito.isLoading}
+                    isError={efeito.isError}
+                    onRetry={() => void efeito.refetch()}
+                    linhasEsqueleto={2}
+                  >
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Grupo</TableHead>
+                          <TableHead className="text-right">Organizações</TableHead>
+                          <TableHead className="text-right">Membros</TableHead>
+                          <TableHead className="text-right">Time ativo (média)</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(efeito.data ?? []).map((e) => (
+                          <TableRow key={e.grupo}>
+                            <TableCell className="font-medium">{e.grupo}</TableCell>
+                            <TableCell className="num text-right">
+                              {formatInt(e.orgs)}
+                            </TableCell>
+                            <TableCell className="num text-right">
+                              {formatInt(e.membros)}
+                            </TableCell>
+                            <TableCell className="num text-right font-medium">
+                              {e.pct_time_ativo != null ? formatPercent(e.pct_time_ativo) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TabelaCard>
+                </BentoItem>
+
+                <BentoItem span={6}>
+                  <TabelaCard
+                    nivel="diagnostico"
+                    id="card-quem-parou-primeiro"
+                    icon={ArrowDownWideNarrowIcon}
+                    title="Quando a conta esfria, quem parou primeiro?"
+                    headline={masterAntes?.pct != null ? formatPercent(masterAntes.pct) : '—'}
+                    headlineLabel={
+                      timeAntes?.pct != null
+                        ? `das vezes o master parou antes, contra ${formatPercent(timeAntes.pct)} do time`
+                        : 'das vezes o master parou antes do time'
+                    }
+                    description={
+                      masterAntes
+                        ? `Organizações cujo master está parado há 30+ dias, com histórico dos dois lados (${formatInt(masterAntes.base_com_historico)} contas) · ${formatInt(masterAntes.fora_sem_historico)} ficam de fora porque um dos lados nunca registrou ação: essas não esfriaram, nunca esquentaram · janela de 14 dias para não chamar de "antes" o que é a mesma semana · master que delegou o uso aparece aqui como parado sem ter abandonado`
+                        : 'Organizações cujo master está parado há 30+ dias, com histórico dos dois lados'
+                    }
+                    isLoading={sequencia.isLoading}
+                    isError={sequencia.isError}
+                    onRetry={() => void sequencia.refetch()}
+                    linhasEsqueleto={3}
+                  >
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Quem registrou a última ação primeiro</TableHead>
+                          <TableHead className="text-right">Organizações</TableHead>
+                          <TableHead className="text-right">Fatia</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(sequencia.data ?? []).map((s) => (
+                          <TableRow key={s.quem}>
+                            <TableCell className="font-medium">{s.quem}</TableCell>
+                            <TableCell className="num text-right">{formatInt(s.orgs)}</TableCell>
+                            <TableCell
+                              className="num text-right font-medium"
+                              style={fundoIntensidade(s.pct)}
+                            >
+                              {s.pct != null ? formatPercent(s.pct) : '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TabelaCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+
+              <SecaoDeAnalise
+                titulo="O que já foi contratado e ainda não virou uso"
+                icone={ClipboardListIcon}
+                descricao="As duas listas existem para virar tarefa de CS e mudam de grão entre si: uma linha é um benefício oferecido à base inteira, a outra é uma organização nomeada. A janela de atividade é a do módulo, declarada no topo da tela, e a lista de organizações vem cortada nas 25 mais paradas — a contagem aqui é o tamanho da lista, não o tamanho do problema. Nenhuma das duas ordena por dinheiro: não há valor em reais nesta tela, só volume de gente, de assento e de uso."
+              >
+                <BentoItem span={12}>
+                  <TabelaCard
+                    nivel="prescritivo"
+                    icon={PackageOpenIcon}
+                    title="Valor contratado e não consumido"
+                    headline={
+                      maisDesperdicado?.pct_uso != null
+                        ? formatPercent(maisDesperdicado.pct_uso)
+                        : '—'
+                    }
+                    headlineLabel={
+                      maisDesperdicado
+                        ? `de uso no mais parado (${maisDesperdicado.item})`
+                        : undefined
+                    }
+                    description="Benefícios que a empresa entrega e o cliente não usa — churn silencioso e oportunidade de ativação por CS"
+                    isLoading={valor.isLoading}
+                    isError={valor.isError}
+                    onRetry={() => void valor.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={valor.data ?? []}
+                      chave={(v) => v.item}
+                      buscarEm={(v) => [v.item]}
+                      rotuloBusca="Buscar benefício"
+                      vazio="Nenhum benefício disponível no período."
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Benefício</TableHead>
+                          <TableHead className="text-right">Disponível</TableHead>
+                          <TableHead className="text-right">Usado</TableHead>
+                          <TableHead className="text-right">% de uso</TableHead>
+                          <TableHead className="text-right">Beneficiários</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(v) => (
+                        <TableRow>
+                          <TableCell className="font-medium">{v.item}</TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(v.disponivel)}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(v.usado)}
+                          </TableCell>
+                          <TableCell className="num text-right font-medium">
+                            {v.pct_uso != null ? formatPercent(v.pct_uso) : '—'}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(v.beneficiarios)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
+
+                <BentoItem span={12}>
+                  <TabelaCard
+                    nivel="prescritivo"
+                    icon={AlertTriangleIcon}
+                    title="Organizações em risco — time parado"
+                    headline={
+                      orgMaisParada?.pct_time_ativo != null
+                        ? formatPercent(orgMaisParada.pct_time_ativo)
+                        : '—'
+                    }
+                    headlineLabel={
+                      orgMaisParada
+                        ? `de time ativo na pior (${orgMaisParada.organizacao})`
+                        : undefined
+                    }
+                    description="Orgs ativas com 3+ membros, ordenadas pelo menor percentual de time ativo · lista para ação de CS"
+                    isLoading={risco.isLoading}
+                    isError={risco.isError}
+                    onRetry={() => void risco.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={risco.data ?? []}
+                      chave={(r) => String(r.organizacao)}
+                      buscarEm={(r) => [r.organizacao]}
+                      rotuloBusca="Buscar por organização"
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Organização</TableHead>
+                          <TableHead>Plano</TableHead>
+                          <TableHead className="text-right">Membros</TableHead>
+                          <TableHead className="text-right">Ativos 30d</TableHead>
+                          <TableHead className="text-right">Time ativo</TableHead>
+                          <TableHead>Master</TableHead>
+                          <TableHead className="text-right">Assentos ociosos</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(r) => (
+                        <TableRow>
+                          <TableCell className="max-w-64 truncate font-medium">
+                            {r.organizacao}
+                          </TableCell>
+                          <TableCell>{r.plano ?? '—'}</TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(r.membros)}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(r.ativos_30d)}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {r.pct_time_ativo != null ? formatPercent(r.pct_time_ativo) : '—'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={r.master_ativo ? 'secondary' : 'outline'}>
+                              {r.master_ativo ? 'Ativo' : 'Parado'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(r.assentos_ociosos)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+            </div>
           ),
         }}
       />
