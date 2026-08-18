@@ -91,11 +91,19 @@ no CLAUDE.md: número que vai para a tela não pode ser inventado. Se a camada p
 o desenho obrigatório é: **o calculador produz o número, a régua e o corte; o modelo apenas redige,
 nunca calcula e nunca escolhe o limiar.** É a Fase 6 que a proposta anterior marcou como opcional.
 
-**A camada de dados brutos e o contrato de PII.** O BI tem hoje **2 contas, ambas `member`**, e
-`public.bi_clientes_em_risco` devolve nome e e-mail para qualquer autenticado — divergindo do
-contrato de PII do CLAUDE.md, que exige `private.is_admin()` para lista nominal (pendência O do
-roadmap, aberta). Uma superfície de exploração **amplifica qualquer brecha que já exista**, então
-`private.is_admin()` deixa de ser acabamento e vira pré-requisito da camada.
+**A camada de dados brutos e o contrato de PII.** ✅ **Resolvida em 18/ago, e não como este parágrafo
+previa.** O texto original dizia que `private.is_admin()` deixava de ser acabamento e virava
+pré-requisito da camada. O Mateus decidiu o contrário: **não haverá papel de admin no BI**, então o
+contrato passa a valer por "quem tem conta no BI" — a segunda saída que a pendência O já listava.
+
+A consequência é mais forte do que parece, e está registrada no CLAUDE.md: **o controle deixa de ser
+de acesso e passa a ser de armazenamento.** O que não pode ser visto não pode ser servido. Foi por
+isso que o `Explorar` nasceu com allowlist congelada em `marts.explorar_catalogo` nos dois eixos
+(tabela e coluna), com padrão seguro dos dois lados e uma guarda que aborta a migration se algum
+identificador direto ficar servido — ela é o único controle que sobrou, e não um acabamento.
+
+Conferido na mesma data: são **três** RPCs servindo nome e e-mail a qualquer autenticado, não uma —
+`bi_clientes_em_risco`, `bi_masters_top_convidadores` e `bi_ia_experimentaram_e_sumiram`.
 
 ---
 
@@ -186,9 +194,9 @@ A parte mais importante do documento. Dizer isto agora vale mais do que descobri
 | 3 | O desfecho vem do CS | `organization_id` em `fact_cs_atendimento`; o card "o que a conta consumiu antes do desfecho"; primeiras regras de CS no motor | fases 1 e 2 |
 | 4 | Coorte de entrada → desfecho comportamental | 5.746 clientes com 90 dias de observação, janela fechada, estratificado por intensidade | fase 1 |
 | 5 | Performando contra o quê | limiar **absoluto** no lugar do quartil interno; normalização por tamanho de grade; tokens e limite de plano | **decisão do Mateus** (a meta) |
-| 6 | Dados brutos navegáveis | catálogo dos marts, filtro, corte declarado, exportação; nominal atrás de `is_admin()` | contrato de PII |
+| 6 | Dados brutos navegáveis | ✅ **entregue em 18/ago**: aba `Dados` por módulo (sem consulta nova) + `/explorar` sobre 37 tabelas e 1,78 M de linhas, por allowlist congelada em `marts.explorar_catalogo`. **Nominal NÃO fica atrás de `is_admin()`** — não haverá papel de admin (decisão de 18/08), e o controle passou a ser de armazenamento. Falta repetir a aba `Dados` nos outros 9 módulos e a exportação | ✅ |
 | 7 | O motor atravessa telas e ganha memória | RPC transversal CS × plataforma; histórico append por cron; recalibração de severidade | fases 3–5 |
-| 8 | Plano de ação como objeto | achado com dono, prazo, status e reincidência | **decisão do Mateus** (reportar × gerir) |
+| 8 | Plano de ação como objeto | ✅ **modo REPORTA no ar em 18/ago** (`/plano`, `bi_plano_de_acao`): lista transversal ordenada por score, com âncora para o card que prova e a saturação do motor declarada. O modo GERIR (dono, prazo, status, reincidência) segue aberto e é aditivo — nada do que subiu precisa ser desfeito | **decisão do Mateus** (reportar × gerir) |
 
 ### Buracos conhecidos neste plano
 
@@ -229,8 +237,8 @@ Ordenadas por quanto travam.
 8. **A camada de análise passa a ser redigida por modelo?** Se sim, com o calculador produzindo o
    número e o modelo só redigindo.
 9. **Receita** (pendência A): reconectar, apontar para o `via_hub`, ou congelar de vez.
-10. **Lista nominal atrás de `is_admin()`** (pendência O) — bloqueia a fase 6.
-11. **Até onde vai "todos os dados brutos"** e quem vê o quê.
+10. ~~**Lista nominal atrás de `is_admin()`** (pendência O) — bloqueia a fase 6.~~ **RESPONDIDA em 18/08: não haverá papel de admin.** O contrato de PII passa a valer por "quem tem conta no BI", e o controle vira de armazenamento — o que não pode ser visto não é servido.
+11. ~~**Até onde vai "todos os dados brutos"** e quem vê o quê.~~ **RESPONDIDA em 18/08 (o Mateus pediu para seguir a análise):** todos os marts com linha, menos os identificadores diretos — `nome`, `email`, `organizacao`, a régua vivendo em `marts.identificadores_diretos()`. Chave e hash entram, porque distinguem sem identificar. Quem vê: todo mundo com conta no BI.
 
 ### Pedidos a terceiros, que têm lead time
 

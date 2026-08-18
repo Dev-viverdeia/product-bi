@@ -561,6 +561,19 @@ export type Database = {
           tipo: string
         }[]
       }
+      bi_explorar: {
+        Args: { p_limite?: number; p_offset?: number; p_tabela: string }
+        Returns: Json
+      }
+      bi_explorar_catalogo: {
+        Args: never
+        Returns: {
+          colunas_retidas: string[]
+          colunas_servidas: string[]
+          linhas: number
+          tabela: string
+        }[]
+      }
       bi_fluxo_da_tela: {
         Args: { p_dias?: number; p_tela: string }
         Returns: {

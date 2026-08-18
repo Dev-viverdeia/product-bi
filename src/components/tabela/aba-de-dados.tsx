@@ -2,11 +2,11 @@ import { DatabaseIcon } from 'lucide-react'
 
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
-import { TableCell, TableHead, TableRow } from '@/components/ui/table'
-import { formatDecimal, formatInt } from '@/lib/format'
+import { CelulaBruta, type LinhaBruta } from '@/components/tabela/celula-bruta'
+import { TableHead, TableRow } from '@/components/ui/table'
+import { formatInt } from '@/lib/format'
 
-/** Uma linha qualquer devolvida por uma RPC `bi_*`. */
-export type LinhaBruta = Record<string, unknown>
+export type { LinhaBruta }
 
 export type FonteDeDados = {
   /** nome exato da RPC — é a régua de "de onde veio este número" */
@@ -24,33 +24,6 @@ export type FonteDeDados = {
   limite?: number
 }
 
-/** Célula: o tipo do valor decide o alinhamento, não o nome da coluna. */
-function Celula({ valor }: { valor: unknown }) {
-  if (valor === null || valor === undefined) {
-    // Travessão e não vazio: célula em branco é indistinguível de erro de
-    // renderização, e nulo aqui costuma ser supressão declarada pelo banco.
-    return <TableCell className="text-muted-foreground">—</TableCell>
-  }
-  if (typeof valor === 'number') {
-    return (
-      <TableCell className="num text-right">
-        {Number.isInteger(valor) ? formatInt(valor) : formatDecimal(valor)}
-      </TableCell>
-    )
-  }
-  if (typeof valor === 'boolean') {
-    return <TableCell>{valor ? 'sim' : 'não'}</TableCell>
-  }
-  if (typeof valor === 'object') {
-    return (
-      <TableCell className="text-muted-foreground max-w-[28ch] truncate font-mono text-xs">
-        {JSON.stringify(valor)}
-      </TableCell>
-    )
-  }
-  return <TableCell className="max-w-[40ch] truncate">{String(valor)}</TableCell>
-}
-
 /**
  * A camada de dados de um módulo: as linhas que os cards da tela já leram.
  *
@@ -65,9 +38,8 @@ function Celula({ valor }: { valor: unknown }) {
  *   camadas o rótulo em pt-BR é a regra; aqui ele atrapalharia. O que esta aba
  *   entrega é auditabilidade — quem abre quer saber exatamente qual função
  *   devolveu exatamente qual campo, para conferir no banco.
- * - **O tipo decide o formato, não o nome.** Número vai à direita em mono,
- *   nulo vira travessão, jsonb vira o JSON. Adivinhar semântica pelo nome da
- *   coluna ("pct_" é percentual?) erraria em silêncio.
+ * - **O tipo decide o formato, não o nome** — a régua está em `CelulaBruta`,
+ *   compartilhada com a tela `Explorar`.
  * - **O corte é declarado** quando a RPC tem teto, pela `limiteDaFonte` da
  *   TabelaLonga: sem isso "não achei na busca" lê como "não existe".
  */
@@ -122,7 +94,7 @@ export function AbaDeDados({ fontes }: { fontes: FonteDeDados[] }) {
                 renderLinha={(l) => (
                   <TableRow>
                     {colunas.map((c) => (
-                      <Celula key={c} valor={l[c]} />
+                      <CelulaBruta key={c} valor={l[c]} />
                     ))}
                   </TableRow>
                 )}

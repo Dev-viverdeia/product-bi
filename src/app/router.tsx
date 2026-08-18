@@ -17,6 +17,9 @@ const VisaoGeralPage = lazy(() =>
 const PlanoDeAcaoPage = lazy(() =>
   import('@/features/plano/plano-page').then((m) => ({ default: m.PlanoDeAcaoPage })),
 )
+const ExplorarPage = lazy(() =>
+  import('@/features/explorar/explorar-page').then((m) => ({ default: m.ExplorarPage })),
+)
 const ClientesPage = lazy(() =>
   import('@/features/clientes/clientes-page').then((m) => ({ default: m.ClientesPage })),
 )
@@ -63,6 +66,7 @@ export function AppRouter() {
           <Route element={<AppLayout />}>
             <Route index element={<VisaoGeralPage />} />
             <Route path="/plano" element={<PlanoDeAcaoPage />} />
+            <Route path="/explorar" element={<ExplorarPage />} />
             <Route path="/clientes" element={<ClientesPage />} />
             <Route path="/entrada" element={<EntradaPage />} />
             <Route path="/formacoes" element={<FormacoesPage />} />

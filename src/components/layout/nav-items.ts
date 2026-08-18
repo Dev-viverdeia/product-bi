@@ -29,6 +29,7 @@ import {
   SendIcon,
   StarIcon,
   TargetIcon,
+  TelescopeIcon,
   TrendingUpIcon,
   TriangleAlertIcon,
   UserPlusIcon,
@@ -113,6 +114,15 @@ export const navItems: NavItem[] = [
     regua:
       'O que atacar primeiro, em todos os módulos · cada item é um achado calculado na tela de origem, com a régua e o número que o card de lá mostra · sem seletor de período: os módulos têm janelas diferentes e cada frase carrega a própria',
     icon: ClipboardListIcon,
+  },
+  {
+    title: 'Explorar',
+    shortTitle: 'Explorar',
+    to: '/explorar',
+    grupo: 'panorama',
+    regua:
+      'O dado bruto dos marts, por allowlist congelada em migration · chave e hash são servidos de propósito, identificador direto não sai daqui e a retenção aparece com o nome do campo',
+    icon: TelescopeIcon,
   },
   {
     title: 'Visão geral',

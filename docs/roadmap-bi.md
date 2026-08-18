@@ -670,6 +670,57 @@ calados passaram a `descontinuado`, e o card parou de pedir conserto sobre
 produto que não existe. O histórico fica nos fatos de propósito — janela que
 alcance o período em que os módulos existiam continua contando as ações deles.
 
+### As três camadas saíram do papel (18/ago)
+
+A arquitetura que o Mateus desenhou em 17/ago — **dados brutos · análises · plano
+de ação** — deixou de ser só proposta. Estado no fim de 18/ago:
+
+| Camada | Onde vive | Estado |
+| --- | --- | --- |
+| Análise | aba `Análise` de cada módulo | ✅ 9 de 10 telas (CS de fora, por pendência do Mateus) |
+| Gráficos | aba seguinte, fatiada por pergunta | ✅ 10 de 10 |
+| Dados | aba `Dados` do módulo | ✅ **Visão Geral**, como peça de referência; falta repetir em 9 |
+| Plano de ação | `/plano`, seção de topo | ✅ no ar, modo **reporta** |
+| Explorar | `/explorar`, seção de topo | ✅ no ar, 37 tabelas e 1,78 milhão de linhas |
+
+**O que a fase 6 virou na prática.** A camada de dados tem duas metades de
+natureza oposta, e só uma estava travada:
+
+- **As linhas por trás dos cards** (`AbaDeDados`) não abrem exposição nenhuma:
+  são as mesmas linhas que a tela já baixou para desenhar o gráfico. A decisão
+  central foi **não fazer consulta nova** — se a aba relesse o banco, passaria a
+  existir uma segunda consulta capaz de divergir do card ao lado. A garantia é
+  estrutural, não uma promessa: é o mesmo objeto em memória.
+- **O `Explorar` sobre os marts** é exposição de verdade, porque o schema `marts`
+  não está na API REST e o navegador não o alcança. Quem serve são duas RPCs
+  contra uma **allowlist congelada por migration**.
+
+⚠️ **Como não há papel de admin (decisão de 18/08), a allowlist é o único
+controle que sobrou** — o controle deixou de ser de acesso e passou a ser de
+armazenamento. Por isso ela é allowlist nos dois eixos (tabela e coluna), com
+padrão seguro dos dois lados, e por isso a migration termina com uma guarda que
+aborta se algum identificador direto ficou servido.
+
+**Três defeitos meus, achados conferindo o próprio resultado:**
+
+1. A recomendação original dizia "deixar os fatos de grão de pessoa fora". Está
+   errada e teria esvaziado o Explorar — quase todo fato é de grão de pessoa. A
+   régua certa é **identificador direto**: `user_id` é chave pseudônima e o
+   contrato de PII manda usar chave no lugar do valor.
+2. A primeira lista de identificadores era `nome` e `email`. Com ela, o catálogo
+   retinha `dim_organizacao.nome` e **servia `dim_usuario.organizacao`**, que é o
+   mesmo valor na tabela vizinha. Retenção que o vizinho desfaz não é retenção.
+   `organizacao` entrou na lista.
+3. A proposta afirmava que a aba `Dados` "nasce barata porque cada card já
+   declara qual RPC o alimenta". **Nenhum card declara.** São 93 RPCs em 10
+   módulos e o vínculo card→RPC era feito a olho.
+
+**O que a varredura por nome de coluna encontrou** (e uma lista escrita à mão
+teria perdido): `fact_fatura.email` e `master_snapshot.organizacao`. Todo o resto
+é hash (`contato_hash`, `email_hash`, `empresa_hash`, `solicitante_email_hash`),
+chave (`empresa_id`, `organization_id`, `user_id`) ou conteúdo (`titulo`, `slug`,
+`path`, `tela`) — e esses ficam servidos de propósito.
+
 ### Levantamento concluído em 11/ago
 
 - **`proposta-fase-2-profundidade.md`** — documento de decisão: anatomia padrão
@@ -727,7 +778,7 @@ gravidade, não de esforço.
 | S | **Atribuição de `atendimento_tickets` depende do Pulse — `retencao` não.** Medido em 12/ago: o workaround que o time do Pulse sugeriu para `retencao` (ligar a `pipeline_cards` por `empresa_hash`) resolve **205 de 232 (88,4%)** com org única, 6 ambíguos, 21 sem org — derivamos do nosso lado, sem pedir nada. Já `atendimento_tickets` traz só `contato_hash` (telefone), e `marts.dim_usuario` **não espelha telefone**: não há caminho nosso. Aceito o que eles ofereceram (match por telefone normalizado, só o unívoco, ~81%) | CS | resposta enviada ao Pulse |
 | R | ~~**CS: conexão de pé, import bloqueado por 2 grants**~~ **Resolvido.** Os dois `grant execute` saíram — `bi_pulse.hash_pii` (usada por 7 das 8 views) e `public.wa_phone_key` (usada por `retencao`). Medido em 17/08: **as 9 foreign tables de `pulse` leem**, e os 9 marts de CS estão carregados com **95.781 linhas** (`retencao` 261 · `atendimento_tickets` 2.645 · `pipeline_cards` 6.557 · `cancelamentos` 296 · `disparos_campanhas` 1.970 · `cliente_status_diario` 20.937). O host errado (`aws-0` → `aws-1`) segue corrigido e versionado | CS | ✅ |
 | Q | **Atribuição de CS: resolvida em 3 das 5 views** (12/ago). O time do Pulse expôs `organization_id` em `pipeline_cards` (75,2%), `pipeline_movimentos` (80,4%) e `cancelamentos` (83,8%) — verificado ao vivo. Fizeram melhor que o pedido: em vez de liberar `bi.empresa` para o nosso role, embrulharam a busca em `public.bi_empresa_org_id(uuid) returns uuid` SECURITY DEFINER. O role ganhou a chave **sem** ganhar acesso a razão social, e-mail ou telefone — segue lendo 8 objetos e zero dos 414 de `public`. Coluna adicionada no fim da view, para não quebrar `select *` de quem já consome. **Resolvida também em `atendimento_tickets`** (medido 17/08): o time entregou `organization_id` + `organization_id_origem` na view, cobrindo **1.984 de 2.645 tickets (75,0%)**, todos por `telefone_unico` — o match por telefone normalizado unívoco que o item S registra como aceito. Sobram 661 sem org e 1.308 orgs distintas atribuídas. **Falta só `retencao`** (261 linhas), que segue com `empresa_hash`/`id_via` e sem `organization_id` — o caminho ali é o workaround do item S, derivado do nosso lado. ⚠️ **A coluna nova não chega ao BI ainda**: `pulse.atendimento_tickets` foi importada antes dela e a definição da foreign table está velha — precisa de `import foreign schema ... limit to (atendimento_tickets)` para a coluna aparecer | CS | reimportar a foreign table; `retencao` pelo caminho do item S |
-| O | **Lista nomeada não passa por `private.is_admin()`.** O contrato de PII no CLAUDE.md diz que lista com nome e e-mail fica atrás de `is_admin()`; `public.bi_clientes_em_risco` já devolvia nome e e-mail para qualquer autenticado, e a lista nova de IA seguiu o mesmo modelo — divergir só na nova criaria duas regras para o mesmo dado | IA · Clientes | decisão do Mateus: apertar as duas ou registrar que o contrato vale por "quem tem conta no BI" |
+| O | ~~**Lista nomeada não passa por `private.is_admin()`.**~~ **RESOLVIDA POR DECISÃO em 18/08: não haverá papel de admin no BI.** O contrato de PII passa a valer por "quem tem conta no BI" — a segunda das duas saídas que esta pendência listava. São **três** RPCs nominais e não duas (`bi_clientes_em_risco`, `bi_masters_top_convidadores`, `bi_ia_experimentaram_e_sumiram`); a terceira apareceu na conferência. Consequência registrada no CLAUDE.md: o controle deixa de ser de ACESSO e passa a ser de ARMAZENAMENTO, e é por isso que a allowlist do Explorar é a peça central daquela camada | IA · Clientes · Entrada | ✅ (decisão) |
 | M | **Os cards novos de Formações também não têm regra no motor** — mesma situação de Entrada (item K). O texto da aba ainda fala das quatro perguntas antigas | Formações | mesmo lote de reescrita do catálogo |
 | N | **Uma linha da tela de CS foi corrigida fora do combinado.** O headline de atendentes tinha o mesmo defeito do "0 enquanto carrega" e o teste novo reprovava o build; corrigi só essa linha, sem tocar em nada do que está pendente com o Mateus | CS | ciente — nenhuma decisão de CS foi antecipada |
 | L | **Tabela comparativa pede rolagem lateral em 375px.** É o comportamento correto do DS (rola dentro do próprio container, a página não rola), e o headline já carrega o número principal — mas a coluna "Convidado" só aparece rolando | Entrada | avaliar esconder uma coluna no mobile quando o padrão se repetir nas outras telas |
