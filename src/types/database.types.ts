@@ -595,11 +595,12 @@ export type Database = {
       bi_formacoes_entrada_na_grade: {
         Args: never
         Returns: {
-          alunos: number
           certificaram: number
           grupo: string
+          inscricoes: number
           margem_pp: number
           pct: number
+          pessoas: number
         }[]
       }
       bi_formacoes_kpis: {

@@ -325,8 +325,8 @@ export function FormacoesPage() {
                     }
                     description={
                       pelaPrimeira
-                        ? `Alunos com 90+ dias desde a 1ª aula daquele curso · margem de ${formatDecimal(pelaPrimeira.margem_pp)} pp — a diferença precisa passar disso para não ser ruído · entrar no meio também descreve quem já conhecia o assunto, e isso não sai daqui`
-                        : 'Alunos com 90+ dias desde a 1ª aula daquele curso'
+                        ? `A unidade é a INSCRIÇÃO, não a pessoa: a mesma pessoa abre um curso pela 1ª aula e outro pelo meio, então ela aparece nos dois grupos · inscrições com 90+ dias desde a 1ª aula daquele curso · margem de ${formatDecimal(pelaPrimeira.margem_pp)} pp, calculada sobre PESSOAS — observações da mesma pessoa não são independentes, e usar inscrições encolheria a margem · entrar no meio também descreve quem já conhecia o assunto, e isso não sai daqui`
+                        : 'Inscrições com 90+ dias desde a 1ª aula daquele curso'
                     }
                     isLoading={entradaGrade.isLoading}
                     isError={entradaGrade.isError}
@@ -337,7 +337,8 @@ export function FormacoesPage() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Por onde abriu o curso</TableHead>
-                          <TableHead className="text-right">Alunos</TableHead>
+                          <TableHead className="text-right">Inscrições</TableHead>
+                          <TableHead className="text-right">Pessoas</TableHead>
                           <TableHead className="text-right">Certificaram</TableHead>
                           <TableHead className="text-right">Taxa</TableHead>
                         </TableRow>
@@ -346,7 +347,12 @@ export function FormacoesPage() {
                         {(entradaGrade.data ?? []).map((e) => (
                           <TableRow key={e.grupo}>
                             <TableCell className="font-medium">{e.grupo}</TableCell>
-                            <TableCell className="num text-right">{formatInt(e.alunos)}</TableCell>
+                            <TableCell className="num text-right">
+                              {formatInt(e.inscricoes)}
+                            </TableCell>
+                            <TableCell className="num text-muted-foreground text-right">
+                              {formatInt(e.pessoas)}
+                            </TableCell>
                             <TableCell className="num text-right">
                               {formatInt(e.certificaram)}
                             </TableCell>

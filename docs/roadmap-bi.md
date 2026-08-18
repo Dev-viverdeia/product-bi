@@ -846,6 +846,62 @@ de ler a função. O denominador da taxa é `disponivel + usado`, não `disponiv
 a conta certa é 17,65% → 13,72%. Dividir antes de ler a fonte é exatamente o
 defeito que esta auditoria persegue.
 
+### Terceiro corte: dedup, denominador cortado, fan-out e unidade (18/ago)
+
+Quatro cortes semânticos. Três saíram limpos, e o quarto achou um defeito.
+
+**Dedup — limpo.** O mapa de dados avisa que `marts.fact_fatura` tem 1.119
+linhas para 354 faturas distintas e que somar `valor_brl` sem deduplicar infla
+3,1×. As três RPCs de Receita **filtram por `tipo`**, e isso É a deduplicação:
+medido, `invoice.payment_succeeded` tem 236 linhas para 236 faturas distintas, e
+nenhum tipo tem `fatura_id` repetido.
+
+Conferi de passagem se `rec_falha_cobranca` superestima a perda — 31 das 131
+faturas que falharam (23,7%, R$ 64.164,89) foram pagas depois. **Não é defeito:**
+o `gabarito_leitura` da regra já diz "isto não é receita perdida… parte dele
+entra depois". O número exato não entrou na frase de propósito, porque nenhum
+card o mostra.
+
+**Denominador cortado — limpo.** Nenhuma página soma lista que a RPC truncou. O
+único acerto do varredor foi falso positivo (o `reduce` era sobre outra fonte).
+
+**Fan-out — limpo, com uma exceção.** Seis RPCs contam entidade com `count(*)`
+após dois ou mais joins. Cinco agrupam por pessoa, então o `count(*)` já é
+gente: `bi_composicao_crescimento` bate **exatamente** com o KPI de ativos
+(3.670 = 3.670, fatias somando 1,0000) e `bi_entrada_primeira_acao_por_origem` é
+partição exata (9.122 = 9.122).
+
+**Unidade — um defeito, em `bi_formacoes_entrada_na_grade`.** Ela agrupa por
+`(curso_id, user_id)` e chama o `count(*)` de `alunos`:
+
+| grupo | publicado como "Alunos" | pessoas |
+| --- | --- | --- |
+| Começou pela 1ª aula | 5.591 | **2.944** |
+| Entrou no meio da grade | 6.159 | **3.513** |
+| total | 11.750 | **4.715** |
+
+O card publicava 11.750 onde as pessoas são 4.715 — infla 2,5×. E 2.944 + 3.513
+= 6.457 contra 4.715 distintas, ou seja **1.742 pessoas estão nos dois grupos**,
+apresentadas como grupos separados.
+
+⚠️ **É um erro que este projeto já tinha nomeado e recusado em outro lugar.** O
+CLAUDE.md registra a recusa de uma análise de Soluções por "unidade errada — 13
+soluções contra 22, tratadas como 18 mil tentativas independentes. Mesmo erro da
+'grade longa' em Formações". O erro foi nomeado num card e sobreviveu publicado
+em outro.
+
+**A consequência que mais importa é a margem.** Ela vinha de 11.750 observações
+tratadas como independentes, quando cada pessoa contribui ~2,5 correlacionadas:
+**1,8 pp publicados contra 2,4 pp honestos**. O achado sobrevive (45,2% contra
+35,3%, quase dez pontos), mas margem menor que a real promete precisão que o
+dado não tem — e a margem existe exatamente porque "diferença sem margem não é
+comparação".
+
+A função passa a devolver `inscricoes` e `pessoas`, a taxa continua por
+inscrição (unidade certa da pergunta) e a margem usa pessoas como n. Das oito
+funções que publicam `margem_pp`, **esta era a única** que agrupava por duas
+chaves.
+
 ### Levantamento concluído em 11/ago
 
 - **`proposta-fase-2-profundidade.md`** — documento de decisão: anatomia padrão
