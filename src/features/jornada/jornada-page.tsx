@@ -139,16 +139,20 @@ export function JornadaPage() {
           isLoading={kpis.isLoading}
           isError={kpis.isError}
         />
+        {/* Média e mediana lado a lado, com o rótulo dizendo qual é qual: a
+            distância entre elas É a inflação por sessão-robô que o card das
+            sessões-monstro denuncia por escrito. Dois tiles com o mesmo nome e
+            números diferentes leriam como defeito. */}
         <KpiCard
-          label="Telas por sessão"
+          label="Telas por sessão (média)"
           value={kpis.data?.telas_por_sessao ?? null}
           format={formatDecimal}
           isLoading={kpis.isLoading}
           isError={kpis.isError}
         />
         <KpiCard
-          label="Duração mediana (min)"
-          value={kpis.data?.minutos_medianos ?? null}
+          label="Telas por sessão (mediana)"
+          value={kpis.data?.telas_medianas ?? null}
           format={formatDecimal}
           isLoading={kpis.isLoading}
           isError={kpis.isError}

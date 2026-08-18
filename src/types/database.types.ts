@@ -695,9 +695,9 @@ export type Database = {
       bi_jornada_kpis: {
         Args: { p_dias?: number }
         Returns: {
-          minutos_medianos: number
           pct_uma_tela: number
           sessoes: number
+          telas_medianas: number
           telas_por_sessao: number
         }[]
       }
@@ -885,23 +885,6 @@ export type Database = {
           pct: number
           sessoes: number
           tela: string
-        }[]
-      }
-      bi_power_users: {
-        Args: {
-          p_dias?: number
-          p_limite?: number
-          p_papel?: string
-          p_plano?: string
-        }
-        Returns: {
-          dias_ativos: number
-          email: string
-          eventos: number
-          modulos: number
-          nome: string
-          organizacao: string
-          plano: string
         }[]
       }
       bi_profundidade_sessao: {
@@ -1132,7 +1115,6 @@ export type Database = {
           views: number
         }[]
       }
-      bi_ultima_sincronizacao: { Args: never; Returns: string }
       bi_uso_vs_receita: {
         Args: never
         Returns: {
