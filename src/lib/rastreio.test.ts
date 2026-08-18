@@ -16,20 +16,32 @@ describe('leitura do veredito de rastreio', () => {
   })
 
   /*
-    Os três estados precisam ser distinguíveis SEM cor — é regra do DS, e aqui
-    é também regra de conteúdo: "parado" virou três coisas diferentes, e o card
-    existe justamente para separá-las.
+    O rótulo é que distingue, não a cor — regra do DS ("nunca só cor") e aqui
+    também regra de conteúdo: "parado" virou quatro coisas diferentes, e o card
+    existe justamente para separá-las. Tom PODE repetir: são quatro vereditos
+    para três tons úteis, já que nenhum deles é uma boa notícia.
   */
-  it('dá rótulo e tom distintos a cada veredito', () => {
+  it('dá rótulo distinto a cada veredito', () => {
     const leituras = VEREDITOS.map((v) => lerVeredito(v)!)
     expect(new Set(leituras.map((l) => l.rotulo)).size).toBe(VEREDITOS.length)
-    expect(new Set(leituras.map((l) => l.tom)).size).toBe(VEREDITOS.length)
   })
 
-  it('só "quebrado" é crítico', () => {
+  it('só "quebrado" é crítico, e nenhum veredito é boa notícia', () => {
     expect(lerVeredito('quebrado')?.tom).toBe('critico')
     expect(lerVeredito('sem_uso')?.tom).toBe('neutro')
     expect(lerVeredito('sem_corroboracao')?.tom).toBe('atencao')
+    expect(lerVeredito('descontinuado')?.tom).toBe('neutro')
+    expect(VEREDITOS.map((v) => lerVeredito(v)!.tom)).not.toContain('bom')
+  })
+
+  /*
+    Comunidade e Networking foram encerrados em 18/08. Sem este veredito o card
+    pediria conserto para sempre sobre produto que não existe — e card que dá
+    alarme falso todo dia ensina a ignorar o card.
+  */
+  it('módulo encerrado não pede conserto', () => {
+    expect(lerVeredito('descontinuado')?.tom).not.toBe('critico')
+    expect(contarQuebrados([{ veredito: 'descontinuado' }])).toBe(0)
   })
 
   /*

@@ -42,6 +42,12 @@ O que não tem a marca vale como pista, não como fato.
 
 Proposta do Mateus na mesma conversa: **dados brutos · análises · plano de ação**.
 
+> ✅ **Reconfirmada por ele em 18/ago/2026**, nas palavras dele: "pensei em três seções principais, para visualizar
+> da melhor forma — uma com os dados brutos mesmo, outra de ANÁLISES desses dados, você analisando, e outra de plano
+> de ação". O desenho abaixo (módulos como navegação, camadas como gramática de aba) segue valendo e **não foi
+> reaberto** — a única decisão dele que muda alguma coisa aqui continua sendo a da camada de análise redigida por
+> modelo, listada em §7.8.
+
 Ela é boa, e não é uma reorganização de menu — é a mesma escada de profundidade que o projeto já
 tem como metadado de card, agora virando arquitetura. Cada camada passa a ter um **contrato de
 quanto pode afirmar**:
@@ -168,7 +174,7 @@ A parte mais importante do documento. Dizer isto agora vale mais do que descobri
 | # | Fase | Entrega | Trava |
 | --- | --- | --- | --- |
 | 1 | A régua da base | `e_org_valida` isolando as 38 cascas; `tipo_conta` separando os 750 sem excluir; relatório de integridade das 16 contas decapitadas | **decisão do Mateus** (os 750) |
-| 2 | Parar de publicar número quebrado | guarda de instrumentação, corte de sessão inflada, aposentadoria do KPI de duração, reconciliação do espelho de CS, lote das 22 RPCs com `now()`, RPCs órfãs | **nenhuma — em execução** |
+| 2 | Parar de publicar número quebrado | guarda de instrumentação ✅, aposentadoria do KPI de duração ✅, reconciliação do espelho de CS ✅, RPCs órfãs ✅, lote das 22 RPCs com `now()` ✅ (18/ago, md5 conferido antes e depois nas 20) — **falta só o corte de sessão inflada** | **decisão do Mateus: o limiar do corte** |
 | 3 | O desfecho vem do CS | `organization_id` em `fact_cs_atendimento`; o card "o que a conta consumiu antes do desfecho"; primeiras regras de CS no motor | fases 1 e 2 |
 | 4 | Coorte de entrada → desfecho comportamental | 5.746 clientes com 90 dias de observação, janela fechada, estratificado por intensidade | fase 1 |
 | 5 | Performando contra o quê | limiar **absoluto** no lugar do quartil interno; normalização por tamanho de grade; tokens e limite de plano | **decisão do Mateus** (a meta) |

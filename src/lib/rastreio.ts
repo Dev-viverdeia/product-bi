@@ -5,17 +5,24 @@ import type { TomDeStatus } from '@/components/ui-marca/status-pill'
  *
  * `marts.rastreio_por_tipo()` responde há quanto tempo um tipo de evento não
  * registra — e só isso NÃO separa cano entupido de torneira fechada. Medido em
- * 18/08: dos quatro tipos parados, dois eram rastreio quebrado
- * (`solution_started`, `connection_accepted`) e dois eram funcionalidade que
- * ninguém usa mais (`community_post_created`, `community_comment`, com a fonte
- * batendo na data exata). Tratar os quatro como o mesmo problema publicaria
- * diagnóstico falso em metade deles.
+ * 18/08: dos quatro tipos parados, um era rastreio quebrado de verdade
+ * (`solution_started`: o mart de progresso registrou 24 mil inícios depois de o
+ * evento calar) e três eram de módulo encerrado — Comunidade e Networking
+ * saíram do ar. Tratar os quatro como o mesmo problema publicaria diagnóstico
+ * falso em três deles, e pediria conserto para sempre sobre produto que não
+ * existe.
  *
- * Quem separa é `etl.corroborar_rastreio()`, que compara o evento com uma fonte
- * independente do mesmo fato. Este módulo é só a leitura em pt-BR do resultado.
+ * Quem separa é `etl.corroborar_rastreio()`, que fecha módulo encerrado em
+ * `descontinuado` e compara o resto com uma fonte independente do mesmo fato.
+ * Este módulo é só a leitura em pt-BR do resultado.
  */
 
-export const VEREDITOS = ['quebrado', 'sem_uso', 'sem_corroboracao'] as const
+export const VEREDITOS = [
+  'quebrado',
+  'sem_uso',
+  'sem_corroboracao',
+  'descontinuado',
+] as const
 
 export type VereditoDeRastreio = (typeof VEREDITOS)[number]
 
@@ -40,6 +47,11 @@ const LEITURAS: Record<VereditoDeRastreio, LeituraDoVeredito> = {
     rotulo: 'sem corroboração',
     tom: 'atencao',
     explicacao: 'não há fonte independente espelhada para conferir o silêncio',
+  },
+  descontinuado: {
+    rotulo: 'descontinuado',
+    tom: 'neutro',
+    explicacao: 'o módulo foi encerrado — não há rastreio a consertar',
   },
 }
 

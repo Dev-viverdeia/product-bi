@@ -623,6 +623,53 @@ compromisso quebrado. Hoje não dispara: o único quebrado que a função leria 
 `solution_started`, que o passo 4 aposentou. Mesmo espírito do escopo por quadro
 do passo 2 — existe para a falha seguinte.
 
+### Fase 2 da proposta de direcionamento — 5 de 6 itens fechados (18/ago)
+
+`docs/proposta-fase-3-direcionamento.md` §6 lista seis itens na fase 2 ("parar de
+publicar número quebrado"). Estado conferido no banco em 18/08:
+
+| Item | Estado |
+| --- | --- |
+| guarda de instrumentação | ✅ passo 5 do lote — virou régua com corroboração |
+| aposentadoria do KPI de duração | ✅ passo 3 — mediana de telas no lugar |
+| reconciliação do espelho de CS | ✅ passo 2 |
+| RPCs órfãs | ✅ passo 3 — `bi_ultima_sincronizacao` e `bi_power_users` |
+| lote das 22 RPCs com `now()` | ✅ **fechado**: 20 na migration `20260818050000`, `bi_jornada_kpis` no passo 3, `bi_saude_pipeline` declarada como exceção permanente |
+| **corte de sessão inflada** | ❌ **aberto** — ver abaixo |
+
+**As 22 RPCs, com verificação que vale registrar.** A substituição é a mesma em
+todas: `(now() at time zone 'America/Sao_Paulo')::date` →
+`marts.data_referencia()`. Com o pipeline vivo os dois valem o mesmo dia, então
+**o resultado tem de ser idêntico** — e é isso que prova que a troca pegou só a
+âncora. Tirei o md5 do resultado das 20 antes e depois: **20 de 20 iguais**,
+incluindo a `bi_raio_x_telas`, que era a de risco (588 ms, sem regressão).
+
+A migration é uma **transformação declarada com asserção**, não vinte corpos
+colados: a mudança é de uma linha por função, e colar ~24 mil caracteres de SQL
+idêntico ao que já está no banco esconderia justamente o que mudou. A lista de
+alvos é explícita, e o bloco aborta se alguma função não contiver o padrão, se
+sobrar `now()` depois, ou se o corpo não mudar.
+
+⚠️ **`bi_saude_pipeline` estava na lista das 22 por engano.** Ela calcula "horas
+desde a última sync" — existe para comparar o relógio do dado com o de parede.
+Migrá-la faria o BI responder "0 hora desde a sincronização" para sempre,
+inclusive com o pipeline parado, que é o único momento em que alguém a lê. Ficou
+com o motivo no próprio `comment on function`.
+
+**O que falta na fase 2: o corte de sessão inflada.** Conferido no banco — só
+existe o card que as MEDE (`bi_jornada_sessoes_infladas`, entregue em 12/ago).
+Nenhuma RPC de navegação corta: `bi_raio_x_telas`, `bi_portas_entrada` e
+`bi_pontos_saida` seguem contando as sessões-robô. É o achado de maior score do
+catálogo inteiro (`jor_posicao_inflada`, 11,20) e continua no ar: 355 sessões
+(0,8%) carregam 22,7% de todas as telas vistas. Antes de cortar é preciso fixar
+o limiar, e limiar é régua — vai para o Mateus com a medição do efeito ao lado.
+
+**Módulo encerrado entrou na régua (18/ago).** Comunidade e Networking saíram do
+ar como produto, o que muda a leitura do card de saúde: três dos quatro eventos
+calados passaram a `descontinuado`, e o card parou de pedir conserto sobre
+produto que não existe. O histórico fica nos fatos de propósito — janela que
+alcance o período em que os módulos existiam continua contando as ações deles.
+
 ### Levantamento concluído em 11/ago
 
 - **`proposta-fase-2-profundidade.md`** — documento de decisão: anatomia padrão
@@ -669,7 +716,7 @@ gravidade, não de esforço.
 | F | **Piso de rastreamento chumbado em `VALUES`.** `bi_churn_modulos` carrega a lista de quando cada módulo passou a ser medido; módulo novo fica invisível para `cli_mortalidade` até alguém lembrar de atualizar | Clientes | virar tabela, ou ganhar teste que reprove módulo ausente da lista |
 | G | **Janela de `cli_comprador` duplicada.** O 120/30 vive no calculador e em `bi_retencao_comprador`; mudar num e não no outro faz a frase mentir sem erro nenhum | Clientes | a RPC devolver a própria régua como coluna |
 | H | **NPS de aula parou em 29/07 — é a coleta na origem, não o pipeline.** Conferido em 17/08 direto na plataforma: `learning_lesson_nps` tem 17.912 linhas e a última é de **29/07/2026**, com o FDW de pé e `fact_nps_aula` sincronizando normalmente (0 linhas novas porque não há linha nova lá). Nenhuma regra de Formações lê NPS, de propósito | Formações | perguntar ao time da plataforma por que a coleta parou |
-| I | **As seis RPCs de Jornada ainda ancoram em `now()`** — confirmado em 17/08: `bi_fluxo_da_tela`, `bi_jornada_kpis`, `bi_pontos_saida`, `bi_portas_entrada`, `bi_profundidade_sessao` e `bi_raio_x_telas`. Dívida declarada; nenhuma das quatro regras compara períodos, então pipeline atrasado encurta a janela sem inverter sinal | Jornada | entra no lote geral das **22 funções de produto** com `now()` |
+| I | ~~**As seis RPCs de Jornada ainda ancoram em `now()`.**~~ **Fechada em 18/08**, junto com a dívida inteira: as 22 funções de produto migraram para `marts.data_referencia()` (`bi_jornada_kpis` no passo 3; as outras 20 na migration `20260818050000`). Verificação: md5 do resultado de cada uma antes e depois — **as 20 idênticas**, que é o esperado com o pipeline vivo. Sobram no relógio 6 `bi_cs_*` e a `bi_saude_pipeline`, as sete por decisão declarada | Jornada · parque | ✅ |
 | J | **`card-retencao-papel` ficou sem regra.** É o card que `cli_gap_papel` apontava antes de ser aposentada. O card segue correto e útil | Clientes | nada urgente — anotado para não parecer esquecimento |
 | K | **Os três cards novos de Entrada não têm regra no motor.** A aba de análise ainda fala das cinco perguntas antigas; o corte comprador × convidado na porta e o efeito do onboarding não aparecem no texto | Entrada | reescrever o catálogo da tela depois que todas subirem a escada, para não mexer duas vezes |
 | P | **O repo não reconstrói o banco.** Medido em 17/08: `supabase/migrations` tem **87 arquivos**; `supabase_migrations.schema_migrations` tem **97 entradas** — a distância de 10 não fechou, só andou junto. Renomeei 26 arquivos para a versão realmente aplicada (o timestamp do arquivo era o que eu escrevia, não o do apply), mas sobram **10 arquivos sem entrada no banco** — quatro deles porque um arquivo virou 2–3 entradas ao ser aplicado em pedaços via MCP — e **18 entradas sem arquivo**. Enquanto isso durar, `supabase db push` é inseguro | infra | reconciliar antes de qualquer merge para a `main`; parte é dívida anterior a 11/ago |
@@ -684,8 +731,8 @@ gravidade, não de esforço.
 | M | **Os cards novos de Formações também não têm regra no motor** — mesma situação de Entrada (item K). O texto da aba ainda fala das quatro perguntas antigas | Formações | mesmo lote de reescrita do catálogo |
 | N | **Uma linha da tela de CS foi corrigida fora do combinado.** O headline de atendentes tinha o mesmo defeito do "0 enquanto carrega" e o teste novo reprovava o build; corrigi só essa linha, sem tocar em nada do que está pendente com o Mateus | CS | ciente — nenhuma decisão de CS foi antecipada |
 | L | **Tabela comparativa pede rolagem lateral em 375px.** É o comportamento correto do DS (rola dentro do próprio container, a página não rola), e o headline já carrega o número principal — mas a coluna "Convidado" só aparece rolando | Entrada | avaliar esconder uma coluna no mobile quando o padrão se repetir nas outras telas |
-| X | **`member_connections` não está espelhada, e por isso o BI não fecha o veredito de `connection_accepted`.** Medido em 18/08 direto na plataforma: 190 conexões aceitas, a última em **14/08**, contra um evento que parou em **05/05** — é rastreio quebrado, com prova. Mas a prova mora fora do BI, então o card publica `sem_corroboracao`, que é o honesto: não se publica o que não se consegue recomputar. São 1.133 linhas | Visão Geral · Networking | espelhar `member_connections` (foreign table + mart + sync). Destrava o veredito **e** o módulo de Networking, que hoje não tem nenhuma instrumentação viva de desfecho |
-| Y | **A Comunidade está morta e a instrumentação está sadia.** Zero post desde 18/06/2026, zero comentário desde 23/04 — 162 posts e 20 respostas em toda a história. Confirmado por corroboração: o evento e a fonte param na mesma data. Registrado por decisão (18/08): **não vira tela** | produto | decisão do Mateus: manter, relançar ou encerrar o módulo. O BI não tem mais o que medir aqui |
+| X | ~~**`member_connections` não está espelhada.**~~ **Encerrada sem execução em 18/08: o Networking saiu do ar.** O veredito de `connection_accepted` passou a `descontinuado`, que é a leitura certa — o evento não sai porque o produto acabou, não porque o cano entupiu. Espelhar a tabela deixou de ter pergunta que a justifique, e o contrato de PII é explícito: tabela sem pergunta não vira mart | — | ✅ (não fazer) |
+| Y | ~~**A Comunidade está morta e a instrumentação está sadia.**~~ **Respondida em 18/08 pelo Mateus: Comunidade e Networking não existem mais como produto.** Os dois entraram em `marts.modulos_descontinuados()`, e o card de saúde parou de pedir conserto para eles. O histórico fica nos fatos de propósito | produto | ✅ |
 | Z | **`bi_acoes_por_modulo` leva ~1,4 s.** Não é a guarda (0,3 ms) nem regressão do lote de 18/ago — é o `count(distinct user_id)` sobre 70 mil linhas, que derrama para disco (`external merge`). Está longe do timeout, mas é o card mais lento da Visão Geral | Visão Geral | medir se um `HashAggregate` com `work_mem` maior ou uma pré-agregação por usuário/dia resolve; não mexer sem medir |
 
 ## Pendências abertas pela auditoria de 08/ago/2026
