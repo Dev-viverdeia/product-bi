@@ -82,10 +82,10 @@ describe('contrato do shell', () => {
  * ordem. Antes cada tela declarava as próprias abas por pergunta, e o custo
  * disso era invisível: o leitor reaprendia a navegação em cada módulo.
  *
- * ⚠️ **A trava que mais importa aqui é a do valor `graficos`.** As 35 regras do
+ * ⚠️ **A trava que mais importa aqui é a do valor `graficos`.** Todas as regras do
  * motor gravam `insights.regra.ancora_aba = 'graficos'`, e é por esse texto que
  * o link "ver o gráfico que sustenta" navega. Renomear o valor da aba no
- * `nav-items.ts` quebraria os 35 links **em silêncio** — o link trocaria de aba
+ * `nav-items.ts` quebraria todos eles **em silêncio** — o link trocaria de aba
  * e não rolaria para nada, sem erro, sem aviso, sem teste falhando. Até hoje a
  * única proteção era uma frase no CLAUDE.md, que não reprova build nenhum.
  */

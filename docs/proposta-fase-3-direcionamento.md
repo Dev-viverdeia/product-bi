@@ -179,7 +179,7 @@ A parte mais importante do documento. Dizer isto agora vale mais do que descobri
 | "Qual formação tirar do ar" pelo caminho de quem cancela | com o corte temporal que a própria pergunta exige (aula iniciada **antes** do pedido), **0 de 58 cursos** ficam acima da base de 7,83% + 2 erros padrão. Sem o corte aparece sinal de 2,2× — artefato de contar aluno que abriu o curso **depois** de cancelar. E testar 58 cursos é escolher o vencedor de 58 sorteios | decidir por **progressão de grade**, normalizada pelo tamanho da grade. Ressalva: os dois piores (Typebot e HotSeats) **já estão fora do ar** |
 | "Telas mais assistidas" antes do cancelamento | só 98 dos 245 casos têm navegação anterior; quebrado por desfecho, o braço RETIDO fica com **12** contra o piso de 30. É arquivo que não existe | a mesma comparação por **solução/formação consumida** (PERDIDO 86 × RETIDO 35), que passa nos dois braços |
 | **"Tempo do usuário"** | **não existe fonte em nenhum dos três bancos.** `learning_progress.last_position_seconds` = 0 em todas as 151.164 linhas; `onboarding_step_tracking` e `onboarding_abandonment_points` com 0 linhas; `analytics` grava sem duração e sem sessão | aposentar o KPI enviesado; usar as durações medidas de verdade; pedir instrumentação (heartbeat + `session_id`) à plataforma |
-| "Literalmente todos os insights" | motor de catálogo só sabe o que alguém previu: 35 regras em 9 telas, **CS com zero**. E ele está **saturado** — 35 de 35 dispararam, 0 suprimidas, o estado "nada fora do padrão" nunca ocorreu | recalibrar limiar regra a regra + a camada de dado bruto, que é o que responde honestamente a "tudo" |
+| "Literalmente todos os insights" | motor de catálogo só sabe o que alguém previu: **34 regras** em 9 telas (eram 35 até a auditoria de 18/08 aposentar `vg_concentracao`), **CS com zero**. E ele está **saturado** — 33 de 34 disparam, 1 suprimida | recalibrar limiar regra a regra + a camada de dado bruto, que é o que responde honestamente a "tudo" |
 | Plano de ação com **efeito medido** | **não existe experimentação em nenhum dos três bancos** — nenhuma tabela de variante, bucket, rollout ou holdout | a ação nomeia a alavanca e declara que o efeito não será atribuível; reincidência é o substituto honesto |
 | Análise de caminho com horizonte longo | os dois eixos não se cruzam: navegação tem 46 dias de arquivo; `fact_evento` tem 461 dias mas só virou multi-módulo em 13/04/2026. A janela em que caminho rico e desfecho coexistem é de ~4 meses e **nunca cresce para trás** | trocar "sequência" por **composição em janela fixa**: o que a pessoa fez nos primeiros 30 dias contra o desfecho em janela fechada |
 
@@ -233,7 +233,7 @@ Ordenadas por quanto travam.
 5. **Qual é a meta** de uma solução e de uma formação performando? **Bloqueia a fase 5.**
 6. **O BI reporta ou gere plano de ação?** Todo o desenho da fase 8 depende disso.
 7. **Régua de severidade** (pendência E): histerese, faixa de incerteza, ou aposentar o gradiente?
-   8 das 35 regras estão a menos de 0,05 do corte.
+   parte das regras fica a menos de 0,05 do corte.
 8. **A camada de análise passa a ser redigida por modelo?** Se sim, com o calculador produzindo o
    número e o modelo só redigindo.
 9. **Receita** (pendência A): reconectar, apontar para o `via_hub`, ou congelar de vez.

@@ -19,15 +19,33 @@ const migrations = Object.entries(
 const sqlCompleto = migrations.map((m) => m.sql).join('\n')
 
 /**
- * Corpo de cada função do motor — tanto o calculador quanto o invólucro de
- * cache, do cabeçalho até o `$$;`.
+ * Corpo de cada função do motor — do cabeçalho até o fecho do próprio corpo.
+ *
+ * ⚠️ **O corpo termina na tag de cifrão que o ABRIU**, e isto foi descoberto do
+ * jeito caro. A primeira versão procurava a string `'$$;'` a partir do
+ * cabeçalho; as migrations do motor abrem com `$function$`, não com `$$`. Esse
+ * `indexOf` nunca casava com o fecho certo: ou devolvia -1, e o "corpo" virava
+ * todo o SQL dali até o fim do arquivo concatenado, ou parava num `$$;` de uma
+ * migration bem posterior.
+ *
+ * Enquanto o texto engolido não citasse `marts.` nem `etl.`, o teste passava
+ * por acidente — verde por sorte, não por acerto. Quebrou no dia em que uma
+ * migration ganhou um `comment on function` explicando de qual mart a régua
+ * saiu, ou seja, reprovando de novo a migration mais bem documentada. É a mesma
+ * armadilha que o bloco de limpeza de comentário abaixo já existia para evitar,
+ * entrando por outra porta.
+ *
+ * Agora a tag é lida do próprio texto (`$function$`, `$$`, o que vier) e o
+ * fecho é a próxima ocorrência DELA.
  */
 function corposDoMotor(): { nome: string; corpo: string }[] {
   const encontrados: { nome: string; corpo: string }[] = []
   const abertura = /create (?:or replace )?function ([a-z_]+\.[a-z_]*achados[a-z_]*)\(/g
   let m: RegExpExecArray | null
   while ((m = abertura.exec(sqlCompleto)) !== null) {
-    const fim = sqlCompleto.indexOf('$$;', m.index)
+    const tag = /\$[a-z_]*\$/.exec(sqlCompleto.slice(m.index))
+    const inicioDoCorpo = tag ? m.index + tag.index + tag[0].length : m.index
+    const fim = tag ? sqlCompleto.indexOf(tag[0], inicioDoCorpo) : -1
     encontrados.push({
       nome: m[1]!,
       // Sem comentário: o que se verifica aqui é o que a função LÊ. As

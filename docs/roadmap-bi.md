@@ -738,6 +738,73 @@ teria perdido): `fact_fatura.email` e `master_snapshot.organizacao`. Todo o rest
 chave (`empresa_id`, `organization_id`, `user_id`) ou conteúdo (`titulo`, `slug`,
 `path`, `tela`) — e esses ficam servidos de propósito.
 
+### Auditoria de coerência do produto (18/ago) — nove dimensões, dois defeitos
+
+A pedido do Mateus ("garanta que todos os dados estão corretos"), varri abas,
+menus e páginas por verificação determinística. Nada de leitura a olho: os
+defeitos desta classe são todos silenciosos.
+
+**O que saiu limpo:** as 35 âncoras de achado resolvem num card real da tela
+certa · `ancora_aba` existe como 1ª aba nos 10 módulos · as três abas em 10/10 ·
+nada perdido na fusão (seção, card, bento, `nivel` e `id` idênticos) · ~100
+fontes de dado declaram a RPC que o hook de fato chama, com objeto-único ×
+array correto em todas · as 106 RPCs que o front chama existem no banco ·
+menu ↔ router 1:1 · `temPeriodo`/`temRecorte` declarado = controle renderizado
+em 12/12 · os 18 campos de percentual dentro de [0,1].
+
+**Dois defeitos, os dois da classe que o projeto mais combate** — a regra
+publicando número que o card apontado não desenha. Foi por isso que
+`org_time_morto`, `sol_aba_pulada` e `sol_catalogo_sem_morto` foram recusadas em
+12/08; estas duas passaram porque nasceram certas e **a tela mudou embaixo
+delas**.
+
+| Regra | O que a frase dizia | O que o card mostrava |
+| --- | --- | --- |
+| `vg_concentracao` | "43,8% de **todas as ações do período** — 59.024 no total" (`bi_eventos_por_tipo`, soma 59.138) | `card-eventos` = "Ações por módulo" (`bi_acoes_por_modulo`, soma **70.949**) |
+| `ent_sem_primeira_acao` | "31,57% do grupo… **a maior barra do gráfico** é a de quem não agiu" (`bi_tempo_primeiro_valor`) | `card-tempo-primeira-acao` = corte por origem, onde a maior barra do comprador é "No mesmo dia" |
+
+**`vg_concentracao` foi APOSENTADA**, e a causa não era a âncora: era a base.
+Rastreado até `c0b7c71` — quando a Visão Geral subiu a escada, o card que
+desenhava `bi_eventos_por_tipo` saiu e o `id` foi reaproveitado por outro
+gráfico. Mas desde o passo 4 da Fase 2 a definição de "ação de produto" da casa
+é `bi_acoes_por_modulo`, e os 11.811 de diferença **são exatamente** o braço de
+inícios reconstruídos do mart. Reescrita sobre a base atual a regra ficaria
+redundante: `solution_viewed` é o único tipo classificado como `consumo`, então
+"a fatia do comportamento líder" e "a fatia de consumo" viraram o mesmo número —
+já publicado no headline de "O uso é raso ou profundo?". Mesmo caso de
+`cli_gap_papel`, aposentada em 12/08.
+
+**`ent_sem_primeira_acao` foi REESCRITA** sobre a RPC que o card desenha. Voltar
+a distribuição de sete faixas desfaria uma decisão deliberada e registrada em
+código; e não é preciso, porque o corte por origem responde a mesma pergunta com
+mais informação. A regra passa a publicar a fratura que este roadmap já celebra
+como achado de 12/08 e que o motor nunca teve: **34,5% dos convidados nunca
+agiram, contra 10,3% de quem comprou — 3,34×**, score 1,67.
+
+Depois das duas: o catálogo tem **34 regras**, e os 9 calculadores leem
+**apenas** RPCs que a página desenha.
+
+**Dívida encontrada:** 3 RPCs órfãs no banco (`bi_eventos_por_tipo` e
+`bi_tempo_primeiro_valor`, agora com o aviso no próprio `comment on function`, e
+as duas de CS sem card) e 2 hooks órfãos em `visao-geral/queries.ts`.
+
+⚠️ **O teste de contrato do motor estava verde por acidente, e isto é o achado
+mais incômodo da auditoria.** `contrato-do-motor.test.ts` extraía o corpo de
+cada função procurando a string `'$$;'` — mas as migrations do motor abrem com
+`$function$`. O `indexOf` nunca casava com o fecho certo: devolvia -1 e o
+"corpo" virava todo o SQL dali até o fim do arquivo concatenado. Enquanto o
+texto engolido não citasse `marts.` nem `etl.`, passava. Quebrou justamente
+quando uma migration ganhou um `comment on function` explicando de qual mart a
+régua saiu — a mesma armadilha que a limpeza de comentário já existia para
+evitar, entrando por outra porta. Corrigido: a tag é lida do próprio texto.
+
+⚠️ **O que a auditoria NÃO consegue travar no CI, e por quê.** O invariante
+"todo calculador lê só RPC que a página desenha" precisa do estado atual dos
+calculadores, e isso só o banco tem — o CI não tem banco. Tentei extrair das
+migrations e o parser errou 4 dos 9 (deu a receita para Formações e a entrada
+para Soluções). Não instalei: guarda que mede errado é pior que guarda nenhuma.
+Fica como conferência de revisão, com a consulta registrada neste documento.
+
 ### Levantamento concluído em 11/ago
 
 - **`proposta-fase-2-profundidade.md`** — documento de decisão: anatomia padrão

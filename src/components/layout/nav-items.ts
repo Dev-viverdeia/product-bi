@@ -80,9 +80,9 @@ export type NavItem = {
    * atalho. Declarar nos dois lugares seria garantir que um dia divergem.
    *
    * ⚠️ **`graficos` é o alvo de TODA âncora do motor de achados.**
-   * `insights.regra.ancora_aba` vale `'graficos'` nas 35 regras, e é por ele
+   * `insights.regra.ancora_aba` vale `'graficos'` em TODA regra do catálogo, e é por ele
    * que o link "ver o gráfico que sustenta" navega. Renomear esse valor aqui
-   * quebraria os 35 links em silêncio — o link trocaria de aba e não rolaria
+   * quebraria todos esses links em silêncio — o link trocaria de aba e não rolaria
    * para nada. `contrato-de-shell.test.ts` reprova a ausência da aba.
    *
    * A primeira aba é a padrão (`useAbaAtiva` cai em `abas[0]`), então a ordem
