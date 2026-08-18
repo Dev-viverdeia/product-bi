@@ -15,7 +15,11 @@ export type AuthContextValue = {
   /** true até a sessão inicial ser resolvida — evite redirecionar antes disso */
   isLoading: boolean
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string, fullName: string) => Promise<void>
+  /**
+   * Não existe signUp: a criação de conta é fechada no Supabase e o acesso é
+   * concedido pelo time. Quem entra vê o BI inteiro — nomes e e-mails de
+   * cliente inclusive —, então quem recebe a conta É o controle de acesso.
+   */
   signOut: () => Promise<void>
 }
 
