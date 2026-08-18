@@ -68,7 +68,15 @@ Proposta:
 
 - **Os dez módulos continuam sendo a navegação principal.** As três camadas viram a gramática de
   aba dentro de cada um: **`Análise` · `Gráficos` · `Dados`**. A aba `Análise` já existe e já é a
-  padrão; `Dados` é a novidade, e nasce barata porque cada card já declara qual RPC o alimenta.
+  padrão; `Dados` é a novidade.
+  - ⚠️ **Correção (18/ago): a primeira versão deste documento dizia que `Dados` "nasce barata porque
+    cada card já declara qual RPC o alimenta". Isso é falso** — conferido no código: `ChartCard` e
+    `TabelaCard` aceitam `id`, `nivel`, `icon`, `headline` e `description`, e **nenhuma prop de
+    fonte**. O vínculo card→RPC existe só dentro do `queries.ts` de cada feature, e o casamento entre
+    um card e a consulta que o alimenta é feito a olho. São **93 RPCs distintas** chamadas por 10
+    módulos (CS 13 · Clientes 12 · Entrada 10 · Formações 9 · IA 9 · Jornada 9 · Organizações 8 ·
+    Soluções 8 · Visão Geral 8 · Receita 5). A camada de dados precisa **primeiro** de uma declaração
+    de fonte no card — que é a mesma peça que destrava "ver o dado que sustenta este gráfico".
 - **`Plano de ação` vira seção de topo**, porque é a única genuinamente transversal — "onde estamos
   acertando e errando" não é pergunta de um módulo. Hoje o motor é cego entre telas **por contrato
   de CI** (`contrato-do-motor.test.ts`), e é essa camada que quebra a cegueira.
