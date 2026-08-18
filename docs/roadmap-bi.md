@@ -902,6 +902,46 @@ inscrição (unidade certa da pergunta) e a margem usa pessoas como n. Das oito
 funções que publicam `margem_pp`, **esta era a única** que agrupava por duas
 chaves.
 
+### Quarto corte: a tela de CS (18/ago)
+
+A única tela que nenhum corte anterior alcançava — fonte diferente (Pulse), grão
+de empresa, 13 RPCs.
+
+**Reconciliou quase tudo, e uma divergência aparente não era defeito.** O card
+"Quem atendeu" soma 500 contra o KPI de 582, e os 82 que faltam são exatamente
+os ciclos `so_ia` que o card vizinho publica — complementares, não
+contraditórios. `bi_cs_retencao` bate com os KPIs (351 + 90 + 42 = 483),
+`desfecho_conflita_base` só é verdadeiro para PERDIDO, e os quatro KPIs de
+retenção são foto e não janela, o que o rótulo já declara ("Clientes retidos
+(total)").
+
+**Um defeito: a série mensal mostra menos que os vizinhos, sem dizer.** 509
+contra 539 — trinta pedidos sem `solicitado_em`. A exclusão está certa (não há
+onde pôr linha sem data num eixo de tempo); faltava a declaração. Conferido na
+origem antes de tratar como defeito nosso: `pulse.cancelamentos` tem a mesma
+proporção, então o espelho não perdeu nada. A RPC passa a devolver `sem_data`
+repetido em toda linha — mesmo padrão de `pct_compromisso_geral` — e o card
+declara com o número.
+
+⚠️ **O achado maior veio de rodar o que nunca tinha rodado.** As duas redes de
+CS criadas no passo 2 desta manhã (`bi_propagar_exclusoes_cs`,
+`bi_reconciliar_valores_cs`) têm horário 07:25 e 07:35 UTC e foram criadas
+DEPOIS da janela do dia: `cron.job_run_details` mostrava **zero execução** para
+as duas. Executadas à mão durante a auditoria:
+
+| passo | efeito na primeira execução |
+| --- | --- |
+| `propagar_exclusoes_cs` | 16 cancelamentos fantasmas removidos — mart 555 → 539 = origem 539, canário 16 → 0 |
+| `reconciliar_valores_cs` | **47 cancelamentos e 14 atendimentos** com valor defasado, corrigidos |
+
+Sessenta e um registros com valor errado estavam publicados na tela de CS. O
+desenho do passo 2 estava certo — ele só nunca tinha rodado. **Criar o cron não
+é o mesmo que o cron ter rodado**: a primeira execução de um passo novo merece
+ser forçada à mão, ou o defeito que ele conserta continua no ar até a madrugada
+seguinte. O mesmo vale para `bi_corroborar_rastreio`, criado hoje às 07:45 UTC e
+ainda sem execução — a tabela dele foi semeada na própria migration, então o
+card não depende do cron para o primeiro dia.
+
 ### Levantamento concluído em 11/ago
 
 - **`proposta-fase-2-profundidade.md`** — documento de decisão: anatomia padrão

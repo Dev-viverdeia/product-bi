@@ -384,6 +384,7 @@ export type Database = {
         Args: never
         Returns: {
           mes: string
+          sem_data: number
           solicitacoes: number
         }[]
       }

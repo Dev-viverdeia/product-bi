@@ -473,7 +473,15 @@ export function CsPage() {
                         : '—'
                     }
                     headlineLabel="no último mês"
-                    description="Pedido de cancelamento registrado, independentemente do desfecho. Uma empresa pode aparecer mais de uma vez, em ciclos diferentes."
+                    description={
+                      // O corte é declarado com o número: quem soma esta série e
+                      // compara com os cards de origem e desfecho encontra a
+                      // diferença, e precisa saber de onde ela vem. O campo nasce
+                      // vazio na origem — não é perda do espelho.
+                      cancelMensal.data?.[0]
+                        ? `Pedido de cancelamento registrado, independentemente do desfecho. Uma empresa pode aparecer mais de uma vez, em ciclos diferentes · ${formatInt(cancelMensal.data[0].sem_data)} pedidos sem data de solicitação ficam fora desta série (não há onde pô-los no eixo de tempo), então ela soma menos que os cards por origem e por desfecho`
+                        : 'Pedido de cancelamento registrado, independentemente do desfecho. Uma empresa pode aparecer mais de uma vez, em ciclos diferentes.'
+                    }
                     isLoading={cancelMensal.isLoading}
                     isError={cancelMensal.isError}
                     onRetry={() => void cancelMensal.refetch()}
