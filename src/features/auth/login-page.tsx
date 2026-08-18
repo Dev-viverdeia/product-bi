@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { BarChart3Icon, Loader2Icon } from 'lucide-react'
+import { Loader2Icon } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { MarcaVia } from '@/components/ui-marca/marca-via'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -79,10 +80,10 @@ export function LoginPage() {
   return (
     <div className="page-atmosphere flex min-h-svh items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-6">
-        <div className="flex flex-col items-center gap-2 text-center">
-          <div className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-lg">
-            <BarChart3Icon className="size-5" />
-          </div>
+        <div className="flex flex-col items-center gap-3 text-center">
+          {/* A marca assina; o nome do produto é o título. Nessa ordem: quem
+              abre a tela precisa saber de quem é o BI antes de saber qual é. */}
+          <MarcaVia peca="lockup" className="text-foreground h-5" />
           <h1 className="text-xl font-semibold">Product BI</h1>
         </div>
 

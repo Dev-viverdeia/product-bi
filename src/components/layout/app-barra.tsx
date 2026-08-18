@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router'
-import { BarChart3Icon, LogOutIcon, MenuIcon } from 'lucide-react'
+import { LogOutIcon, MenuIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { AbaCanal } from '@/components/layout/aba-canal'
@@ -8,6 +8,7 @@ import { useAbaAtiva } from '@/components/layout/aba-do-modulo'
 import { AlertaPipeline } from '@/components/layout/alerta-pipeline'
 import { moduloDaRota, navFerramentas, navItems } from '@/components/layout/nav-items'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
+import { MarcaVia } from '@/components/ui-marca/marca-via'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -249,7 +250,7 @@ export function AppBarra() {
         className="focus-visible:ring-ring flex shrink-0 items-center gap-3 rounded-full py-1 pr-3.5 pl-3 focus-visible:ring-2 focus-visible:outline-none"
       >
         <span className="bg-primary text-primary-foreground flex size-10 shrink-0 items-center justify-center rounded-full">
-          <BarChart3Icon className="size-[18px]" strokeWidth={1.75} />
+          <MarcaVia className="h-[15px]" />
         </span>
         <span className="hidden text-lg font-semibold tracking-tight sm:inline">Product BI</span>
       </Link>
