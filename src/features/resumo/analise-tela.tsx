@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router'
 import { AlertCircleIcon, ArrowRightIcon } from 'lucide-react'
 
 import { PARAM_ABA } from '@/components/layout/aba-do-modulo'
-import { StatusPill } from '@/components/ui-marca/status-pill'
+import { AcordeaoDeAchados } from '@/components/ui-marca/acordeao-de-achados'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Periodo } from '@/lib/periodo'
 import { formatDateShort, formatInt } from '@/lib/format'
@@ -50,10 +50,15 @@ function selecionar(achados: Achado[]) {
   }
 }
 
-/** Uma seção por achado: o fato, o que ele quer dizer, e o que fazer. */
-function Achado({ achado, ordem }: { achado: Achado; ordem: number }) {
+/**
+ * O que abre quando o leitor clica: a leitura e a ação.
+ *
+ * O fato NÃO entra aqui — ele é o resumo do acordeão, sempre visível. Repeti-lo
+ * dentro do detalhe faria o mesmo número aparecer duas vezes na mesma linha
+ * assim que ela abrisse.
+ */
+function DetalheDoAchado({ achado }: { achado: Achado }) {
   const [params] = useSearchParams()
-  const { tom, rotulo } = lerSeveridade(achado.severidade)
 
   const destino = useMemo(() => {
     const proximos = new URLSearchParams(params)
@@ -62,51 +67,38 @@ function Achado({ achado, ordem }: { achado: Achado; ordem: number }) {
   }, [params, achado.ancora_aba])
 
   return (
-    <section className="border-border/70 border-t pt-6 first:border-t-0 first:pt-0">
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="text-muted-foreground num text-xs">{formatInt(ordem)}</span>
-        <h3 className="text-lg font-medium tracking-tight">{achado.titulo}</h3>
-        <StatusPill tom={tom}>{rotulo}</StatusPill>
-      </div>
-
-      {/* Medida de leitura: prosa em coluna larga cansa antes do fim do
-          parágrafo, e este texto existe para ser lido inteiro. */}
-      <div className="mt-3 max-w-[68ch] space-y-3">
-        <p className="text-[15px] leading-relaxed font-medium">
-          {preencherGabarito(achado.gabarito, achado.parametros)}
+    <>
+      {achado.gabarito_leitura ? (
+        <p className="text-[15px] leading-relaxed">
+          {preencherGabarito(achado.gabarito_leitura, achado.parametros)}
         </p>
-        {achado.gabarito_leitura ? (
-          <p className="text-muted-foreground text-[15px] leading-relaxed">
-            {preencherGabarito(achado.gabarito_leitura, achado.parametros)}
-          </p>
-        ) : null}
+      ) : null}
 
-        <div className="border-border bg-muted/40 rounded-md border px-4 py-3">
-          <p className="text-muted-foreground mb-1 text-xs font-medium">O que fazer</p>
-          <p className="text-[15px] leading-relaxed">
-            {preencherGabarito(achado.gabarito_acao, achado.parametros)}
-          </p>
-        </div>
-
-        <Link
-          to={destino}
-          replace
-          onClick={() => {
-            // A troca de aba remonta o conteúdo, então o alvo só existe no
-            // quadro seguinte — daí o rAF em vez de rolar na hora.
-            requestAnimationFrame(() =>
-              document
-                .getElementById(achado.ancora_id)
-                ?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
-            )
-          }}
-          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 text-sm underline-offset-4 transition-colors hover:underline focus-visible:ring-2 focus-visible:outline-none"
-        >
-          Ver o gráfico que sustenta
-          <ArrowRightIcon className="size-3.5" aria-hidden />
-        </Link>
+      <div className="border-border bg-muted/40 rounded-md border px-4 py-3">
+        <p className="text-muted-foreground mb-1 text-xs font-medium">O que fazer</p>
+        <p className="text-[15px] leading-relaxed">
+          {preencherGabarito(achado.gabarito_acao, achado.parametros)}
+        </p>
       </div>
-    </section>
+
+      <Link
+        to={destino}
+        replace
+        onClick={() => {
+          // A troca de aba remonta o conteúdo, então o alvo só existe no
+          // quadro seguinte — daí o rAF em vez de rolar na hora.
+          requestAnimationFrame(() =>
+            document
+              .getElementById(achado.ancora_id)
+              ?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+          )
+        }}
+        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 text-sm underline-offset-4 transition-colors hover:underline focus-visible:ring-2 focus-visible:outline-none"
+      >
+        Ver o gráfico que sustenta
+        <ArrowRightIcon className="size-3.5" aria-hidden />
+      </Link>
+    </>
   )
 }
 
@@ -234,11 +226,17 @@ export function AnaliseDaTela({
           </p>
         </div>
       ) : (
-        <div className="space-y-6">
-          {visiveis.map((achado, i) => (
-            <Achado key={achado.regra} achado={achado} ordem={i + 1} />
-          ))}
-        </div>
+        <AcordeaoDeAchados
+          achados={visiveis.map((achado) => ({
+            id: achado.regra,
+            titulo: achado.titulo,
+            severidade: lerSeveridade(achado.severidade),
+            // fechado, a linha visível é o FATO: quem passa o olho leva o
+            // número embora sem abrir nada
+            resumo: preencherGabarito(achado.gabarito, achado.parametros),
+            detalhe: <DetalheDoAchado achado={achado} />,
+          }))}
+        />
       )}
       </div>
 

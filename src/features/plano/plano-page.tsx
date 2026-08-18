@@ -7,7 +7,7 @@ import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { moduloDaTela } from '@/components/layout/nav-items'
 import { KpiCard, KpiGrid } from '@/components/charts'
-import { StatusPill } from '@/components/ui-marca/status-pill'
+import { AcordeaoDeAchados } from '@/components/ui-marca/acordeao-de-achados'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatInt } from '@/lib/format'
 import { lerSeveridade } from '@/lib/severidade'
@@ -15,59 +15,41 @@ import { preencherGabarito } from '@/features/resumo/gabarito'
 import { usePlanoDeAcao, type AchadoDoPlano } from '@/features/plano/queries'
 
 /**
- * Um item do plano.
+ * O que abre quando o leitor clica num item do plano.
  *
- * Mesma anatomia de três degraus da análise por tela — o fato, a leitura, a
- * ação — porque é o mesmo achado. O que muda é o que o item precisa carregar
- * a mais: **de qual módulo ele veio**, já que aqui o leitor não tem o contexto
- * da tela em volta.
+ * A linha fechada já traz o fato; aqui entram a leitura, a ação e o caminho de
+ * volta ao card que prova. O módulo de origem fica no cabeçalho da linha,
+ * porque sem ele o leitor transversal não sabe de qual tela veio o número.
  */
-function ItemDoPlano({ achado, ordem }: { achado: AchadoDoPlano; ordem: number }) {
-  const { tom, rotulo } = lerSeveridade(achado.severidade)
+function DetalheDoItem({ achado }: { achado: AchadoDoPlano }) {
   const modulo = moduloDaTela(achado.tela)
-
-  // O destino leva à tela, à aba certa e ao card que prova. Sem a aba, o link
-  // abriria na análise escrita e o gráfico ficaria a um clique de distância
-  // que ninguém dá.
   const destino = modulo ? `${modulo.to}?${PARAM_ABA}=${achado.ancora_aba ?? 'graficos'}` : null
 
   return (
-    <li className="border-border/70 border-t pt-6 first:border-t-0 first:pt-0">
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="text-muted-foreground num text-xs">{formatInt(ordem)}</span>
-        <h3 className="text-lg font-medium tracking-tight">{achado.titulo}</h3>
-        <StatusPill tom={tom}>{rotulo}</StatusPill>
-        <span className="text-muted-foreground text-xs">{modulo?.title ?? achado.tela}</span>
-      </div>
-
-      <div className="mt-3 max-w-[68ch] space-y-3">
-        <p className="text-[15px] leading-relaxed font-medium">
-          {preencherGabarito(achado.gabarito, achado.parametros)}
+    <>
+      {achado.gabarito_leitura ? (
+        <p className="text-[15px] leading-relaxed">
+          {preencherGabarito(achado.gabarito_leitura, achado.parametros)}
         </p>
-        {achado.gabarito_leitura ? (
-          <p className="text-muted-foreground text-[15px] leading-relaxed">
-            {preencherGabarito(achado.gabarito_leitura, achado.parametros)}
-          </p>
-        ) : null}
+      ) : null}
 
-        <div className="border-border bg-muted/40 rounded-md border px-4 py-3">
-          <p className="text-muted-foreground mb-1 text-xs font-medium">O que fazer</p>
-          <p className="text-[15px] leading-relaxed">
-            {preencherGabarito(achado.gabarito_acao, achado.parametros)}
-          </p>
-        </div>
-
-        {destino ? (
-          <Link
-            to={destino}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 text-sm underline-offset-4 transition-colors hover:underline focus-visible:ring-2 focus-visible:outline-none"
-          >
-            Abrir em {modulo?.title}
-            <ArrowRightIcon className="size-3.5" aria-hidden />
-          </Link>
-        ) : null}
+      <div className="border-border bg-muted/40 rounded-md border px-4 py-3">
+        <p className="text-muted-foreground mb-1 text-xs font-medium">O que fazer</p>
+        <p className="text-[15px] leading-relaxed">
+          {preencherGabarito(achado.gabarito_acao, achado.parametros)}
+        </p>
       </div>
-    </li>
+
+      {destino ? (
+        <Link
+          to={destino}
+          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 text-sm underline-offset-4 transition-colors hover:underline focus-visible:ring-2 focus-visible:outline-none"
+        >
+          Abrir em {modulo?.title}
+          <ArrowRightIcon className="size-3.5" aria-hidden />
+        </Link>
+      ) : null}
+    </>
   )
 }
 
@@ -113,13 +95,18 @@ function FaixaDeAchados({
   }
 
   return (
-    <div className="max-w-[76ch] space-y-8">
+    <div className="max-w-[80ch] space-y-6">
       <p className="text-muted-foreground text-sm">{intro}</p>
-      <ol className="space-y-8">
-        {achados.map((achado, i) => (
-          <ItemDoPlano key={`${achado.tela}-${achado.regra}`} achado={achado} ordem={i + 1} />
-        ))}
-      </ol>
+      <AcordeaoDeAchados
+        achados={achados.map((achado) => ({
+          id: `${achado.tela}-${achado.regra}`,
+          titulo: achado.titulo,
+          severidade: lerSeveridade(achado.severidade),
+          origem: moduloDaTela(achado.tela)?.title ?? achado.tela,
+          resumo: preencherGabarito(achado.gabarito, achado.parametros),
+          detalhe: <DetalheDoItem achado={achado} />,
+        }))}
+      />
     </div>
   )
 }

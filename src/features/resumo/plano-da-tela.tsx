@@ -2,7 +2,7 @@ import { Link, useSearchParams } from 'react-router'
 import { AlertCircleIcon, ArrowRightIcon } from 'lucide-react'
 
 import { PARAM_ABA } from '@/components/layout/aba-do-modulo'
-import { StatusPill } from '@/components/ui-marca/status-pill'
+import { AcordeaoDeAchados } from '@/components/ui-marca/acordeao-de-achados'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatInt } from '@/lib/format'
 import type { Periodo } from '@/lib/periodo'
@@ -12,58 +12,48 @@ import { preencherGabarito } from '@/features/resumo/gabarito'
 import { useAchados, temRegra, type Achado } from '@/features/resumo/queries'
 
 /**
- * Um item da sugestão: o fato que a sustenta, e a ação.
+ * O que abre quando o leitor clica: o fato que motiva a sugestão.
  *
- * A diferença para o mesmo achado na aba `Análise` é de FOCO, não de conteúdo:
- * lá o peso está na leitura ("o que isto significa, e o que não significa"),
- * aqui está na ação. O fato aparece nos dois porque uma sugestão sem o número
- * que a motiva é palpite com cara de recomendação.
+ * Aqui a ordem se INVERTE em relação à aba `Análise`. Lá o resumo visível é o
+ * fato e a ação fica no detalhe; nesta aba o leitor veio atrás do que fazer,
+ * então a ação é o resumo e o número passa a ser a justificativa. É o mesmo
+ * achado, com o peso trocado — nunca um número diferente.
  */
-function Sugestao({ achado, ordem }: { achado: Achado; ordem: number }) {
+function JustificativaDoAchado({ achado }: { achado: Achado }) {
   const [params] = useSearchParams()
-  const { tom, rotulo } = lerSeveridade(achado.severidade)
 
   const proximos = new URLSearchParams(params)
   proximos.set(PARAM_ABA, achado.ancora_aba ?? 'graficos')
 
   return (
-    <li className="border-border/70 border-t pt-6 first:border-t-0 first:pt-0">
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="text-muted-foreground num text-xs">{formatInt(ordem)}</span>
-        <h3 className="text-lg font-medium tracking-tight">{achado.titulo}</h3>
-        <StatusPill tom={tom}>{rotulo}</StatusPill>
-      </div>
+    <>
+      <p className="text-[15px] leading-relaxed">
+        <span className="font-medium">Por quê: </span>
+        {preencherGabarito(achado.gabarito, achado.parametros)}
+      </p>
 
-      <div className="mt-3 max-w-[68ch] space-y-3">
-        <div className="border-border bg-muted/40 rounded-md border px-4 py-3">
-          <p className="text-muted-foreground mb-1 text-xs font-medium">O que fazer</p>
-          <p className="text-[15px] leading-relaxed">
-            {preencherGabarito(achado.gabarito_acao, achado.parametros)}
-          </p>
-        </div>
-
+      {achado.gabarito_leitura ? (
         <p className="text-muted-foreground text-[15px] leading-relaxed">
-          <span className="text-foreground font-medium">Por quê: </span>
-          {preencherGabarito(achado.gabarito, achado.parametros)}
+          {preencherGabarito(achado.gabarito_leitura, achado.parametros)}
         </p>
+      ) : null}
 
-        <Link
-          to={`?${proximos.toString()}`}
-          replace
-          onClick={() => {
-            requestAnimationFrame(() =>
-              document
-                .getElementById(achado.ancora_id)
-                ?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
-            )
-          }}
-          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 text-sm underline-offset-4 transition-colors hover:underline focus-visible:ring-2 focus-visible:outline-none"
-        >
-          Ver o gráfico que sustenta
-          <ArrowRightIcon className="size-3.5" aria-hidden />
-        </Link>
-      </div>
-    </li>
+      <Link
+        to={`?${proximos.toString()}`}
+        replace
+        onClick={() => {
+          requestAnimationFrame(() =>
+            document
+              .getElementById(achado.ancora_id)
+              ?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+          )
+        }}
+        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 text-sm underline-offset-4 transition-colors hover:underline focus-visible:ring-2 focus-visible:outline-none"
+      >
+        Ver o gráfico que sustenta
+        <ArrowRightIcon className="size-3.5" aria-hidden />
+      </Link>
+    </>
   )
 }
 
@@ -163,11 +153,16 @@ export function PlanoDaTela({
             tem.
           </p>
         ) : (
-          <ol className="space-y-8">
-            {publicaveis.map((achado, i) => (
-              <Sugestao key={achado.regra} achado={achado} ordem={i + 1} />
-            ))}
-          </ol>
+          <AcordeaoDeAchados
+            achados={publicaveis.map((achado) => ({
+              id: achado.regra,
+              titulo: achado.titulo,
+              severidade: lerSeveridade(achado.severidade),
+              // fechado, a linha visível é a AÇÃO — é o que se procura aqui
+              resumo: preencherGabarito(achado.gabarito_acao, achado.parametros),
+              detalhe: <JustificativaDoAchado achado={achado} />,
+            }))}
+          />
         )}
       </div>
 

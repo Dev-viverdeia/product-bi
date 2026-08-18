@@ -353,6 +353,43 @@
   --ease-via-out: var(--via-ease-out);
   --ease-snap: var(--via-ease-snap);
   --ease-spring: var(--via-ease-spring);
+
+  /* Acordeao de achados. A altura vem da variavel que o Radix mede no
+     conteudo — sem ela a transicao teria de adivinhar um valor fixo e
+     cortaria o texto mais longo. */
+  --animate-accordion-down: accordion-down 0.2s var(--via-ease-out);
+  --animate-accordion-up: accordion-up 0.18s var(--via-ease-out);
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+/* Abrir e fechar continua funcionando; o que some e o percurso. */
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='accordion-content'],
+  [data-state='open'],
+  [data-state='closed'] {
+    animation-duration: 0.01ms !important;
+  }
 }
 
 /* =============================================================
