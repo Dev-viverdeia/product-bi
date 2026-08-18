@@ -11,10 +11,10 @@ import { AMOSTRA_MINIMA, rotuloPapel, type Recorte } from '@/lib/segmento'
 import { lerSeveridade } from '@/lib/severidade'
 import { preencherGabarito } from '@/features/resumo/gabarito'
 import {
+  temRegra,
   useAchados,
   useDataReferencia,
   type Achado,
-  type TelaComResumo,
 } from '@/features/resumo/queries'
 
 /** Teto de achados na leitura. Acima disso vira lista e ninguém lê até o fim. */
@@ -129,7 +129,7 @@ export function AnaliseDaTela({
   periodo,
   recorte,
 }: {
-  tela: TelaComResumo
+  tela: string
   /** omitir nas telas sem seletor de período — cada achado declara a própria janela */
   periodo?: Periodo
   /** omitir nas telas sem o recorte por persona e plano */
@@ -137,6 +137,10 @@ export function AnaliseDaTela({
 }) {
   const achados = useAchados(tela, periodo, recorte)
   const referencia = useDataReferencia()
+
+  // A aba existe em TODA tela desde o padrão de três abas; o motor ainda não
+  // cobre todas. Declarar o vazio é melhor que a tela ficar fora do padrão.
+  const semRegra = !temRegra(tela)
 
   const { visiveis, suprimidos, abaixoDoCorte, avaliadas } = useMemo(
     () => selecionar(achados.data ?? []),
@@ -160,6 +164,22 @@ export function AnaliseDaTela({
     .join(' · ')
 
   const apuracao = !achados.isLoading && !achados.isError
+
+  if (semRegra) {
+    return (
+      <div className="max-w-[68ch] space-y-3">
+        <p className="text-[15px] leading-relaxed">
+          Esta tela ainda não tem regra no catálogo do motor, então não há leitura calculada
+          para ela.
+        </p>
+        <p className="text-muted-foreground text-[15px] leading-relaxed">
+          A aba existe mesmo assim para o padrão ser o mesmo em todo módulo — e para a dívida
+          ficar visível na tela em vez de escondida numa exceção de layout. O catálogo aberto
+          está em <span className="font-mono text-sm">/regras</span>.
+        </p>
+      </div>
+    )
+  }
 
   return (
     /*

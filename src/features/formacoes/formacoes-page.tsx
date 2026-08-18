@@ -17,6 +17,7 @@ import { BentoItem } from '@/components/layout/bento'
 import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
+import { AbaDeDados } from '@/components/tabela/aba-de-dados'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
@@ -33,6 +34,7 @@ import {
 } from '@/components/ui/table'
 import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import { AnaliseDaTela } from '@/features/resumo/analise-tela'
+import { PlanoDaTela } from '@/features/resumo/plano-da-tela'
 import {
   useAssuntos,
   useDropoffPosicao,
@@ -159,8 +161,7 @@ export function FormacoesPage() {
       <ModuloTabs
         rota="/formacoes"
         conteudos={{
-          analise: <AnaliseDaTela tela="formacoes" periodo={periodo} />,
-          uso: (
+          graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
                 titulo="O que os alunos estão assistindo"
@@ -247,10 +248,7 @@ export function FormacoesPage() {
                   </ChartCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
-          conclusao: (
-            <div className="space-y-4">
+
               <SecaoDeAnalise
                 titulo="O que decide se o aluno chega ao fim"
                 icone={CheckCheckIcon}
@@ -362,10 +360,7 @@ export function FormacoesPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
-          qualidade: (
-            <div className="space-y-4">
+
               <SecaoDeAnalise
                 titulo="Quanto tempo leva até o certificado, e o que vem depois"
                 icone={RouteIcon}
@@ -513,8 +508,104 @@ export function FormacoesPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
+
+              {/* A camada de dados fecha a aba, depois dos gráficos que ela
+                  sustenta: as MESMAS queries, passadas já resolvidas. Nenhuma
+                  consulta nova — se a lista refizesse a leitura, ela poderia
+                  divergir do card logo acima. */}
+              <AbaDeDados
+                fontes={[
+                  {
+                    rpc: 'bi_formacoes_kpis',
+                    titulo: 'Os quatro KPIs do topo do módulo',
+                    descricao: 'uma linha só · segue o período do topo',
+                    linhas: kpis.data ? [kpis.data] : [],
+                    isLoading: kpis.isLoading,
+                    isError: kpis.isError,
+                    onRetry: () => void kpis.refetch(),
+                  },
+                  {
+                    rpc: 'bi_formacoes_uso',
+                    titulo: 'Alunos e aulas por formação',
+                    descricao:
+                      'alunos e aulas seguem o período do topo; histórico, certificados e conclusão correm desde o início e não se comparam com eles',
+                    linhas: uso.data,
+                    isLoading: uso.isLoading,
+                    isError: uso.isError,
+                    onRetry: () => void uso.refetch(),
+                  },
+                  {
+                    rpc: 'bi_assuntos',
+                    titulo: 'Aulas concluídas por categoria de curso',
+                    linhas: assuntos.data,
+                    isLoading: assuntos.isLoading,
+                    isError: assuntos.isError,
+                    onRetry: () => void assuntos.refetch(),
+                  },
+                  {
+                    rpc: 'bi_duracao_ideal',
+                    titulo: 'Conclusão da aula por faixa de duração',
+                    descricao:
+                      'taxa normalizada dentro do próprio curso · só curso E aula publicados, com 50+ conclusões · faixa com menos de 10 aulas não vira média',
+                    linhas: duracao.data,
+                    isLoading: duracao.isLoading,
+                    isError: duracao.isError,
+                    onRetry: () => void duracao.refetch(),
+                  },
+                  {
+                    rpc: 'bi_dropoff_posicao',
+                    titulo: 'Sobrevivência por posição da aula na grade',
+                    descricao: 'conclusões ÷ 1ª aula do curso, por decil da grade',
+                    linhas: dropoff.data,
+                    isLoading: dropoff.isLoading,
+                    isError: dropoff.isError,
+                    onRetry: () => void dropoff.refetch(),
+                  },
+                  {
+                    rpc: 'bi_formacoes_entrada_na_grade',
+                    titulo: 'Certificação de quem começa pela 1ª aula, contra quem entra no meio',
+                    descricao:
+                      'alunos com 90+ dias desde a 1ª aula do curso · margem_pp é o piso para a diferença não ser ruído',
+                    linhas: entradaGrade.data,
+                    isLoading: entradaGrade.isLoading,
+                    isError: entradaGrade.isError,
+                    onRetry: () => void entradaGrade.refetch(),
+                  },
+                  {
+                    rpc: 'bi_formacoes_efeito_certificado',
+                    titulo: 'Atividade recente de quem certificou, contra quem estudou e parou',
+                    descricao:
+                      'clientes com 120+ dias de casa, os dois lados já estudaram · associação, não causa',
+                    linhas: efeitoCert.data,
+                    isLoading: efeitoCert.isLoading,
+                    isError: efeitoCert.isError,
+                    onRetry: () => void efeitoCert.refetch(),
+                  },
+                  {
+                    rpc: 'bi_jornada_cursos',
+                    titulo: 'Dias entre a 1ª aula e o certificado, por formação',
+                    descricao: 'mediana · cursos com 20+ certificados',
+                    linhas: jornada.data,
+                    isLoading: jornada.isLoading,
+                    isError: jornada.isError,
+                    onRetry: () => void jornada.refetch(),
+                  },
+                  {
+                    rpc: 'bi_nps_cursos',
+                    titulo: 'Nota declarada da aula, agregada por formação',
+                    descricao:
+                      'escala 0–10 · 10+ respostas · só quem escolheu responder, então a base já entra puxada para cima',
+                    linhas: nps.data,
+                    isLoading: nps.isLoading,
+                    isError: nps.isError,
+                    onRetry: () => void nps.refetch(),
+                  },
+                ]}
+              />
             </div>
           ),
+          analise: <AnaliseDaTela tela="formacoes" periodo={periodo} />,
+          plano: <PlanoDaTela tela="formacoes" periodo={periodo} />,
         }}
       />
     </div>

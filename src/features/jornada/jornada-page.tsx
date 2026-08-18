@@ -16,6 +16,7 @@ import { BentoItem } from '@/components/layout/bento'
 import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
+import { AbaDeDados } from '@/components/tabela/aba-de-dados'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
@@ -40,6 +41,7 @@ import {
 import { formatDateShort, formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import { LIMITE_LISTA } from '@/lib/rpc'
 import { AnaliseDaTela } from '@/features/resumo/analise-tela'
+import { PlanoDaTela } from '@/features/resumo/plano-da-tela'
 import {
   useFluxoDaTela,
   useJornadaKpis,
@@ -169,13 +171,12 @@ export function JornadaPage() {
       <ModuloTabs
         rota="/jornada"
         conteudos={{
-          analise: <AnaliseDaTela tela="jornada" periodo={periodo} />,
-          telas: (
+          graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
                 titulo="Dá para confiar no ranking de telas"
                 icone={DatabaseIcon}
-                descricao="Contagem de sessão, não de comportamento — e a única leitura da aba que ignora o período do topo: a faixa lê todo o histórico que a purga da plataforma ainda não apagou. O pageview que ela mede é o mesmo que sustenta o ranking abaixo."
+                descricao="Contagem de sessão, não de comportamento — e uma das leituras que ignoram o período do topo: a faixa lê todo o histórico que a purga da plataforma ainda não apagou. O pageview que ela mede é o mesmo que sustenta o ranking abaixo."
               >
                 <BentoItem span={12}>
                   <TabelaCard
@@ -350,10 +351,7 @@ export function JornadaPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
-          fluxos: (
-            <div className="space-y-4">
+
               <SecaoDeAnalise
                 titulo="Por onde a sessão começa e onde ela termina"
                 icone={RouteIcon}
@@ -557,8 +555,108 @@ export function JornadaPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
+
+              {/* As linhas cruas fecham a aba do dado: as MESMAS queries que os
+                  cards acima desenham, passadas já resolvidas. Nenhuma consulta
+                  nova — se a lista refizesse a leitura, ela poderia divergir do
+                  gráfico logo acima. */}
+              <AbaDeDados
+                fontes={[
+                  {
+                    rpc: 'bi_jornada_kpis',
+                    titulo: 'Os quatro KPIs do topo da tela',
+                    descricao:
+                      'uma linha só · média e mediana de telas por sessão vêm juntas, e a distância entre elas é a inflação que as sessões-monstro causam',
+                    linhas: kpis.data ? [kpis.data] : [],
+                    isLoading: kpis.isLoading,
+                    isError: kpis.isError,
+                    onRetry: () => void kpis.refetch(),
+                  },
+                  {
+                    rpc: 'bi_jornada_sessoes_infladas',
+                    titulo: 'Quantas telas cabem numa sessão, e quanto do total elas carregam',
+                    descricao:
+                      'ignora o período do topo — lê todo o histórico que a purga da plataforma ainda não apagou, e a janela vem nas colunas janela_inicio/janela_fim',
+                    linhas: infladas.data,
+                    isLoading: infladas.isLoading,
+                    isError: infladas.isError,
+                    onRetry: () => void infladas.refetch(),
+                  },
+                  {
+                    rpc: 'bi_raio_x_telas',
+                    titulo: 'Cada tela medida contra o tráfego dela própria',
+                    descricao:
+                      'pct_saida conta todas as sessões, régua diferente da taxa de encerramento de bi_pontos_saida · rotas com identificador chegam agrupadas em padrão',
+                    linhas: raioX.data,
+                    isLoading: raioX.isLoading,
+                    isError: raioX.isError,
+                    onRetry: () => void raioX.refetch(),
+                    limite: LIMITE_LISTA,
+                  },
+                  {
+                    rpc: 'bi_fluxo_da_tela',
+                    titulo: 'Para onde a navegação segue a partir da tela escolhida',
+                    descricao: `origem → destino da tela selecionada no card (${telaSelecionada})`,
+                    linhas: fluxo.data,
+                    isLoading: fluxo.isLoading,
+                    isError: fluxo.isError,
+                    onRetry: () => void fluxo.refetch(),
+                  },
+                  {
+                    rpc: 'bi_portas_entrada',
+                    titulo: 'Em que tela a sessão abre',
+                    descricao: 'conta sessões abertas, não visitas',
+                    linhas: entradas.data,
+                    isLoading: entradas.isLoading,
+                    isError: entradas.isError,
+                    onRetry: () => void entradas.refetch(),
+                    limite: 10,
+                  },
+                  {
+                    rpc: 'bi_pontos_saida',
+                    titulo: 'Em que tela a sessão termina com frequência anormal',
+                    descricao:
+                      'taxa, não volume · sessões com 2+ telas e telas com 100+ encerramentos · vem cortada em dez linhas, então pct_da_tela não se soma como se fosse o total',
+                    linhas: saidas.data,
+                    isLoading: saidas.isLoading,
+                    isError: saidas.isError,
+                    onRetry: () => void saidas.refetch(),
+                    limite: 10,
+                  },
+                  {
+                    rpc: 'bi_profundidade_sessao',
+                    titulo: 'Quantas telas o cliente percorre por sessão',
+                    linhas: profundidade.data,
+                    isLoading: profundidade.isLoading,
+                    isError: profundidade.isError,
+                    onRetry: () => void profundidade.refetch(),
+                  },
+                  {
+                    rpc: 'bi_jornada_porta_de_entrada',
+                    titulo: 'Quem chega por link direto navega menos que quem entra pela home',
+                    descricao:
+                      'janela fixa do histórico de navegação, fora do período do topo · margem_pp é a margem do contraste entre os dois grupos',
+                    linhas: porta.data,
+                    isLoading: porta.isLoading,
+                    isError: porta.isError,
+                    onRetry: () => void porta.refetch(),
+                  },
+                  {
+                    rpc: 'bi_jornada_profundidade_e_retencao',
+                    titulo: 'Navegar fundo na 1ª semana prediz seguir ativo',
+                    descricao:
+                      'janelas disjuntas de propósito — navegação na primeira semana, atividade nos 30 dias até o último dia com dado · associação, não causa',
+                    linhas: profundidadeRetencao.data,
+                    isLoading: profundidadeRetencao.isLoading,
+                    isError: profundidadeRetencao.isError,
+                    onRetry: () => void profundidadeRetencao.refetch(),
+                  },
+                ]}
+              />
             </div>
           ),
+          analise: <AnaliseDaTela tela="jornada" periodo={periodo} />,
+          plano: <PlanoDaTela tela="jornada" periodo={periodo} />,
         }}
       />
     </div>

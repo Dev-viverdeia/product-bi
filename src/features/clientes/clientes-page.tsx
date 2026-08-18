@@ -21,6 +21,7 @@ import { BentoItem } from '@/components/layout/bento'
 import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
+import { AbaDeDados } from '@/components/tabela/aba-de-dados'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
@@ -30,6 +31,7 @@ import type { Periodo } from '@/lib/periodo'
 import { SegmentoFiltro } from '@/components/filters/segmento-filtro'
 import { useSegmento } from '@/components/filters/use-segmento'
 import { AnaliseDaTela } from '@/features/resumo/analise-tela'
+import { PlanoDaTela } from '@/features/resumo/plano-da-tela'
 import { StatusPill } from '@/components/ui-marca/status-pill'
 import { TableCell, TableHead, TableRow } from '@/components/ui/table'
 import {
@@ -200,8 +202,7 @@ export function ClientesPage() {
       <ModuloTabs
         rota="/clientes"
         conteudos={{
-          analise: <AnaliseDaTela tela="clientes" periodo={periodo} recorte={recorte} />,
-          retencao: (
+          graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
                 titulo="Quanto de cada safra ainda está de pé meses depois"
@@ -387,10 +388,7 @@ export function ClientesPage() {
                   </ChartCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
-          risco: (
-            <div className="space-y-4">
+
               <SecaoDeAnalise
                 titulo="Quem ainda dá para segurar"
                 icone={ListChecksIcon}
@@ -570,14 +568,11 @@ export function ClientesPage() {
                   </ChartCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
-          funciona: (
-            <div className="space-y-4">
+
               <SecaoDeAnalise
                 titulo="O que a primeira semana já denuncia sobre ficar"
                 icone={TargetIcon}
-                descricao="A aba responde a uma pergunta só: que ação inicial acompanha retenção maior aos 90 dias. Cada linha é um par de grupos da mesma safra — quem fez e quem não fez — e o lift é a razão entre as duas retenções, não o ganho que a ação entregaria. Linha com “—” de um dos lados não é ação sem efeito: é grupo pequeno demais para a régua de amostra."
+                descricao="Esta seção responde a uma pergunta só: que ação inicial acompanha retenção maior aos 90 dias. Cada linha é um par de grupos da mesma safra — quem fez e quem não fez — e o lift é a razão entre as duas retenções, não o ganho que a ação entregaria. Linha com “—” de um dos lados não é ação sem efeito: é grupo pequeno demais para a régua de amostra."
               >
                 <BentoItem span={12}>
                   <TabelaCard
@@ -634,8 +629,134 @@ export function ClientesPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
+
+              {/* As linhas cruas fecham a aba: são as MESMAS queries que os
+                  cards acima desenham, passadas já resolvidas. Nenhuma consulta
+                  nova — se a lista refizesse a leitura, ela poderia divergir do
+                  gráfico logo acima. */}
+              <AbaDeDados
+                fontes={[
+                  {
+                    rpc: 'bi_engajamento_clientes',
+                    titulo: 'Os quatro KPIs do topo: hábito, frequência e amplitude',
+                    descricao:
+                      'uma linha só · taxa nula é supressão pela régua de amostra (menos de 30 no recorte)',
+                    linhas: engajamento.data ? [engajamento.data] : [],
+                    isLoading: engajamento.isLoading,
+                    isError: engajamento.isError,
+                    onRetry: () => void engajamento.refetch(),
+                  },
+                  {
+                    rpc: 'bi_retencao_cohort',
+                    titulo: 'Quanto de cada safra de entrada seguia ativo em cada janela',
+                    descricao:
+                      'janela contada da entrada da safra, não do período do topo · nulo = janela ainda não completa, ou safra com menos de 30 clientes',
+                    linhas: cohort.data,
+                    isLoading: cohort.isLoading,
+                    isError: cohort.isError,
+                    onRetry: () => void cohort.refetch(),
+                  },
+                  {
+                    rpc: 'bi_retencao_comprador',
+                    titulo: 'Retenção de quem comprou contra quem foi convidado',
+                    descricao:
+                      'corte por is_master (dono da organização), que não é o papel do contrato · 120+ dias de casa, ativo nos últimos 30',
+                    linhas: comprador.data,
+                    isLoading: comprador.isLoading,
+                    isError: comprador.isError,
+                    onRetry: () => void comprador.refetch(),
+                  },
+                  {
+                    rpc: 'bi_retencao_por_papel',
+                    titulo: 'Retenção pelos 3 papéis que cobrem 99% da base',
+                    descricao:
+                      'responde ao filtro de plano e ignora o de papel de propósito — a comparação é o card',
+                    linhas: retencaoPapel.data,
+                    isLoading: retencaoPapel.isLoading,
+                    isError: retencaoPapel.isError,
+                    onRetry: () => void retencaoPapel.refetch(),
+                  },
+                  {
+                    rpc: 'bi_mortalidade_modulo',
+                    titulo: 'De quem passou por cada módulo, que fatia parou ali',
+                    descricao:
+                      'taxa sobre a audiência de cada módulo, base histórica inteira — não responde ao período do topo',
+                    linhas: mortalidade.data,
+                    isLoading: mortalidade.isLoading,
+                    isError: mortalidade.isError,
+                    onRetry: () => void mortalidade.refetch(),
+                  },
+                  {
+                    rpc: 'bi_dias_ativos_distribuicao',
+                    titulo: 'Clientes por faixa de dias ativos no período',
+                    linhas: diasAtivos.data,
+                    isLoading: diasAtivos.isLoading,
+                    isError: diasAtivos.isError,
+                    onRetry: () => void diasAtivos.refetch(),
+                  },
+                  {
+                    rpc: 'bi_amplitude_modulos',
+                    titulo: 'Clientes por número de módulos usados no período',
+                    linhas: amplitude.data,
+                    isLoading: amplitude.isLoading,
+                    isError: amplitude.isError,
+                    onRetry: () => void amplitude.refetch(),
+                  },
+                  {
+                    rpc: 'bi_clientes_em_risco',
+                    titulo: 'Quem ainda dá para segurar, com nome e e-mail',
+                    descricao:
+                      'inatividade (14+ dias em silêncio) ou plano vencendo em ≤30 dias · a lista vem cortada no limite da fonte',
+                    linhas: risco.data,
+                    isLoading: risco.isLoading,
+                    isError: risco.isError,
+                    onRetry: () => void risco.refetch(),
+                    limite: LIMITE_LISTA,
+                  },
+                  {
+                    rpc: 'bi_churn_resumo',
+                    titulo: 'Tamanho do churn e vida média de quem saiu',
+                    descricao: 'uma linha só · churn = 60+ dias sem uso',
+                    linhas: churnResumo.data ? [churnResumo.data] : [],
+                    isLoading: churnResumo.isLoading,
+                    isError: churnResumo.isError,
+                    onRetry: () => void churnResumo.refetch(),
+                  },
+                  {
+                    rpc: 'bi_churn_modulos',
+                    titulo: 'O que quem saiu nunca usou, contra quem ficou',
+                    descricao:
+                      'gap em pontos percentuais entre os dois grupos · % só com 30+ clientes no grupo',
+                    linhas: churnModulos.data,
+                    isLoading: churnModulos.isLoading,
+                    isError: churnModulos.isError,
+                    onRetry: () => void churnModulos.refetch(),
+                  },
+                  {
+                    rpc: 'bi_retencao_por_amplitude',
+                    titulo: 'Módulos usados nos primeiros 30 dias × retenção hoje',
+                    descricao: 'faixa com menos de 30 clientes sai com taxa nula',
+                    linhas: retencaoAmplitude.data,
+                    isLoading: retencaoAmplitude.isLoading,
+                    isError: retencaoAmplitude.isError,
+                    onRetry: () => void retencaoAmplitude.refetch(),
+                  },
+                  {
+                    rpc: 'bi_aha_moment',
+                    titulo: 'Ação na 1ª semana × retenção aos 90 dias',
+                    descricao:
+                      'correlação, não causalidade · régua de amostra: 50+ fizeram, e % de “não fizeram” só com 30+',
+                    linhas: aha.data,
+                    isLoading: aha.isLoading,
+                    isError: aha.isError,
+                    onRetry: () => void aha.refetch(),
+                  },
+                ]}
+              />
             </div>
           ),
+          analise: <AnaliseDaTela tela="clientes" periodo={periodo} recorte={recorte} />,
+          plano: <PlanoDaTela tela="clientes" periodo={periodo} recorte={recorte} />,
         }}
       />
     </div>

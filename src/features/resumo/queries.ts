@@ -5,7 +5,14 @@ import { rpc } from '@/lib/rpc'
 import { argsSegmento, type Recorte } from '@/lib/segmento'
 import { supabase } from '@/lib/supabase'
 
-/** Telas que já têm motor de achados. CS entra depois — tem pendência em aberto. */
+/**
+ * Telas que já têm motor de achados.
+ *
+ * CS não está aqui: ela entrou no padrão de três abas em 18/ago, mas o catálogo
+ * ainda não tem regra dela (pendência do Mateus). As abas `Análise` e `Plano`
+ * dela declaram esse vazio em vez de a tela ficar fora do padrão — dívida
+ * visível na tela vale mais que exceção escondida no layout.
+ */
 export type TelaComResumo =
   | 'visao-geral'
   | 'clientes'
@@ -28,6 +35,17 @@ const RPC_POR_TELA = {
   jornada: 'bi_achados_jornada',
   receita: 'bi_achados_receita',
 } as const
+
+/**
+ * A tela tem regra no catálogo?
+ *
+ * Existe porque `AnaliseDaTela` e `PlanoDaTela` agora rodam em TODAS as telas —
+ * inclusive nas que o motor ainda não cobre. Sem esta guarda, CS chamaria uma
+ * RPC inexistente e a tela mostraria erro onde a verdade é ausência de regra.
+ */
+export function temRegra(tela: string): tela is TelaComResumo {
+  return tela in RPC_POR_TELA
+}
 
 export type Achado = {
   regra: string
@@ -56,12 +74,15 @@ export type Achado = {
  * recorte por persona. Quando o argumento não vem, ele não é enviado — a RPC
  * usa o próprio padrão e a tela não passa a afirmar um escopo que não oferece.
  */
-export function useAchados(tela: TelaComResumo, dias?: Periodo, recorte?: Recorte) {
+export function useAchados(tela: string, dias?: Periodo, recorte?: Recorte) {
   return useQuery({
     queryKey: ['resumo', tela, dias ?? null, recorte?.papel ?? null, recorte?.plano ?? null],
+    // tela sem regra não consulta: a RPC nem existe, e um erro na tela diria
+    // "falhou" onde a verdade é "ainda não há regra"
+    enabled: temRegra(tela),
     queryFn: async () => {
       const rows = await rpc(
-        supabase.rpc(RPC_POR_TELA[tela], {
+        supabase.rpc(RPC_POR_TELA[tela as TelaComResumo], {
           ...(dias === undefined ? {} : { p_dias: dias }),
           ...(recorte === undefined ? {} : argsSegmento(recorte)),
         }),

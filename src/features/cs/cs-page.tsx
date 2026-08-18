@@ -25,11 +25,14 @@ import { BentoItem } from '@/components/layout/bento'
 import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
+import { AbaDeDados } from '@/components/tabela/aba-de-dados'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TableCell, TableHead, TableRow } from '@/components/ui/table'
 import { formatCompact, formatDateShort, formatInt, formatMesAno, formatPercent } from '@/lib/format'
+import { AnaliseDaTela } from '@/features/resumo/analise-tela'
+import { PlanoDaTela } from '@/features/resumo/plano-da-tela'
 import {
   useAtendimentoIaHumano,
   useAtendimentoMensal,
@@ -130,8 +133,8 @@ export function CsPage() {
       <CabecalhoDeModulo controles={<PeriodoFiltro valor={periodo} onChange={setPeriodo} />} />
 
       {/* Limitações são parte do dado: ficam visíveis e FORA das abas, porque
-          valem para as quatro — em nota de rodapé de uma aba só, somem nas
-          outras três. Também não é card de mosaico: não responde pergunta
+          valem para as três — em nota de rodapé de uma aba só, somem nas
+          outras duas. Também não é card de mosaico: não responde pergunta
           nenhuma, é a bula de tudo que vem abaixo. */}
       <Card className={semCarga ? 'border-destructive/40' : undefined}>
         <CardHeader>
@@ -187,7 +190,7 @@ export function CsPage() {
         </CardHeader>
       </Card>
 
-      {/* Fora das abas: contexto das quatro. Trocar de aba não pode custar o
+      {/* Fora das abas: contexto das três. Trocar de aba não pode custar o
           número de referência nem obrigar a reajustar o período. */}
       <KpiGrid>
         {/* Sem carga, a RPC devolve 0 porque as tabelas estão vazias — e "0
@@ -232,7 +235,7 @@ export function CsPage() {
       <ModuloTabs
         rota="/cs"
         conteudos={{
-          atendimento: (
+          graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
                 titulo="Quanto atendimento entra, e quanto a IA fecha sozinha"
@@ -368,11 +371,7 @@ export function CsPage() {
                     limite não sumiu da tela — subiu para o bloco de limitações, que é
                     onde ele pertence enquanto não houver número para desenhar. */}
               </SecaoDeAnalise>
-            </div>
-          ),
 
-          comunicacao: (
-            <div className="space-y-4">
               <SecaoDeAnalise
                 titulo="Quanta gente a comunicação alcança, e quanto se perde no caminho"
                 icone={MegaphoneIcon}
@@ -458,15 +457,11 @@ export function CsPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
 
-          retencao: (
-            <div className="space-y-4">
               <SecaoDeAnalise
                 titulo="Quantos pedem para sair, e onde esses casos param"
                 icone={DoorOpenIcon}
-                descricao="Nada nesta aba responde ao seletor de dias do topo: a série é o histórico mês a mês e o desfecho é o estado de hoje da carteira inteira. Os grãos também divergem — a série conta pedidos e o desfecho conta clientes deduplicados —, então somar a série nunca reencontra as barras ao lado."
+                descricao="Nada nesta seção responde ao seletor de dias do topo: a série é o histórico mês a mês e o desfecho é o estado de hoje da carteira inteira. Os grãos também divergem — a série conta pedidos e o desfecho conta clientes deduplicados —, então somar a série nunca reencontra as barras ao lado."
               >
                 <BentoItem span={8}>
                   <ChartCard
@@ -598,11 +593,7 @@ export function CsPage() {
                   </ChartCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
 
-          funis: (
-            <div className="space-y-4">
               <SecaoDeAnalise
                 titulo="Onde cada caso está parado nos quadros do CS"
                 icone={WorkflowIcon}
@@ -680,8 +671,154 @@ export function CsPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
+
+              {/* As linhas cruas fecham a aba do dado: são as MESMAS queries que
+                  os cards acima desenham, passadas já resolvidas. Nenhuma
+                  consulta nova — se a lista refizesse a leitura, ela poderia
+                  divergir do card logo acima. */}
+              <AbaDeDados
+                fontes={[
+                  {
+                    rpc: 'bi_cs_frescor',
+                    titulo: 'De quando é o dado de cada fonte do Pulse',
+                    descricao:
+                      'é a régua do bloco de limitações do topo — `ultimo_evento_brt` é a data do fato, não a da carga',
+                    linhas: frescor.data,
+                    isLoading: frescor.isLoading,
+                    isError: frescor.isError,
+                    onRetry: () => void frescor.refetch(),
+                  },
+                  {
+                    rpc: 'bi_cs_kpis',
+                    titulo: 'Os quatro números do topo',
+                    descricao:
+                      'uma linha só · `retidos` é estado da carteira inteira e não responde ao seletor de dias',
+                    linhas: kpis.data ? [kpis.data] : [],
+                    isLoading: kpis.isLoading,
+                    isError: kpis.isError,
+                    onRetry: () => void kpis.refetch(),
+                  },
+                  {
+                    rpc: 'bi_cs_atendimento_mensal',
+                    titulo: 'Atendimentos por mês',
+                    descricao:
+                      'histórico inteiro, mês a mês — ignora o seletor de dias do topo · a unidade é o ciclo (ticket), não a mensagem',
+                    linhas: mensal.data,
+                    isLoading: mensal.isLoading,
+                    isError: mensal.isError,
+                    onRetry: () => void mensal.refetch(),
+                  },
+                  {
+                    rpc: 'bi_cs_atendimento_ia_humano',
+                    titulo: 'Quanto a IA fechou sozinha, por desfecho',
+                    descricao: 'quem assumiu é medido por quem respondeu, não por atribuição formal',
+                    linhas: iaHumano.data,
+                    isLoading: iaHumano.isLoading,
+                    isError: iaHumano.isError,
+                    onRetry: () => void iaHumano.refetch(),
+                  },
+                  {
+                    rpc: 'bi_cs_atendimento_por_atendente',
+                    titulo: 'Quem respondeu os ciclos do período',
+                    linhas: atendentes.data,
+                    isLoading: atendentes.isLoading,
+                    isError: atendentes.isError,
+                    onRetry: () => void atendentes.refetch(),
+                  },
+                  {
+                    rpc: 'bi_cs_atendimento_por_canal',
+                    titulo: 'Por qual número da Central o ciclo entrou',
+                    linhas: canais.data,
+                    isLoading: canais.isLoading,
+                    isError: canais.isError,
+                    onRetry: () => void canais.refetch(),
+                  },
+                  {
+                    rpc: 'bi_cs_disparos_mensal',
+                    titulo: 'Comunicação enviada por mês',
+                    descricao:
+                      'histórico inteiro · `pessoas` deduplica quem recebeu em lotes diferentes, `mensagens` não',
+                    linhas: disparosMensal.data,
+                    isLoading: disparosMensal.isLoading,
+                    isError: disparosMensal.isError,
+                    onRetry: () => void disparosMensal.refetch(),
+                  },
+                  {
+                    rpc: 'bi_cs_disparos_por_canal',
+                    titulo: 'Entrega e falha por canal de comunicação',
+                    descricao:
+                      '`ignorados` é a trava anti-duplicidade de 24h, e fica fora de `pct_erro`',
+                    linhas: disparosCanal.data,
+                    isLoading: disparosCanal.isLoading,
+                    isError: disparosCanal.isError,
+                    onRetry: () => void disparosCanal.refetch(),
+                  },
+                  {
+                    rpc: 'bi_cs_cancelamento_mensal',
+                    titulo: 'Solicitações de cancelamento por mês',
+                    descricao:
+                      'histórico inteiro · conta pedidos, então a mesma empresa pode aparecer mais de uma vez',
+                    linhas: cancelMensal.data,
+                    isLoading: cancelMensal.isLoading,
+                    isError: cancelMensal.isError,
+                    onRetry: () => void cancelMensal.refetch(),
+                  },
+                  {
+                    rpc: 'bi_cs_cancelamento_origem',
+                    titulo: 'Por onde o pedido de cancelamento entrou',
+                    descricao: 'trâmite de entrada, não motivo da saída',
+                    linhas: cancelOrigem.data,
+                    isLoading: cancelOrigem.isLoading,
+                    isError: cancelOrigem.isError,
+                    onRetry: () => void cancelOrigem.refetch(),
+                  },
+                  {
+                    rpc: 'bi_cs_cancelamento_desfecho',
+                    titulo: 'Como o caso terminou comercialmente',
+                    descricao:
+                      'tipo de acordo · motivo é texto livre com quase metade vazia e não sai daqui',
+                    linhas: cancelDesfecho.data,
+                    isLoading: cancelDesfecho.isLoading,
+                    isError: cancelDesfecho.isError,
+                    onRetry: () => void cancelDesfecho.refetch(),
+                  },
+                  {
+                    rpc: 'bi_cs_retencao',
+                    titulo: 'Desfecho da retenção, no grão de cliente deduplicado',
+                    descricao:
+                      '`conflita_base` é o perdido que ainda tem acesso ativo — divergência entre o CS e a plataforma, não erro de um dos lados',
+                    linhas: retencao.data,
+                    isLoading: retencao.isLoading,
+                    isError: retencao.isError,
+                    onRetry: () => void retencao.refetch(),
+                  },
+                  {
+                    // Mesma RPC, quadros diferentes: o argumento entra no rótulo
+                    // porque é ele que distingue as duas leituras.
+                    rpc: `bi_cs_funil (${QUADRO_KICKOFF})`,
+                    titulo: 'Cards do quadro de Kickoff, por etapa',
+                    descricao: 'foto da posição atual, não fluxo do período · grão de cliente',
+                    linhas: kickoff.data,
+                    isLoading: kickoff.isLoading,
+                    isError: kickoff.isError,
+                    onRetry: () => void kickoff.refetch(),
+                  },
+                  {
+                    rpc: `bi_cs_funil (${QUADRO_REVERSAO})`,
+                    titulo: 'Cards do quadro de Reversão, por etapa',
+                    descricao: 'foto da posição atual, não fluxo do período · grão de empresa',
+                    linhas: reversao.data,
+                    isLoading: reversao.isLoading,
+                    isError: reversao.isError,
+                    onRetry: () => void reversao.refetch(),
+                  },
+                ]}
+              />
             </div>
           ),
+
+          analise: <AnaliseDaTela tela="cs" />,
+          plano: <PlanoDaTela tela="cs" />,
         }}
       />
     </div>

@@ -675,13 +675,30 @@ alcance o período em que os módulos existiam continua contando as ações dele
 A arquitetura que o Mateus desenhou em 17/ago — **dados brutos · análises · plano
 de ação** — deixou de ser só proposta. Estado no fim de 18/ago:
 
+> ⚠️ **O desenho de abas mudou no fim do dia 18/ago, por correção do Mateus.** A
+> primeira versão tinha `Análise` primeira, abas por pergunta variando de tela
+> para tela, e o plano de ação só como seção de topo. Ele fechou outro padrão:
+> **as MESMAS três abas em todo módulo — `Gráficos` · `Análise` · `Plano` —
+> nesta ordem**, que é a das três camadas. As abas por pergunta saíram; o
+> agrupamento delas passou para a `SecaoDeAnalise`, dentro de `Gráficos`.
+
 | Camada | Onde vive | Estado |
 | --- | --- | --- |
-| Análise | aba `Análise` de cada módulo | ✅ 9 de 10 telas (CS de fora, por pendência do Mateus) |
-| Gráficos | aba seguinte, fatiada por pergunta | ✅ 10 de 10 |
-| Dados | aba `Dados` do módulo | ✅ **Visão Geral**, como peça de referência; falta repetir em 9 |
-| Plano de ação | `/plano`, seção de topo | ✅ no ar, modo **reporta** |
+| Gráficos (o dado) | 1ª aba de todo módulo, **e a padrão** — gráficos + linhas cruas no fim | ✅ 10 de 10 |
+| Análise (a leitura) | 2ª aba de todo módulo | ✅ 10 de 10 (CS declara que ainda não tem regra) |
+| Plano (a sugestão) | 3ª aba de todo módulo | ✅ 10 de 10 (idem) |
+| Plano transversal | `/plano`, seção de topo | ✅ no ar, modo **reporta** — a pergunta que nenhum módulo responde |
 | Explorar | `/explorar`, seção de topo | ✅ no ar, 37 tabelas e 1,78 milhão de linhas |
+
+**O passo mais arriscado da mudança de abas não foi o layout, foi a âncora.**
+`insights.regra.ancora_aba` guarda o valor da aba para onde o link "ver o
+gráfico que sustenta" navega. Medido antes de mexer: **28 das 35 regras
+apontavam para aba que ia deixar de existir**, em 8 telas — e o CLAUDE.md já
+descrevia essa armadilha em prosa, sem nada no CI para pegá-la. A migration
+`20260818090000` reancorou as 35 em `graficos`, purgou `insights.achado_cache`
+(que guarda o achado serializado com a âncora dentro, e serviria a antiga sem
+erro nenhum) e o `contrato-de-shell.test.ts` ganhou a trava que faltava: todo
+módulo tem de ter a aba `graficos`, e ela tem de ser a primeira.
 
 **O que a fase 6 virou na prática.** A camada de dados tem duas metades de
 natureza oposta, e só uma estava travada:

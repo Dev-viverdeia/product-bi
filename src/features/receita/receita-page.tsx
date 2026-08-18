@@ -14,6 +14,7 @@ import { BentoItem } from '@/components/layout/bento'
 import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
+import { AbaDeDados } from '@/components/tabela/aba-de-dados'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
@@ -35,6 +36,7 @@ import {
   formatPercent,
 } from '@/lib/format'
 import { AnaliseDaTela } from '@/features/resumo/analise-tela'
+import { PlanoDaTela } from '@/features/resumo/plano-da-tela'
 import {
   useLtvCohort,
   useReceitaKpis,
@@ -140,8 +142,9 @@ export function ReceitaPage() {
       <ModuloTabs
         rota="/receita"
         conteudos={{
-          analise: <AnaliseDaTela tela="receita" />,
-          receita: (
+          // As três abas iguais em toda tela: o dado, a leitura, o plano. O
+          // agrupamento por pergunta não se perdeu — ele vive na SecaoDeAnalise.
+          graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
                 titulo="Quanto entrou, e de quanta gente veio"
@@ -258,10 +261,7 @@ export function ReceitaPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
-          safra: (
-            <div className="space-y-4">
+
               <SecaoDeAnalise
                 titulo="O que cada grupo de cliente rendeu, e como ele usa"
                 icone={LayersIcon}
@@ -373,8 +373,71 @@ export function ReceitaPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
+
+              {/* As linhas cruas por último: as MESMAS queries que os cards
+                  acima já leram, passadas resolvidas. Nenhuma consulta nova —
+                  se a camada de dados relesse o banco, ela poderia divergir do
+                  card que ela deveria auditar. */}
+              <AbaDeDados
+                fontes={[
+                  {
+                    rpc: 'bi_receita_kpis',
+                    titulo: 'Os quatro números do topo: receita, faturas, compradores e ticket',
+                    descricao:
+                      'uma linha só · dados_ate é a data do último webhook de pagamento recebido, e é onde toda série desta tela termina',
+                    linhas: kpis.data ? [kpis.data] : [],
+                    isLoading: kpis.isLoading,
+                    isError: kpis.isError,
+                    onRetry: () => void kpis.refetch(),
+                  },
+                  {
+                    rpc: 'bi_receita_mensal',
+                    titulo: 'Quanto entrou e quantas pessoas compraram, mês a mês',
+                    descricao:
+                      'a mesma série alimenta os dois primeiros cards · faturas com pagamento aprovado, deduplicadas',
+                    linhas: mensal.data,
+                    isLoading: mensal.isLoading,
+                    isError: mensal.isError,
+                    onRetry: () => void mensal.refetch(),
+                  },
+                  {
+                    rpc: 'bi_receita_saude_cobranca',
+                    titulo: 'Quanto do dinheiro cobrado falhou ou voltou',
+                    descricao:
+                      'pct_do_pago tem como denominador o valor aprovado da série inteira, não o do mês',
+                    linhas: cobranca.data,
+                    isLoading: cobranca.isLoading,
+                    isError: cobranca.isError,
+                    onRetry: () => void cobranca.refetch(),
+                  },
+                  {
+                    rpc: 'bi_ltv_cohort',
+                    titulo: 'O que cada safra de entrada rendeu',
+                    descricao:
+                      'receita_por_cliente divide pela safra inteira, inclusive quem nunca comprou',
+                    linhas: ltv.data,
+                    isLoading: ltv.isLoading,
+                    isError: ltv.isError,
+                    onRetry: () => void ltv.refetch(),
+                  },
+                  {
+                    rpc: 'bi_uso_vs_receita',
+                    titulo: 'Se quem paga mais também usa mais',
+                    descricao:
+                      'dias_ativos_medio é histórico completo de uso, não a janela da receita · amostra pequena em algumas faixas',
+                    linhas: usoReceita.data,
+                    isLoading: usoReceita.isLoading,
+                    isError: usoReceita.isError,
+                    onRetry: () => void usoReceita.refetch(),
+                  },
+                ]}
+              />
             </div>
           ),
+
+          analise: <AnaliseDaTela tela="receita" />,
+
+          plano: <PlanoDaTela tela="receita" />,
         }}
       />
     </div>

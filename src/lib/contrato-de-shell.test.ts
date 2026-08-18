@@ -74,3 +74,52 @@ describe('contrato do shell', () => {
     expect(semComentarios(moduloTabs!.fonte)).not.toMatch(/TabsList/)
   })
 })
+
+/**
+ * O padrão de três abas, que passou a valer em todo módulo em 18/ago.
+ *
+ * `Gráficos` (o dado) · `Análise` (a leitura) · `Plano` (a sugestão), nesta
+ * ordem. Antes cada tela declarava as próprias abas por pergunta, e o custo
+ * disso era invisível: o leitor reaprendia a navegação em cada módulo.
+ *
+ * ⚠️ **A trava que mais importa aqui é a do valor `graficos`.** As 35 regras do
+ * motor gravam `insights.regra.ancora_aba = 'graficos'`, e é por esse texto que
+ * o link "ver o gráfico que sustenta" navega. Renomear o valor da aba no
+ * `nav-items.ts` quebraria os 35 links **em silêncio** — o link trocaria de aba
+ * e não rolaria para nada, sem erro, sem aviso, sem teste falhando. Até hoje a
+ * única proteção era uma frase no CLAUDE.md, que não reprova build nenhum.
+ */
+describe('padrão de três abas em todo módulo', () => {
+  // glob próprio: o `fontes` acima cobre só `.tsx`, e nav-items é `.ts`
+  const navItems = Object.values(
+    import.meta.glob('../components/layout/nav-items.ts', {
+      query: '?raw',
+      import: 'default',
+      eager: true,
+    }) as Record<string, string>,
+  )[0]!
+
+  /** Blocos `abas: [...]` declarados no arquivo. */
+  const blocos = semComentarios(navItems).match(/abas:\s*\[[^\]]*\]/g) ?? []
+
+  it('há módulo com aba declarada', () => {
+    expect(blocos.length).toBeGreaterThan(5)
+  })
+
+  it.each(blocos.map((bloco, i) => ({ i, bloco })))('módulo %i', ({ bloco }) => {
+    const valores = [...bloco.matchAll(/valor:\s*'([a-z-]+)'/g)].map((m) => m[1])
+    expect(valores).toEqual(['graficos', 'analise', 'plano'])
+  })
+
+  /*
+    A ordem é a da leitura — dado, depois significado, depois ação — e a
+    primeira aba é a padrão, porque `useAbaAtiva` cai em `abas[0]` quando a URL
+    não traz `?aba=`. Trocar a ordem aqui troca a tela que o leitor vê primeiro.
+  */
+  it('graficos é a primeira, e portanto a padrão', () => {
+    for (const bloco of blocos) {
+      const primeiro = bloco.match(/valor:\s*'([a-z-]+)'/)?.[1]
+      expect(primeiro).toBe('graficos')
+    }
+  })
+})

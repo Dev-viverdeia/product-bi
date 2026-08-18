@@ -1,40 +1,20 @@
 import {
-  BanknoteIcon,
-  BookOpenIcon,
-  BotIcon,
   ChartColumnIcon,
   Building2Icon,
-  CheckCheckIcon,
   ClipboardListIcon,
   CompassIcon,
-  DatabaseIcon,
-  DoorOpenIcon,
   FileTextIcon,
   GraduationCapIcon,
   HeadphonesIcon,
-  HeartCrackIcon,
-  LayersIcon,
   LayoutDashboardIcon,
-  LayoutGridIcon,
-  LineChartIcon,
   ListChecksIcon,
   MapIcon,
-  MessageSquareIcon,
-  MonitorIcon,
   PaletteIcon,
   PuzzleIcon,
   ReceiptIcon,
-  RouteIcon,
-  ScissorsIcon,
-  SendIcon,
-  StarIcon,
-  TargetIcon,
   TelescopeIcon,
-  TrendingUpIcon,
-  TriangleAlertIcon,
   UserPlusIcon,
   UsersIcon,
-  WrenchIcon,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -83,23 +63,30 @@ export type NavItem = {
   /** rota é ativa por prefixo (útil para páginas de detalhe) */
   matchPrefix?: boolean
   /**
-   * Abas de contexto do módulo.
+   * As três abas do módulo — **iguais em todas as telas** (decisão do Mateus,
+   * 18/ago/2026).
+   *
+   * `Gráficos` (o dado) · `Análise` (a leitura) · `Plano` (a sugestão). É a
+   * arquitetura de três camadas virando gramática de tela: o leitor aprende a
+   * ordem uma vez e ela vale em qualquer módulo.
+   *
+   * ⚠️ **Isto substituiu as abas por pergunta** (`retencao`, `funil`,
+   * `catalogo`, `implementacao`…), que variavam de tela para tela. O
+   * agrupamento por pergunta não se perdeu: passou para a `SecaoDeAnalise`,
+   * dentro da aba `Gráficos`, que é onde ele já morava visualmente.
    *
    * Declaradas AQUI e não na página porque dois consumidores precisam da mesma
-   * lista: a página, que renderiza as abas, e a barra do topo, que oferece o
-   * atalho para cada uma. Declarar nos dois lugares seria garantir que um dia
-   * divergem.
+   * lista: a página, que renderiza o painel, e a barra do topo, que oferece o
+   * atalho. Declarar nos dois lugares seria garantir que um dia divergem.
    *
-   * Toda tela abre em `analise` — o documento escrito. As abas seguintes são os
-   * gráficos que o sustentam, fatiados por PERGUNTA quando o módulo tem mais de
-   * uma (retenção, risco, o que funciona) e num painel só quando não tem. Sem
-   * essa separação a página vira um documento espremido entre gráficos, que foi
-   * como a Visão Geral nasceu e o motivo de ter sido refeita.
+   * ⚠️ **`graficos` é o alvo de TODA âncora do motor de achados.**
+   * `insights.regra.ancora_aba` vale `'graficos'` nas 35 regras, e é por ele
+   * que o link "ver o gráfico que sustenta" navega. Renomear esse valor aqui
+   * quebraria os 35 links em silêncio — o link trocaria de aba e não rolaria
+   * para nada. `contrato-de-shell.test.ts` reprova a ausência da aba.
    *
-   * O `valor` de cada aba é o mesmo texto que as regras gravam em `ancora_aba`:
-   * é por ele que o link "Ver o gráfico que sustenta" atravessa da análise para
-   * o gráfico. Renomear uma aba aqui sem renomear no catálogo quebra o link em
-   * silêncio — ele troca de aba e não rola para lugar nenhum.
+   * A primeira aba é a padrão (`useAbaAtiva` cai em `abas[0]`), então a ordem
+   * aqui é a ordem da leitura: dado, depois significado, depois ação.
    */
   abas?: AbaDoModulo[]
 }
@@ -135,9 +122,9 @@ export const navItems: NavItem[] = [
     temRecorte: true,
     icon: LayoutDashboardIcon,
     abas: [
-      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
       { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
-      { valor: 'dados', titulo: 'Dados', icone: DatabaseIcon },
+      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
+      { valor: 'plano', titulo: 'Plano', icone: ClipboardListIcon },
     ],
   },
   {
@@ -151,10 +138,9 @@ export const navItems: NavItem[] = [
     temRecorte: true,
     icon: UsersIcon,
     abas: [
+      { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
       { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
-      { valor: 'retencao', titulo: 'Retenção & hábito', icone: LineChartIcon },
-      { valor: 'risco', titulo: 'Risco & churn', icone: TriangleAlertIcon },
-      { valor: 'funciona', titulo: 'O que funciona', icone: TargetIcon },
+      { valor: 'plano', titulo: 'Plano', icone: ClipboardListIcon },
     ],
   },
   {
@@ -170,10 +156,9 @@ export const navItems: NavItem[] = [
     temPeriodo: true,
     icon: UserPlusIcon,
     abas: [
+      { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
       { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
-      { valor: 'funil', titulo: 'Funil', icone: DoorOpenIcon },
-      { valor: 'onboarding', titulo: 'Onboarding & convites', icone: ListChecksIcon },
-      { valor: 'porta', titulo: 'Problemas na porta', icone: TriangleAlertIcon },
+      { valor: 'plano', titulo: 'Plano', icone: ClipboardListIcon },
     ],
   },
   {
@@ -186,10 +171,9 @@ export const navItems: NavItem[] = [
     temPeriodo: true,
     icon: GraduationCapIcon,
     abas: [
+      { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
       { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
-      { valor: 'uso', titulo: 'Uso & assuntos', icone: BookOpenIcon },
-      { valor: 'conclusao', titulo: 'Conclusão', icone: CheckCheckIcon },
-      { valor: 'qualidade', titulo: 'Jornada & NPS', icone: StarIcon },
+      { valor: 'plano', titulo: 'Plano', icone: ClipboardListIcon },
     ],
   },
   {
@@ -202,10 +186,9 @@ export const navItems: NavItem[] = [
     temPeriodo: true,
     icon: PuzzleIcon,
     abas: [
+      { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
       { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
-      { valor: 'catalogo', titulo: 'Catálogo', icone: LayoutGridIcon },
-      { valor: 'implementacao', titulo: 'Implementação', icone: WrenchIcon },
-      { valor: 'curadoria', titulo: 'Curadoria', icone: ScissorsIcon },
+      { valor: 'plano', titulo: 'Plano', icone: ClipboardListIcon },
     ],
   },
   {
@@ -218,10 +201,9 @@ export const navItems: NavItem[] = [
     temPeriodo: true,
     icon: CompassIcon,
     abas: [
+      { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
       { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
-      { valor: 'adocao', titulo: 'Adoção', icone: UsersIcon },
-      { valor: 'uso', titulo: 'Uso', icone: MessageSquareIcon },
-      { valor: 'impacto', titulo: 'Impacto na retenção', icone: TrendingUpIcon },
+      { valor: 'plano', titulo: 'Plano', icone: ClipboardListIcon },
     ],
   },
   {
@@ -232,12 +214,10 @@ export const navItems: NavItem[] = [
     regua:
       'Saúde dos times e valor contratado não consumido · time ativo = ação nos 30 dias até o último dia com dado',
     icon: Building2Icon,
-    // As duas abas separam FORMATO, não assunto: fatiar o panorama em abas por
-    // tema é que deixaria de ser panorama. Dentro da aba de gráficos as perguntas
-    // se separam em seções — que é hierarquia de leitura, não outra navegação.
     abas: [
-      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
       { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
+      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
+      { valor: 'plano', titulo: 'Plano', icone: ClipboardListIcon },
     ],
   },
   {
@@ -253,9 +233,9 @@ export const navItems: NavItem[] = [
     temPeriodo: true,
     icon: MapIcon,
     abas: [
+      { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
       { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
-      { valor: 'telas', titulo: 'Raio-x de tela', icone: MonitorIcon },
-      { valor: 'fluxos', titulo: 'Fluxos & sessão', icone: RouteIcon },
+      { valor: 'plano', titulo: 'Plano', icone: ClipboardListIcon },
     ],
   },
   {
@@ -269,9 +249,9 @@ export const navItems: NavItem[] = [
       'Receita reconhecida dos webhooks de pagamento (Hubla), com faturas deduplicadas · a série termina onde o rastreamento parou',
     icon: ReceiptIcon,
     abas: [
+      { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
       { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
-      { valor: 'receita', titulo: 'Receita', icone: BanknoteIcon },
-      { valor: 'safra', titulo: 'Safra & uso', icone: LayersIcon },
+      { valor: 'plano', titulo: 'Plano', icone: ClipboardListIcon },
     ],
   },
   {
@@ -284,10 +264,9 @@ export const navItems: NavItem[] = [
     temPeriodo: true,
     icon: HeadphonesIcon,
     abas: [
-      { valor: 'atendimento', titulo: 'Atendimento', icone: BotIcon },
-      { valor: 'comunicacao', titulo: 'Comunicação', icone: SendIcon },
-      { valor: 'retencao', titulo: 'Cancelamento & reversão', icone: HeartCrackIcon },
-      { valor: 'funis', titulo: 'Kickoff & funis', icone: ListChecksIcon },
+      { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
+      { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
+      { valor: 'plano', titulo: 'Plano', icone: ClipboardListIcon },
     ],
   },
 ]

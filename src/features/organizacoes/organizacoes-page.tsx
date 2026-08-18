@@ -17,6 +17,7 @@ import { BentoItem } from '@/components/layout/bento'
 import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
+import { AbaDeDados } from '@/components/tabela/aba-de-dados'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 import { Badge } from '@/components/ui/badge'
@@ -31,6 +32,7 @@ import {
 import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import { fundoIntensidade } from '@/lib/intensidade'
 import { AnaliseDaTela } from '@/features/resumo/analise-tela'
+import { PlanoDaTela } from '@/features/resumo/plano-da-tela'
 import {
   useEfeitoMaster,
   useOrgsDistribuicao,
@@ -150,7 +152,7 @@ export function OrganizacoesPage() {
       </div>
 
       {/*
-        As duas abas separam formato, não assunto: o panorama continua inteiro
+        As três abas separam formato, não assunto: o panorama continua inteiro
         num painel só. Quem divide por pergunta são as seções dentro do painel,
         não as abas — fatiar o panorama em abas por tema é que deixaria de ser
         panorama.
@@ -161,7 +163,6 @@ export function OrganizacoesPage() {
       <ModuloTabs
         rota="/organizacoes"
         conteudos={{
-          analise: <AnaliseDaTela tela="organizacoes" />,
           graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
@@ -528,8 +529,98 @@ export function OrganizacoesPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
+
+              {/* A camada de dados fecha a aba: as MESMAS queries que os cards
+                  acima desenham, passadas já resolvidas. Nenhuma consulta nova —
+                  se a lista refizesse a leitura, ela poderia divergir do card. */}
+              <AbaDeDados
+                fontes={[
+                  {
+                    rpc: 'bi_orgs_kpis',
+                    titulo: 'Os quatro KPIs do topo da tela',
+                    descricao:
+                      'uma linha só — contas ativas, membros, time ativo médio e fatia com master ativo',
+                    linhas: kpis.data ? [kpis.data] : [],
+                    isLoading: kpis.isLoading,
+                    isError: kpis.isError,
+                    onRetry: () => void kpis.refetch(),
+                  },
+                  {
+                    rpc: 'bi_orgs_distribuicao_engajamento',
+                    titulo: 'Quantas contas, e quanta gente, em cada faixa de time ativo',
+                    descricao:
+                      'as duas colunas de percentual têm denominadores diferentes — contas e pessoas — e apontam para faixas diferentes de propósito',
+                    linhas: distribuicao.data,
+                    isLoading: distribuicao.isLoading,
+                    isError: distribuicao.isError,
+                    onRetry: () => void distribuicao.refetch(),
+                  },
+                  {
+                    rpc: 'bi_orgs_por_tamanho',
+                    titulo: 'A fatia do time que aparece muda com o tamanho da conta',
+                    descricao:
+                      'taxa por pessoa e média das organizações vêm juntas: quando concordam, o gradiente não é artefato de misturar conta de uma pessoa com conta de cem',
+                    linhas: porTamanho.data,
+                    isLoading: porTamanho.isLoading,
+                    isError: porTamanho.isError,
+                    onRetry: () => void porTamanho.refetch(),
+                  },
+                  {
+                    rpc: 'bi_orgs_ocupacao',
+                    titulo: 'Quantas contas em cada faixa de assentos preenchidos',
+                    descricao:
+                      'membros cadastrados contra o limite contratado — assento preenchido não é assento que aparece',
+                    linhas: ocupacao.data,
+                    isLoading: ocupacao.isLoading,
+                    isError: ocupacao.isError,
+                    onRetry: () => void ocupacao.refetch(),
+                  },
+                  {
+                    rpc: 'bi_orgs_efeito_master',
+                    titulo: 'Quanto time ativo há com o master ativo, e sem ele',
+                    descricao:
+                      'organizações ativas com 2+ membros · master ativo = ação nos 30 dias até o último dia com dado · associação, não causa',
+                    linhas: efeito.data,
+                    isLoading: efeito.isLoading,
+                    isError: efeito.isError,
+                    onRetry: () => void efeito.refetch(),
+                  },
+                  {
+                    rpc: 'bi_orgs_quem_parou_primeiro',
+                    titulo: 'Nas contas esfriadas, quem registrou a última ação primeiro',
+                    descricao:
+                      'só contas com master parado há 30+ dias e histórico dos dois lados · janela de 14 dias para não chamar de "antes" o que é a mesma semana',
+                    linhas: sequencia.data,
+                    isLoading: sequencia.isLoading,
+                    isError: sequencia.isError,
+                    onRetry: () => void sequencia.refetch(),
+                  },
+                  {
+                    rpc: 'bi_valor_nao_consumido',
+                    titulo: 'Quanto de cada benefício contratado virou uso',
+                    descricao: 'uma linha por benefício oferecido à base inteira, não por conta',
+                    linhas: valor.data,
+                    isLoading: valor.isLoading,
+                    isError: valor.isError,
+                    onRetry: () => void valor.refetch(),
+                  },
+                  {
+                    rpc: 'bi_orgs_risco',
+                    titulo: 'As contas com a menor fatia de time ativo',
+                    descricao:
+                      'orgs ativas com 3+ membros, ordenadas pela pior · a contagem é o tamanho da lista, não o tamanho do problema',
+                    linhas: risco.data,
+                    limite: 25,
+                    isLoading: risco.isLoading,
+                    isError: risco.isError,
+                    onRetry: () => void risco.refetch(),
+                  },
+                ]}
+              />
             </div>
           ),
+          analise: <AnaliseDaTela tela="organizacoes" />,
+          plano: <PlanoDaTela tela="organizacoes" />,
         }}
       />
     </div>

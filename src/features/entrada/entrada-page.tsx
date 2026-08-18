@@ -18,6 +18,7 @@ import { BentoItem } from '@/components/layout/bento'
 import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
+import { AbaDeDados } from '@/components/tabela/aba-de-dados'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
@@ -36,6 +37,7 @@ import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import { fundoIntensidade } from '@/lib/intensidade'
 import { LIMITE_LISTA } from '@/lib/rpc'
 import { AnaliseDaTela } from '@/features/resumo/analise-tela'
+import { PlanoDaTela } from '@/features/resumo/plano-da-tela'
 import {
   useAceiteConvite,
   useEfeitoOnboarding,
@@ -146,8 +148,7 @@ export function EntradaPage() {
       <ModuloTabs
         rota="/entrada"
         conteudos={{
-          analise: <AnaliseDaTela tela="entrada" periodo={periodo} />,
-          funil: (
+          graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
                 titulo="Quantos convites viram gente dentro da plataforma"
@@ -292,10 +293,7 @@ export function EntradaPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
-          onboarding: (
-            <div className="space-y-4">
+
               <SecaoDeAnalise
                 titulo="O que acontece com quem não termina o onboarding"
                 icone={MilestoneIcon}
@@ -432,10 +430,7 @@ export function EntradaPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
-          porta: (
-            <div className="space-y-4">
+
               <SecaoDeAnalise
                 titulo="Onde o cliente esbarra antes de conseguir usar"
                 icone={DoorClosedIcon}
@@ -504,8 +499,113 @@ export function EntradaPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
+
+              {/* A camada de dados fecha a aba: as MESMAS queries que os cards
+                  acima desenham, passadas já resolvidas. Nenhuma consulta nova —
+                  se a lista refizesse a leitura, ela poderia divergir do card. */}
+              <AbaDeDados
+                fontes={[
+                  {
+                    rpc: 'bi_entrada_kpis',
+                    titulo: 'Os quatro KPIs do topo da tela',
+                    descricao: `uma linha só — convites, conversão, onboarding e erros dos últimos ${periodo} dias`,
+                    linhas: kpis.data ? [kpis.data] : [],
+                    isLoading: kpis.isLoading,
+                    isError: kpis.isError,
+                    onRetry: () => void kpis.refetch(),
+                  },
+                  {
+                    rpc: 'bi_funil_entrada',
+                    titulo: 'Quanto de cada etapa sobrevive até a primeira ação',
+                    descricao: `safra de convites criados nos últimos ${periodo} dias, convites deletados fora · a etapa de envio não existe: o rastreamento de entrega da plataforma parou em abr/2026`,
+                    linhas: funil.data,
+                    isLoading: funil.isLoading,
+                    isError: funil.isError,
+                    onRetry: () => void funil.refetch(),
+                  },
+                  {
+                    rpc: 'bi_entrada_aceite_convite',
+                    titulo: 'Em quanto tempo o convite é aceito',
+                    descricao:
+                      'só convites com mais de 30 dias, para não registrar como recusa o que ainda pode ser aceito · ignora o período do topo',
+                    linhas: aceite.data,
+                    isLoading: aceite.isLoading,
+                    isError: aceite.isError,
+                    onRetry: () => void aceite.refetch(),
+                  },
+                  {
+                    rpc: 'bi_entrada_primeira_acao_por_origem',
+                    titulo: 'Quando comprador e convidado agem pela primeira vez',
+                    descricao:
+                      'safra fechada: entrou entre 180 e 30 dias atrás, os dois grupos com a mesma janela · ignora o período do topo',
+                    linhas: origem.data,
+                    isLoading: origem.isLoading,
+                    isError: origem.isError,
+                    onRetry: () => void origem.refetch(),
+                  },
+                  {
+                    rpc: 'bi_entrada_efeito_onboarding',
+                    titulo: 'Quem terminou o onboarding volta mais que quem parou no meio',
+                    descricao:
+                      'clientes com 120+ dias de casa · associação, não causa · ignora o período do topo',
+                    linhas: efeitoOnboarding.data,
+                    isLoading: efeitoOnboarding.isLoading,
+                    isError: efeitoOnboarding.isError,
+                    onRetry: () => void efeitoOnboarding.refetch(),
+                  },
+                  {
+                    rpc: 'bi_onboarding_abandono',
+                    titulo: 'Em que etapa param os que não concluíram o onboarding',
+                    descricao: 'foto de hoje, por etapa atual · ignora o período do topo',
+                    linhas: onboarding.data,
+                    isLoading: onboarding.isLoading,
+                    isError: onboarding.isError,
+                    onRetry: () => void onboarding.refetch(),
+                  },
+                  {
+                    rpc: 'bi_masters_convites_resumo',
+                    titulo: 'Quantos masters já convidaram alguém',
+                    descricao: 'uma linha só — histórico completo, sem janela',
+                    linhas: mastersResumo.data ? [mastersResumo.data] : [],
+                    isLoading: mastersResumo.isLoading,
+                    isError: mastersResumo.isError,
+                    onRetry: () => void mastersResumo.refetch(),
+                  },
+                  {
+                    rpc: 'bi_masters_top_convidadores',
+                    titulo: 'Quem traz mais gente para dentro',
+                    descricao: 'histórico completo, sem janela',
+                    linhas: mastersTop.data,
+                    limite: LIMITE_LISTA,
+                    isLoading: mastersTop.isLoading,
+                    isError: mastersTop.isError,
+                    onRetry: () => void mastersTop.refetch(),
+                  },
+                  {
+                    rpc: 'bi_erros_login',
+                    titulo: 'Por que a tentativa de entrar falhou',
+                    descricao: `auth_error_telemetry · últimos ${periodo} dias · conta ocorrências, não pessoas`,
+                    linhas: errosLogin.data,
+                    isLoading: errosLogin.isLoading,
+                    isError: errosLogin.isError,
+                    onRetry: () => void errosLogin.refetch(),
+                  },
+                  {
+                    rpc: 'bi_erros_por_tela',
+                    titulo: 'Em que tela o JavaScript quebra',
+                    descricao: `client_error_logs · últimos ${periodo} dias · conta ocorrências, não pessoas`,
+                    linhas: errosTela.data,
+                    limite: LIMITE_LISTA,
+                    isLoading: errosTela.isLoading,
+                    isError: errosTela.isError,
+                    onRetry: () => void errosTela.refetch(),
+                  },
+                ]}
+              />
             </div>
           ),
+          analise: <AnaliseDaTela tela="entrada" periodo={periodo} />,
+          plano: <PlanoDaTela tela="entrada" periodo={periodo} />,
         }}
       />
     </div>

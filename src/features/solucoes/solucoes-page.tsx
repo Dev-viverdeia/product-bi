@@ -16,6 +16,7 @@ import { BentoItem } from '@/components/layout/bento'
 import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
+import { AbaDeDados } from '@/components/tabela/aba-de-dados'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
@@ -34,6 +35,7 @@ import {
 import { formatDateShort, formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import { fundoIntensidade } from '@/lib/intensidade'
 import { AnaliseDaTela } from '@/features/resumo/analise-tela'
+import { PlanoDaTela } from '@/features/resumo/plano-da-tela'
 import {
   useCandidatasRemocao,
   useConclusaoPorAba,
@@ -141,8 +143,7 @@ export function SolucoesPage() {
       <ModuloTabs
         rota="/solucoes"
         conteudos={{
-          analise: <AnaliseDaTela tela="solucoes" periodo={periodo} />,
-          catalogo: (
+          graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
                 titulo="O que o catálogo entrega, e onde o uso se concentra"
@@ -230,10 +231,7 @@ export function SolucoesPage() {
                   </ChartCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
-          implementacao: (
-            <div className="space-y-4">
+
               <SecaoDeAnalise
                 titulo="Onde o caminho até concluir se estreita"
                 icone={RouteIcon}
@@ -449,10 +447,7 @@ export function SolucoesPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
-          curadoria: (
-            <div className="space-y-4">
+
               <SecaoDeAnalise
                 titulo="O que tirar do catálogo"
                 icone={ScissorsIcon}
@@ -509,8 +504,98 @@ export function SolucoesPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
+
+              {/* A camada de dados fecha a aba: as MESMAS queries que os cards
+                  acima desenham, passadas já resolvidas. Nenhuma consulta nova —
+                  se a lista refizesse a leitura, ela poderia divergir do card. */}
+              <AbaDeDados
+                fontes={[
+                  {
+                    rpc: 'bi_solucoes_kpis',
+                    titulo: 'Os quatro KPIs do topo',
+                    descricao:
+                      'uma linha só · publicadas e conclusão são históricas; iniciadas e concluídas seguem o período',
+                    linhas: kpis.data ? [kpis.data] : [],
+                    isLoading: kpis.isLoading,
+                    isError: kpis.isError,
+                    onRetry: () => void kpis.refetch(),
+                  },
+                  {
+                    rpc: 'bi_solucoes_ranking',
+                    titulo: 'Quais soluções são mais iniciadas',
+                    descricao:
+                      'histórico completo, fora do período do topo · pageviews só desde jul/2026, então ficam abaixo das iniciadas',
+                    linhas: ranking.data,
+                    limite: 200,
+                    isLoading: ranking.isLoading,
+                    isError: ranking.isError,
+                    onRetry: () => void ranking.refetch(),
+                  },
+                  {
+                    rpc: 'bi_solucoes_por_categoria',
+                    titulo: 'Onde o uso se concentra por categoria',
+                    descricao: 'soluções iniciadas por categoria, histórico completo',
+                    linhas: categorias.data,
+                    isLoading: categorias.isLoading,
+                    isError: categorias.isError,
+                    onRetry: () => void categorias.refetch(),
+                  },
+                  {
+                    rpc: 'bi_solucoes_conversao_tela',
+                    titulo: 'Do catálogo até concluir, etapa por etapa',
+                    descricao:
+                      'usuários únicos · a janela é recortada no início do rastreio de navegação, e o campo desde declara a partir de quando',
+                    linhas: conversao.data,
+                    isLoading: conversao.isLoading,
+                    isError: conversao.isError,
+                    onRetry: () => void conversao.refetch(),
+                  },
+                  {
+                    rpc: 'bi_solucoes_conclusao_por_aba',
+                    titulo: 'Quanta gente conclui cada aba da implementação',
+                    descricao:
+                      'não é funil: as abas são independentes, e a base de comparação é a aba mais concluída',
+                    linhas: abas.data,
+                    isLoading: abas.isLoading,
+                    isError: abas.isError,
+                    onRetry: () => void abas.refetch(),
+                  },
+                  {
+                    rpc: 'bi_solucoes_efeito_conclusao',
+                    titulo: 'Quem concluiu solução segue mais ativo?',
+                    descricao:
+                      'dois grupos de pessoas diferentes, com 120+ dias de casa · margem_pp diz quando a diferença ainda cabe no ruído · associação, não causa',
+                    linhas: efeitoConclusao.data,
+                    isLoading: efeitoConclusao.isLoading,
+                    isError: efeitoConclusao.isError,
+                    onRetry: () => void efeitoConclusao.refetch(),
+                  },
+                  {
+                    rpc: 'bi_solucoes_ordem_da_tentativa',
+                    titulo: 'A primeira tentativa termina mais que as seguintes?',
+                    descricao:
+                      'os dois grupos são as mesmas pessoas, em tentativas diferentes · só quem tentou 2+ soluções',
+                    linhas: ordemTentativa.data,
+                    isLoading: ordemTentativa.isLoading,
+                    isError: ordemTentativa.isError,
+                    onRetry: () => void ordemTentativa.refetch(),
+                  },
+                  {
+                    rpc: 'bi_solucoes_candidatas_remocao',
+                    titulo: 'Quais soluções revisar ou tirar do catálogo',
+                    descricao:
+                      'quartil inferior de uso ou nenhuma conclusão · o critério de entrada é o próprio recorte, sobre o histórico completo',
+                    linhas: candidatas.data,
+                    isLoading: candidatas.isLoading,
+                    isError: candidatas.isError,
+                    onRetry: () => void candidatas.refetch(),
+                  },
+                ]}
+              />
             </div>
           ),
+          analise: <AnaliseDaTela tela="solucoes" periodo={periodo} />,
+          plano: <PlanoDaTela tela="solucoes" periodo={periodo} />,
         }}
       />
     </div>

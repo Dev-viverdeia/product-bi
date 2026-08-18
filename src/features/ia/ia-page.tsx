@@ -18,6 +18,7 @@ import { BentoItem } from '@/components/layout/bento'
 import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
+import { AbaDeDados } from '@/components/tabela/aba-de-dados'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
@@ -35,6 +36,7 @@ import {
 import { formatDateShort, formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import { LIMITE_LISTA } from '@/lib/rpc'
 import { AnaliseDaTela } from '@/features/resumo/analise-tela'
+import { PlanoDaTela } from '@/features/resumo/plano-da-tela'
 import {
   useBuilderSteps,
   useConsultorModos,
@@ -152,8 +154,7 @@ export function IaPage() {
       <ModuloTabs
         rota="/ia"
         conteudos={{
-          analise: <AnaliseDaTela tela="ia" periodo={periodo} />,
-          adocao: (
+          graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
                 titulo="Quanto do público as ferramentas alcançam"
@@ -274,10 +275,7 @@ export function IaPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
-          uso: (
-            <div className="space-y-4">
+
               <SecaoDeAnalise
                 titulo="Como são as conversas do Consultor"
                 icone={LayersIcon}
@@ -399,10 +397,7 @@ export function IaPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
-            </div>
-          ),
-          impacto: (
-            <div className="space-y-4">
+
               <SecaoDeAnalise
                 titulo="O que acontece com quem experimenta a IA"
                 icone={TrendingUpIcon}
@@ -509,8 +504,104 @@ export function IaPage() {
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>
+
+              {/* As linhas cruas fecham a aba do dado: são as MESMAS queries que
+                  os cards acima desenham, passadas já resolvidas. Nenhuma
+                  consulta nova — se a aba refizesse a leitura, ela poderia
+                  divergir do card logo acima. */}
+              <AbaDeDados
+                fontes={[
+                  {
+                    rpc: 'bi_ia_kpis',
+                    titulo: 'Os quatro KPIs do topo',
+                    descricao: 'uma linha só — clientes e volume nas duas ferramentas',
+                    linhas: kpis.data ? [kpis.data] : [],
+                    isLoading: kpis.isLoading,
+                    isError: kpis.isError,
+                    onRetry: () => void kpis.refetch(),
+                  },
+                  {
+                    rpc: 'bi_ia_adocao',
+                    titulo: 'Quantos clientes ativos usam cada ferramenta',
+                    descricao: 'conta clientes distintos, nunca mensagens',
+                    linhas: adocao.data,
+                    isLoading: adocao.isLoading,
+                    isError: adocao.isError,
+                    onRetry: () => void adocao.refetch(),
+                  },
+                  {
+                    rpc: 'bi_consultor_recorrencia',
+                    titulo: 'Em quantos dias distintos cada cliente volta ao Consultor',
+                    linhas: recorrencia.data,
+                    isLoading: recorrencia.isLoading,
+                    isError: recorrencia.isError,
+                    onRetry: () => void recorrencia.refetch(),
+                  },
+                  {
+                    rpc: 'bi_ia_modo_de_entrada',
+                    titulo: 'O modo da primeira conversa muda se o cliente volta',
+                    descricao:
+                      'coorte fixa de quem estreou há 30+ dias, fora do período do topo · modo com menos de 30 estreantes não aparece',
+                    linhas: modoEntrada.data,
+                    isLoading: modoEntrada.isLoading,
+                    isError: modoEntrada.isError,
+                    onRetry: () => void modoEntrada.refetch(),
+                  },
+                  {
+                    rpc: 'bi_ia_profundidade_conversa',
+                    titulo: 'Em que mensagem a conversa do Consultor para',
+                    descricao:
+                      'histórico completo, fora do período do topo · a unidade é a conversa, não o cliente',
+                    linhas: profundidade.data,
+                    isLoading: profundidade.isLoading,
+                    isError: profundidade.isError,
+                    onRetry: () => void profundidade.refetch(),
+                  },
+                  {
+                    rpc: 'bi_consultor_modos',
+                    titulo: 'Conversas por modo do Consultor',
+                    descricao: 'histórico completo, fora do período do topo',
+                    linhas: modos.data,
+                    isLoading: modos.isLoading,
+                    isError: modos.isError,
+                    onRetry: () => void modos.refetch(),
+                  },
+                  {
+                    rpc: 'bi_builder_steps',
+                    titulo: 'Confiabilidade e tempo de cada etapa do Builder',
+                    descricao: 'janela fixa de 90 dias · a unidade é a geração, não a pessoa',
+                    linhas: steps.data,
+                    isLoading: steps.isLoading,
+                    isError: steps.isError,
+                    onRetry: () => void steps.refetch(),
+                  },
+                  {
+                    rpc: 'bi_ia_impacto_retencao',
+                    titulo: 'Retenção de quem usou e de quem não usou IA na 1ª semana',
+                    descricao:
+                      'coorte a partir do lançamento do Consultor, com 60+ dias de casa · correlação, não causalidade',
+                    linhas: impacto.data,
+                    isLoading: impacto.isLoading,
+                    isError: impacto.isError,
+                    onRetry: () => void impacto.refetch(),
+                  },
+                  {
+                    rpc: 'bi_ia_experimentaram_e_sumiram',
+                    titulo: 'Quem usou o Consultor em um dia só e não voltou',
+                    descricao:
+                      'segue ativo no produto — quem sumiu do produto inteiro tem lista própria em Clientes',
+                    linhas: sumiram.data,
+                    isLoading: sumiram.isLoading,
+                    isError: sumiram.isError,
+                    onRetry: () => void sumiram.refetch(),
+                    limite: LIMITE_LISTA,
+                  },
+                ]}
+              />
             </div>
           ),
+          analise: <AnaliseDaTela tela="ia" periodo={periodo} />,
+          plano: <PlanoDaTela tela="ia" periodo={periodo} />,
         }}
       />
     </div>
