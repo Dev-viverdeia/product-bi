@@ -872,6 +872,25 @@ export type Database = {
           plano: string
         }[]
       }
+      bi_plano_de_acao: {
+        Args: { p_dias?: number; p_papel?: string; p_plano?: string }
+        Returns: {
+          ancora_aba: string
+          ancora_id: string
+          familia: string
+          gabarito: string
+          gabarito_acao: string
+          gabarito_leitura: string
+          motivo: string
+          parametros: Json
+          regra: string
+          score: number
+          severidade: string
+          suprimida: boolean
+          tela: string
+          titulo: string
+        }[]
+      }
       bi_pontos_saida: {
         Args: { p_dias?: number; p_limite?: number }
         Returns: {

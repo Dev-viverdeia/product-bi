@@ -3,11 +3,12 @@ import { Link, useSearchParams } from 'react-router'
 import { AlertCircleIcon, ArrowRightIcon } from 'lucide-react'
 
 import { PARAM_ABA } from '@/components/layout/aba-do-modulo'
-import { StatusPill, type TomDeStatus } from '@/components/ui-marca/status-pill'
+import { StatusPill } from '@/components/ui-marca/status-pill'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Periodo } from '@/lib/periodo'
 import { formatDateShort, formatInt } from '@/lib/format'
 import { AMOSTRA_MINIMA, rotuloPapel, type Recorte } from '@/lib/segmento'
+import { lerSeveridade } from '@/lib/severidade'
 import { preencherGabarito } from '@/features/resumo/gabarito'
 import {
   useAchados,
@@ -18,12 +19,6 @@ import {
 
 /** Teto de achados na leitura. Acima disso vira lista e ninguém lê até o fim. */
 const MAXIMO_DE_ACHADOS = 3
-
-const TOM: Record<string, { tom: TomDeStatus; rotulo: string }> = {
-  critico: { tom: 'critico', rotulo: 'risco alto' },
-  atencao: { tom: 'atencao', rotulo: 'atenção' },
-  neutro: { tom: 'neutro', rotulo: 'observação' },
-}
 
 const PLANO: Record<string, string> = {
   starter: 'Starter',
@@ -58,7 +53,7 @@ function selecionar(achados: Achado[]) {
 /** Uma seção por achado: o fato, o que ele quer dizer, e o que fazer. */
 function Achado({ achado, ordem }: { achado: Achado; ordem: number }) {
   const [params] = useSearchParams()
-  const { tom, rotulo } = TOM[achado.severidade] ?? TOM.neutro!
+  const { tom, rotulo } = lerSeveridade(achado.severidade)
 
   const destino = useMemo(() => {
     const proximos = new URLSearchParams(params)

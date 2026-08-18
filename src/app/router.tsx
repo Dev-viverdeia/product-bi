@@ -14,6 +14,9 @@ import { NotFoundPage } from '@/pages/not-found-page'
 const VisaoGeralPage = lazy(() =>
   import('@/features/visao-geral/visao-geral-page').then((m) => ({ default: m.VisaoGeralPage })),
 )
+const PlanoDeAcaoPage = lazy(() =>
+  import('@/features/plano/plano-page').then((m) => ({ default: m.PlanoDeAcaoPage })),
+)
 const ClientesPage = lazy(() =>
   import('@/features/clientes/clientes-page').then((m) => ({ default: m.ClientesPage })),
 )
@@ -59,6 +62,7 @@ export function AppRouter() {
               Outlet, para o shell não piscar a cada troca de rota. */}
           <Route element={<AppLayout />}>
             <Route index element={<VisaoGeralPage />} />
+            <Route path="/plano" element={<PlanoDeAcaoPage />} />
             <Route path="/clientes" element={<ClientesPage />} />
             <Route path="/entrada" element={<EntradaPage />} />
             <Route path="/formacoes" element={<FormacoesPage />} />

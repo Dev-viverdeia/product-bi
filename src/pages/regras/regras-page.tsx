@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { ListChecksIcon } from 'lucide-react'
 
-import { navItems } from '@/components/layout/nav-items'
+import { moduloDaTela } from '@/components/layout/nav-items'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatInt } from '@/lib/format'
@@ -14,15 +14,13 @@ import { useRegras } from '@/features/resumo/queries'
  * quando o motor cobria só as duas telas piloto. As sete que entraram depois
  * apareciam com o slug cru no título do card ("formacoes", "ia", "jornada"),
  * e ninguém notou porque a página não quebra: ela só fica feia e desalinhada
- * do resto do app. Derivando da fonte única, tela nova aparece nomeada sem
- * ninguém lembrar de voltar aqui.
+ * do resto do app.
  *
- * A única tradução que sobra é a da Visão geral, cuja rota é `/` e por isso
- * não deriva do slug.
+ * A conversão slug→módulo subiu para `nav-items.ts` quando o plano de ação
+ * passou a precisar dela: era a segunda cópia nascendo.
  */
 function nomeDaTela(tela: string) {
-  const rota = tela === 'visao-geral' ? '/' : `/${tela}`
-  return navItems.find((item) => item.to === rota)?.title ?? tela
+  return moduloDaTela(tela)?.title ?? tela
 }
 
 /**

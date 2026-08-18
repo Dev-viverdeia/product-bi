@@ -5,6 +5,7 @@ import {
   ChartColumnIcon,
   Building2Icon,
   CheckCheckIcon,
+  ClipboardListIcon,
   CompassIcon,
   DoorOpenIcon,
   FileTextIcon,
@@ -103,6 +104,15 @@ export type NavItem = {
 
 /** Ponto único para registrar novas seções do produto. */
 export const navItems: NavItem[] = [
+  {
+    title: 'Plano de ação',
+    shortTitle: 'Plano',
+    to: '/plano',
+    grupo: 'panorama',
+    regua:
+      'O que atacar primeiro, em todos os módulos · cada item é um achado calculado na tela de origem, com a régua e o número que o card de lá mostra · sem seletor de período: os módulos têm janelas diferentes e cada frase carrega a própria',
+    icon: ClipboardListIcon,
+  },
   {
     title: 'Visão geral',
     shortTitle: 'Visão geral',
@@ -283,6 +293,20 @@ export const navFerramentas: NavItem[] = [
 /** Abas de uma rota, para a página renderizar e a barra oferecer o atalho. */
 export function abasDaRota(rota: string): AbaDoModulo[] {
   return navItems.find((item) => item.to === rota)?.abas ?? []
+}
+
+/**
+ * Módulo a que pertence uma tela do motor de achados.
+ *
+ * O motor identifica a tela por slug (`visao-geral`, `clientes`), e a rota é o
+ * slug com barra na frente — menos a Visão Geral, que é a raiz. Vive aqui, e
+ * não em cada página, porque agora tem dois leitores (`/regras` e o plano de
+ * ação) e a conversão errada não quebra nada: só mostra o slug cru no lugar do
+ * nome, que foi exatamente o defeito de sete telas em 17/ago.
+ */
+export function moduloDaTela(tela: string): NavItem | undefined {
+  const rota = tela === 'visao-geral' ? '/' : `/${tela}`
+  return navItems.find((item) => item.to === rota)
 }
 
 /**
