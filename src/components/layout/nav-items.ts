@@ -7,6 +7,7 @@ import {
   CheckCheckIcon,
   ClipboardListIcon,
   CompassIcon,
+  DatabaseIcon,
   DoorOpenIcon,
   FileTextIcon,
   GraduationCapIcon,
@@ -126,6 +127,7 @@ export const navItems: NavItem[] = [
     abas: [
       { valor: 'analise', titulo: 'Análise', icone: FileTextIcon },
       { valor: 'graficos', titulo: 'Gráficos', icone: ChartColumnIcon },
+      { valor: 'dados', titulo: 'Dados', icone: DatabaseIcon },
     ],
   },
   {

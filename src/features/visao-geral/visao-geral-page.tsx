@@ -15,6 +15,7 @@ import { BentoItem } from '@/components/layout/bento'
 import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
 import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
+import { AbaDeDados } from '@/components/tabela/aba-de-dados'
 import { TabelaCard } from '@/components/tabela/tabela-card'
 import { TabelaLonga } from '@/components/tabela/tabela-longa'
 
@@ -164,6 +165,67 @@ export function VisaoGeralPage() {
         rota="/"
         conteudos={{
           analise: <AnaliseDaTela tela="visao-geral" periodo={periodo} recorte={recorte} />,
+          // A camada de dados: as MESMAS queries que os gráficos usam, passadas
+          // já resolvidas. Nenhuma consulta nova — se a aba refizesse a leitura,
+          // ela poderia divergir do card ao lado.
+          dados: (
+            <AbaDeDados
+              fontes={[
+                {
+                  rpc: 'bi_visao_geral_kpis',
+                  titulo: 'Os quatro KPIs do topo, com o período anterior',
+                  descricao: 'uma linha só — os valores e as bases de comparação',
+                  linhas: kpis.data ? [kpis.data] : [],
+                  isLoading: kpis.isLoading,
+                  isError: kpis.isError,
+                  onRetry: () => void kpis.refetch(),
+                },
+                {
+                  rpc: 'bi_atividade_diaria',
+                  titulo: 'Clientes ativos por dia',
+                  linhas: atividade.data,
+                  isLoading: atividade.isLoading,
+                  isError: atividade.isError,
+                  onRetry: () => void atividade.refetch(),
+                },
+                {
+                  rpc: 'bi_composicao_crescimento',
+                  titulo: 'De onde vieram os ativos do período',
+                  linhas: composicao.data,
+                  isLoading: composicao.isLoading,
+                  isError: composicao.isError,
+                  onRetry: () => void composicao.refetch(),
+                },
+                {
+                  rpc: 'bi_acoes_por_modulo',
+                  titulo: 'Ações por módulo, separadas em consumo e compromisso',
+                  descricao:
+                    'pct_compromisso nulo é supressão: piso de 30 ações, ou guarda de rastreio quebrado',
+                  linhas: porModulo.data,
+                  isLoading: porModulo.isLoading,
+                  isError: porModulo.isError,
+                  onRetry: () => void porModulo.refetch(),
+                },
+                {
+                  rpc: 'bi_heatmap_navegacao',
+                  titulo: 'Pageviews por dia da semana e hora',
+                  linhas: heatmap.data,
+                  isLoading: heatmap.isLoading,
+                  isError: heatmap.isError,
+                  onRetry: () => void heatmap.refetch(),
+                },
+                {
+                  rpc: 'bi_saude_rastreio',
+                  titulo: 'Saúde do rastreio por tipo de evento',
+                  descricao: 'não aplica a régua e_cliente, de propósito — mede instrumentação',
+                  linhas: rastreio.data,
+                  isLoading: rastreio.isLoading,
+                  isError: rastreio.isError,
+                  onRetry: () => void rastreio.refetch(),
+                },
+              ]}
+            />
+          ),
           graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
