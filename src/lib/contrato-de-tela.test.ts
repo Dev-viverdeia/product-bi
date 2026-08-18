@@ -110,3 +110,43 @@ describe('headline não conta uma lista que ainda não chegou', () => {
     expect(achatar(fonte)).not.toMatch(/headline=\{[^}]*\?\?\s*\[\]\)\.length/)
   })
 })
+
+describe('filho direto de SecaoDeAnalise é sempre BentoItem', () => {
+  /*
+    `SecaoDeAnalise` renderiza os filhos DENTRO de um `BentoGrid`, que é
+    `grid-cols-1 md:grid-cols-6 xl:grid-cols-12`. Um `<div>` cru ali não é
+    largura nenhuma: ele vira item de UMA coluna a partir de `md` — a página
+    inteira espremida numa tira de 1/12 no desktop.
+
+    O modo de falha é o pior possível: **no celular passa**, porque o grid é de
+    uma coluna só. Quem revisa em tela estreita não vê nada de errado, e o
+    type-checker menos ainda. Aconteceu em 18/ago nas duas telas novas
+    (`/plano` e `/explorar`), montadas sem verificação de navegador, e só
+    apareceu quando alguém abriu no desktop.
+
+    A saída é `<BentoItem span={12}>` quando o bloco ocupa a seção inteira — ou
+    não usar `SecaoDeAnalise`, que é o que as duas telas fizeram no fim: elas
+    são documento e ferramenta, não mosaico de cards.
+  */
+  const comSecao = paginas.filter((p) => p.fonte.includes('<SecaoDeAnalise'))
+
+  it('há tela com seção para verificar', () => {
+    expect(comSecao.length).toBeGreaterThan(5)
+  })
+
+  it.each(comSecao)('$caminho', ({ fonte }) => {
+    const plano = achatar(fonte)
+    const forasteiros: string[] = []
+
+    for (const abertura of plano.matchAll(/<SecaoDeAnalise\b/g)) {
+      // pula o resto da tag de abertura e olha o primeiro elemento do corpo
+      const depois = plano.slice(abertura.index)
+      const fimDaTag = depois.indexOf('>')
+      if (fimDaTag === -1) continue
+      const primeiro = /<([A-Za-z][\w.]*)/.exec(depois.slice(fimDaTag + 1, fimDaTag + 400))
+      if (primeiro && primeiro[1] !== 'BentoItem') forasteiros.push(primeiro[1]!)
+    }
+
+    expect(forasteiros).toEqual([])
+  })
+})

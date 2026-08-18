@@ -1,10 +1,9 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router'
-import { ArrowRightIcon, ClipboardListIcon, ScaleIcon } from 'lucide-react'
+import { ArrowRightIcon } from 'lucide-react'
 
 import { PARAM_ABA } from '@/components/layout/aba-do-modulo'
 import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
-import { SecaoDeAnalise } from '@/components/layout/secao-de-analise'
 import { moduloDaTela } from '@/components/layout/nav-items'
 import { KpiCard, KpiGrid } from '@/components/charts'
 import { StatusPill } from '@/components/ui-marca/status-pill'
@@ -143,24 +142,37 @@ export function PlanoDeAcaoPage() {
         />
       </KpiGrid>
 
-      <SecaoDeAnalise
-        titulo="O que atacar primeiro"
-        icone={ClipboardListIcon}
-        descricao="Ordenado por gravidade medida — cada achado vale um múltiplo do limiar da própria regra, que é o que torna comparáveis regras de unidades diferentes. O módulo de origem fica ao lado do título, e o link abre o card que sustenta o número."
-      >
-        <div className="bg-card border-border/60 rounded-lg border p-5 shadow-sm md:p-6">
+      {/*
+        DOCUMENTO, não seção com mosaico. A primeira versão embrulhava esta
+        lista numa `SecaoDeAnalise`, que põe os filhos dentro de um `BentoGrid`
+        de 12 colunas — e um `<div>` cru ali vira item de UMA coluna a partir de
+        `md`. No celular passava; no desktop a página desmontava numa tira.
+
+        A gramática certa é a da aba `Análise`: leitura à esquerda em medida
+        fixa, prestação de contas à direita. É a mesma natureza de conteúdo.
+      */}
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,72ch)_minmax(16rem,26rem)] lg:gap-14">
+        <div className="space-y-8">
+          <header className="space-y-1">
+            <h2 className="text-xl font-medium tracking-tight">O que atacar primeiro</h2>
+            <p className="text-muted-foreground text-sm">
+              Ordenado por gravidade medida — cada achado vale um múltiplo do limiar da própria
+              regra, que é o que torna comparáveis regras de unidades diferentes.
+            </p>
+          </header>
+
           {plano.isLoading ? (
             <div className="space-y-6">
               {[0, 1, 2].map((i) => (
                 <div key={i} className="space-y-2">
-                  <Skeleton className="h-6 w-2/3" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-4/5" />
+                  <Skeleton className="h-6 w-2/3 rounded-md" />
+                  <Skeleton className="h-4 w-full rounded-md" />
+                  <Skeleton className="h-16 w-4/5 rounded-md" />
                 </div>
               ))}
             </div>
           ) : plano.isError ? (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-[15px]">
               Não foi possível carregar o plano de ação.
             </p>
           ) : publicaveis.length === 0 ? (
@@ -170,66 +182,73 @@ export function PlanoDeAcaoPage() {
               tem.
             </p>
           ) : (
-            <ol className="space-y-6">
+            <ol className="space-y-8">
               {publicaveis.map((achado, i) => (
                 <ItemDoPlano key={`${achado.tela}-${achado.regra}`} achado={achado} ordem={i + 1} />
               ))}
             </ol>
           )}
         </div>
-      </SecaoDeAnalise>
 
-      <SecaoDeAnalise
-        titulo="Como esta lista foi montada"
-        icone={ScaleIcon}
-        descricao="A prestação de contas do plano. Sem ela, uma lista ordenada parece objetiva por si só."
-      >
-        <div className="bg-card border-border/60 space-y-4 rounded-lg border p-5 text-[15px] leading-relaxed shadow-sm md:p-6">
-          <p className="text-muted-foreground max-w-[68ch]">
-            Cada item sai do motor determinístico da tela de origem — sem modelo de linguagem
-            no caminho. O número da frase é o mesmo que o card daquela tela desenha, porque o
-            calculador chama a mesma consulta com os mesmos argumentos.
-          </p>
+        <aside className="space-y-6 text-sm lg:pt-1">
+          <section className="space-y-2">
+            <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              Como esta lista foi montada
+            </h3>
+            <p className="text-muted-foreground max-w-[52ch] leading-relaxed">
+              Cada item sai do motor determinístico da tela de origem — sem modelo de linguagem
+              no caminho. O número da frase é o mesmo que o card daquela tela desenha, porque o
+              calculador chama a mesma consulta com os mesmos argumentos.
+            </p>
+          </section>
 
           {saturacao != null && saturacao > 0.8 ? (
-            <p className="max-w-[68ch]">
-              <strong className="font-medium">
-                O motor está saturado: {formatInt(publicaveis.length)} das{' '}
-                {formatInt(avaliadas)} regras dispararam.
-              </strong>{' '}
-              <span className="text-muted-foreground">
-                Um catálogo calibrado para achar quase sempre rankeia bem e filtra mal — então
-                a <em>ordem</em> desta lista vale mais que a presença de um item nela.
-                Recalibrar os limiares é decisão em aberto, e enquanto isso ela fica declarada
-                aqui em vez de passar por completude.
-              </span>
-            </p>
+            <section className="space-y-2">
+              <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                O motor está saturado
+              </h3>
+              <p className="max-w-[52ch] leading-relaxed">
+                <strong className="font-medium">
+                  {formatInt(publicaveis.length)} das {formatInt(avaliadas)} regras dispararam.
+                </strong>{' '}
+                <span className="text-muted-foreground">
+                  Um catálogo calibrado para achar quase sempre rankeia bem e filtra mal — então
+                  a <em>ordem</em> desta lista vale mais que a presença de um item nela.
+                  Recalibrar os limiares é decisão em aberto, e enquanto isso ela fica declarada
+                  aqui em vez de passar por completude.
+                </span>
+              </p>
+            </section>
           ) : null}
 
           {suprimidos.length > 0 ? (
-            <div className="max-w-[68ch]">
-              <p className="mb-1 font-medium">
-                {formatInt(suprimidos.length)} suprimido(s), com o motivo:
-              </p>
-              <ul className="text-muted-foreground list-inside list-disc space-y-1">
+            <section className="space-y-2">
+              <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                {formatInt(suprimidos.length)} suprimido(s), com o motivo
+              </h3>
+              <ul className="text-muted-foreground max-w-[52ch] space-y-1.5 leading-relaxed">
                 {suprimidos.map((a) => (
                   <li key={`${a.tela}-${a.regra}`}>
-                    {a.titulo} — {a.motivo ?? 'sem amostra suficiente'} (
-                    {moduloDaTela(a.tela)?.title ?? a.tela})
+                    <span className="text-foreground">{a.titulo}</span> —{' '}
+                    {a.motivo ?? 'sem amostra suficiente'} ({moduloDaTela(a.tela)?.title ?? a.tela})
                   </li>
                 ))}
               </ul>
-            </div>
+            </section>
           ) : null}
 
-          <p className="text-muted-foreground max-w-[68ch]">
-            O plano relata; ele não gere. Não há dono, prazo nem status por achado, e nenhum
-            item promete efeito atribuível — não existe experimentação em nenhuma das fontes,
-            então "fizemos X e melhorou" não seria uma afirmação que este BI consegue
-            sustentar.
-          </p>
-        </div>
-      </SecaoDeAnalise>
+          <section className="space-y-2">
+            <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              O que este plano não faz
+            </h3>
+            <p className="text-muted-foreground max-w-[52ch] leading-relaxed">
+              Ele relata; não gere. Não há dono, prazo nem status por achado, e nenhum item
+              promete efeito atribuível — não existe experimentação em nenhuma das fontes, então
+              "fizemos isto e melhorou" não seria uma afirmação que este BI consegue sustentar.
+            </p>
+          </section>
+        </aside>
+      </div>
     </div>
   )
 }

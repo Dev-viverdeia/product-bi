@@ -196,7 +196,7 @@ export function AnaliseDaTela({
       chegar ao próximo achado. Abaixo de lg empilha, e o aparato vai para o
       fim, que é onde ele pertence quando não cabe ao lado.
     */
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,68ch)_minmax(0,1fr)] lg:gap-16">
+    <div className="grid gap-10 lg:grid-cols-[minmax(0,68ch)_minmax(16rem,26rem)] lg:gap-14">
       <div className="space-y-8">
         <header className="space-y-1">
           <h2 className="text-xl font-medium tracking-tight">O que os dados dizem</h2>

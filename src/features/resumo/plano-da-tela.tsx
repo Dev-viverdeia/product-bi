@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from 'react-router'
-import { ArrowRightIcon, ClipboardListIcon } from 'lucide-react'
+import { AlertCircleIcon, ArrowRightIcon } from 'lucide-react'
 
 import { PARAM_ABA } from '@/components/layout/aba-do-modulo'
 import { StatusPill } from '@/components/ui-marca/status-pill'
@@ -103,12 +103,12 @@ export function PlanoDaTela({
 
   if (!temRegra(tela)) {
     return (
-      <div className="bg-card border-border/60 rounded-lg border p-5 shadow-sm md:p-6">
-        <p className="max-w-[68ch] text-[15px] leading-relaxed">
+      <div className="max-w-[68ch] space-y-3">
+        <p className="text-[15px] leading-relaxed">
           Esta tela ainda não tem regra no catálogo do motor, então não há sugestão calculada
           para ela.
         </p>
-        <p className="text-muted-foreground mt-3 max-w-[68ch] text-[15px] leading-relaxed">
+        <p className="text-muted-foreground text-[15px] leading-relaxed">
           A aba existe mesmo assim para o padrão ser o mesmo em todo módulo — e para a dívida
           ficar visível na tela em vez de escondida numa exceção de layout. O catálogo aberto
           está em <span className="font-mono text-sm">/regras</span>.
@@ -122,55 +122,87 @@ export function PlanoDaTela({
   const suprimidos = todos.filter((a) => a.suprimida)
 
   return (
-    <div className="bg-card border-border/60 rounded-lg border p-5 shadow-sm md:p-6">
-      {achados.isLoading ? (
-        <div className="space-y-6">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="h-6 w-2/3" />
-              <Skeleton className="h-16 w-full" />
-            </div>
-          ))}
-        </div>
-      ) : achados.isError ? (
-        <p className="text-muted-foreground text-sm">Não foi possível carregar as sugestões.</p>
-      ) : publicaveis.length === 0 ? (
-        <p className="max-w-[68ch] text-[15px] leading-relaxed">
-          Nada fora do padrão nas {formatInt(todos.length)} regras avaliadas desta tela. O bloco
-          tem permissão de não ter o que sugerir — e é isso que dá crédito às vezes em que ele
-          tem.
-        </p>
-      ) : (
-        <>
-          <div className="mb-5 flex items-center gap-2">
-            <ClipboardListIcon aria-hidden className="text-muted-foreground size-4" />
-            <p className="text-muted-foreground text-sm">
-              {formatInt(publicaveis.length)} sugest{publicaveis.length === 1 ? 'ão' : 'ões'} para
-              esta tela, em ordem de gravidade medida
-            </p>
+    /*
+      SEM card, e em duas colunas a partir de lg — a MESMA gramática da aba
+      `Análise`, que é a irmã desta. A primeira versão embrulhava tudo numa
+      moldura branca própria: a aba ao lado é documento e esta era bloco, então
+      trocar de aba trocava a natureza da página, e a linha de sugestão herdava
+      dois paddings para exibir texto.
+
+      À esquerda a sugestão, em medida de leitura. À direita a prestação de
+      contas: o que foi suprimido e o que este bloco NÃO faz.
+    */
+    <div className="grid gap-10 lg:grid-cols-[minmax(0,68ch)_minmax(16rem,26rem)] lg:gap-14">
+      <div className="space-y-8">
+        <header className="space-y-1">
+          <h2 className="text-xl font-medium tracking-tight">O que fazer a respeito</h2>
+          <p className="text-muted-foreground text-sm">
+            {achados.isLoading
+              ? 'Calculando…'
+              : `${formatInt(publicaveis.length)} sugest${
+                  publicaveis.length === 1 ? 'ão' : 'ões'
+                } para esta tela, em ordem de gravidade medida`}
+          </p>
+        </header>
+
+        {achados.isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-5 w-72 rounded-md" />
+            <Skeleton className="h-4 w-full rounded-md" />
+            <Skeleton className="h-16 w-full rounded-md" />
           </div>
-          <ol className="space-y-6">
+        ) : achados.isError ? (
+          <p className="text-muted-foreground flex items-center gap-2 text-[15px]">
+            <AlertCircleIcon className="size-4 shrink-0" aria-hidden />
+            Não foi possível carregar as sugestões.
+          </p>
+        ) : publicaveis.length === 0 ? (
+          <p className="text-[15px] leading-relaxed">
+            Nada fora do padrão nas {formatInt(todos.length)} regras avaliadas desta tela. O bloco
+            tem permissão de não ter o que sugerir — e é isso que dá crédito às vezes em que ele
+            tem.
+          </p>
+        ) : (
+          <ol className="space-y-8">
             {publicaveis.map((achado, i) => (
               <Sugestao key={achado.regra} achado={achado} ordem={i + 1} />
             ))}
           </ol>
-        </>
-      )}
+        )}
+      </div>
 
-      {suprimidos.length > 0 ? (
-        <div className="border-border/70 mt-6 max-w-[68ch] border-t pt-4">
-          <p className="mb-1 text-sm font-medium">
-            {formatInt(suprimidos.length)} suprimida(s), com o motivo:
+      <aside className="space-y-6 text-sm lg:pt-1">
+        <section className="space-y-2">
+          <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+            O que este bloco não faz
+          </h3>
+          <p className="text-muted-foreground max-w-[52ch] leading-relaxed">
+            O BI reporta; ele não gere. Não há dono, prazo nem status, e nenhum item promete
+            efeito atribuível — não existe experimentação em nenhuma das três fontes, então
+            "fizemos isto e melhorou" não é afirmação que este BI consegue sustentar.
           </p>
-          <ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
-            {suprimidos.map((a) => (
-              <li key={a.regra}>
-                {a.titulo} — {a.motivo ?? 'sem amostra suficiente'}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+          <p className="text-muted-foreground max-w-[52ch] leading-relaxed">
+            Nada aqui é recalculado: é o mesmo achado que a aba <em>Análise</em> lê, com a mesma
+            régua. Muda o que fica em primeiro plano, nunca o número.
+          </p>
+        </section>
+
+        {suprimidos.length > 0 ? (
+          <section className="space-y-2">
+            <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              Suprimidas, com o motivo
+            </h3>
+            <ul className="text-muted-foreground max-w-[52ch] space-y-1.5 leading-relaxed">
+              {suprimidos.map((a) => (
+                <li key={a.regra}>
+                  <span className="text-foreground">{a.titulo}</span> —{' '}
+                  {a.motivo ?? 'sem amostra suficiente'}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+      </aside>
     </div>
   )
 }
