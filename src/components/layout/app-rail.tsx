@@ -72,7 +72,7 @@ export function AppRail({ className }: { className?: string }) {
       )}
     >
       {GRUPOS_DE_NAV.map((grupo) => {
-        const doGrupo = navItems.filter((item) => item.grupo === grupo)
+        const doGrupo = navItems.filter((item) => item.grupo === grupo && !item.oculto)
         if (doGrupo.length === 0) return null
         return (
           <div key={grupo} className="flex flex-col items-center gap-1.5">

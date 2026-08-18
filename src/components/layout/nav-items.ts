@@ -1,8 +1,10 @@
 import {
   ChartColumnIcon,
+  CircleAlertIcon,
   Building2Icon,
   ClipboardListIcon,
   CompassIcon,
+  EyeIcon,
   FileTextIcon,
   GraduationCapIcon,
   HeadphonesIcon,
@@ -12,7 +14,9 @@ import {
   PaletteIcon,
   PuzzleIcon,
   ReceiptIcon,
+  ScaleIcon,
   TelescopeIcon,
+  TriangleAlertIcon,
   UserPlusIcon,
   UsersIcon,
 } from 'lucide-react'
@@ -63,6 +67,15 @@ export type NavItem = {
   /** rota é ativa por prefixo (útil para páginas de detalhe) */
   matchPrefix?: boolean
   /**
+   * Fora do rail e da barra, mas com a rota viva.
+   *
+   * Some da navegação sem sair do app: quem tem o endereço continua abrindo, e
+   * `moduloDaRota` continua achando o item — então o `CabecalhoDeModulo` ainda
+   * tem título e régua. Remover do array seria outra coisa: a tela abriria sem
+   * cabeçalho nenhum.
+   */
+  oculto?: boolean
+  /**
    * As três abas do módulo — **iguais em todas as telas** (decisão do Mateus,
    * 18/ago/2026).
    *
@@ -91,6 +104,16 @@ export type NavItem = {
   abas?: AbaDoModulo[]
 }
 
+/**
+ * Seções de topo que atravessam os módulos.
+ *
+ * Elas NÃO seguem a gramática de três abas (`Gráficos · Análise · Plano`), que
+ * é dos módulos: aqui não há um domínio para fatiar em dado, leitura e ação —
+ * a tela inteira já é uma das três camadas. `contrato-de-shell.test.ts` usa
+ * esta lista para não cobrar delas o padrão dos módulos.
+ */
+export const ROTAS_TRANSVERSAIS = ['/plano', '/explorar'] as const
+
 /** Ponto único para registrar novas seções do produto. */
 export const navItems: NavItem[] = [
   {
@@ -101,6 +124,16 @@ export const navItems: NavItem[] = [
     regua:
       'O que atacar primeiro, em todos os módulos · cada item é um achado calculado na tela de origem, com a régua e o número que o card de lá mostra · sem seletor de período: os módulos têm janelas diferentes e cada frase carrega a própria',
     icon: ClipboardListIcon,
+    // Abas por SEVERIDADE, não por módulo. Trinta e três achados numa lista só
+    // viram rolagem que ninguém termina, e agrupar por módulo devolveria a
+    // pergunta que esta tela existe para responder — "o que primeiro?" — ao
+    // leitor. A ordem dentro de cada aba continua sendo a do score.
+    abas: [
+      { valor: 'prioridade', titulo: 'Risco alto', icone: TriangleAlertIcon },
+      { valor: 'atencao', titulo: 'Atenção', icone: CircleAlertIcon },
+      { valor: 'observacao', titulo: 'Observação', icone: EyeIcon },
+      { valor: 'apuracao', titulo: 'Como foi apurado', icone: ScaleIcon },
+    ],
   },
   {
     title: 'Explorar',
@@ -110,6 +143,9 @@ export const navItems: NavItem[] = [
     regua:
       'O dado bruto dos marts, por allowlist congelada em migration · chave e hash são servidos de propósito, identificador direto não sai daqui e a retenção aparece com o nome do campo',
     icon: TelescopeIcon,
+    // Fora da navegação por decisão do Mateus em 18/ago. A rota segue viva e a
+    // allowlist do banco segue valendo — o que saiu foi a porta, não a camada.
+    oculto: true,
   },
   {
     title: 'Visão geral',

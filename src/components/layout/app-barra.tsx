@@ -94,7 +94,9 @@ function NavegacaoEmGaveta() {
           <SheetTitle>Navegação</SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-0.5 p-2">
-          {[...navItems, ...navFerramentas].map((item) => {
+          {[...navItems, ...navFerramentas]
+            .filter((item) => !item.oculto)
+            .map((item) => {
             const ativo = item.matchPrefix ? pathname.startsWith(item.to) : pathname === item.to
             return (
               <Link

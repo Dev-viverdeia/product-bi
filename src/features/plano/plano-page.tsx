@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router'
-import { ArrowRightIcon } from 'lucide-react'
+import { AlertCircleIcon, ArrowRightIcon } from 'lucide-react'
 
 import { PARAM_ABA } from '@/components/layout/aba-do-modulo'
 import { CabecalhoDeModulo } from '@/components/layout/cabecalho-de-modulo'
+import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { moduloDaTela } from '@/components/layout/nav-items'
 import { KpiCard, KpiGrid } from '@/components/charts'
 import { StatusPill } from '@/components/ui-marca/status-pill'
@@ -28,9 +29,7 @@ function ItemDoPlano({ achado, ordem }: { achado: AchadoDoPlano; ordem: number }
   // O destino leva à tela, à aba certa e ao card que prova. Sem a aba, o link
   // abriria na análise escrita e o gráfico ficaria a um clique de distância
   // que ninguém dá.
-  const destino = modulo
-    ? `${modulo.to}?${PARAM_ABA}=${achado.ancora_aba ?? 'graficos'}`
-    : null
+  const destino = modulo ? `${modulo.to}?${PARAM_ABA}=${achado.ancora_aba ?? 'graficos'}` : null
 
   return (
     <li className="border-border/70 border-t pt-6 first:border-t-0 first:pt-0">
@@ -72,18 +71,75 @@ function ItemDoPlano({ achado, ordem }: { achado: AchadoDoPlano; ordem: number }
   )
 }
 
+/** Uma faixa de severidade: o que ela significa, e os achados dela por score. */
+function FaixaDeAchados({
+  achados,
+  intro,
+  vazio,
+  carregando,
+  erro,
+}: {
+  achados: AchadoDoPlano[]
+  intro: string
+  vazio: string
+  carregando: boolean
+  erro: boolean
+}) {
+  if (carregando) {
+    return (
+      <div className="max-w-[76ch] space-y-6">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-6 w-2/3 rounded-md" />
+            <Skeleton className="h-4 w-full rounded-md" />
+            <Skeleton className="h-16 w-4/5 rounded-md" />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (erro) {
+    return (
+      <p className="text-muted-foreground flex items-center gap-2 text-[15px]">
+        <AlertCircleIcon className="size-4 shrink-0" aria-hidden />
+        Não foi possível carregar o plano de ação.
+      </p>
+    )
+  }
+
+  if (achados.length === 0) {
+    return <p className="max-w-[68ch] text-[15px] leading-relaxed">{vazio}</p>
+  }
+
+  return (
+    <div className="max-w-[76ch] space-y-8">
+      <p className="text-muted-foreground text-sm">{intro}</p>
+      <ol className="space-y-8">
+        {achados.map((achado, i) => (
+          <ItemDoPlano key={`${achado.tela}-${achado.regra}`} achado={achado} ordem={i + 1} />
+        ))}
+      </ol>
+    </div>
+  )
+}
+
 /**
  * O plano de ação — a camada de cima das três.
  *
- * Quatro regras que não são estéticas:
+ * Cinco regras que não são estéticas:
  *
  * - **Nada é calculado aqui.** Cada item é um achado que já saiu do calculador
  *   da própria tela, com a régua daquela tela e o número que o card daquela
  *   tela mostra. Esta página junta e ordena; ela não é uma segunda conta.
+ * - **Abas por SEVERIDADE, não por módulo.** Trinta e três achados numa lista
+ *   só viram rolagem que ninguém termina; e agrupar por módulo devolveria ao
+ *   leitor exatamente a pergunta que esta tela existe para responder — "o que
+ *   primeiro?". Dentro de cada faixa a ordem continua sendo a do score.
  * - **A ordem é a mensagem, não a presença.** `score` é múltiplo do limiar de
  *   cada regra, e é isso que torna comparável regra de unidade diferente. Já a
  *   PRESENÇA na lista vale pouco enquanto o motor estiver saturado — e ele
- *   está, o que a própria página declara.
+ *   está, o que a aba `Como foi apurado` declara.
  * - **Sem seletor de período**, porque o plano atravessa telas com janelas
  *   diferentes. Cada frase carrega a própria régua.
  * - **O que foi suprimido aparece com o motivo**, como na análise por tela.
@@ -91,13 +147,15 @@ function ItemDoPlano({ achado, ordem }: { achado: AchadoDoPlano; ordem: number }
 export function PlanoDeAcaoPage() {
   const plano = usePlanoDeAcao()
 
-  const { publicaveis, suprimidos, criticos, modulos } = useMemo(() => {
+  const { publicaveis, suprimidos, criticos, atencao, observacao, modulos } = useMemo(() => {
     const todos = plano.data ?? []
     const pub = todos.filter((a) => !a.suprimida)
     return {
       publicaveis: pub,
       suprimidos: todos.filter((a) => a.suprimida),
-      criticos: pub.filter((a) => a.severidade === 'critico').length,
+      criticos: pub.filter((a) => a.severidade === 'critico'),
+      atencao: pub.filter((a) => a.severidade === 'atencao'),
+      observacao: pub.filter((a) => a.severidade !== 'critico' && a.severidade !== 'atencao'),
       modulos: new Set(pub.map((a) => a.tela)).size,
     }
   }, [plano.data])
@@ -111,6 +169,8 @@ export function PlanoDeAcaoPage() {
     <div className="space-y-4">
       <CabecalhoDeModulo />
 
+      {/* Fora das abas: os KPIs são contexto das quatro. Trocar de faixa não
+          pode custar o tamanho do todo. */}
       <KpiGrid>
         <KpiCard
           label="Achados publicáveis"
@@ -121,7 +181,7 @@ export function PlanoDeAcaoPage() {
         />
         <KpiCard
           label="Em risco alto"
-          value={plano.data ? criticos : null}
+          value={plano.data ? criticos.length : null}
           format={formatInt}
           isLoading={plano.isLoading}
           isError={plano.isError}
@@ -142,113 +202,100 @@ export function PlanoDeAcaoPage() {
         />
       </KpiGrid>
 
-      {/*
-        DOCUMENTO, não seção com mosaico. A primeira versão embrulhava esta
-        lista numa `SecaoDeAnalise`, que põe os filhos dentro de um `BentoGrid`
-        de 12 colunas — e um `<div>` cru ali vira item de UMA coluna a partir de
-        `md`. No celular passava; no desktop a página desmontava numa tira.
+      <ModuloTabs
+        rota="/plano"
+        conteudos={{
+          prioridade: (
+            <FaixaDeAchados
+              achados={criticos}
+              carregando={plano.isLoading}
+              erro={plano.isError}
+              intro="Achados a partir do dobro do limiar da própria regra. É por onde começar, e a ordem aqui é a ordem de ataque."
+              vazio="Nenhum achado em risco alto no momento. É a única faixa em que o vazio é boa notícia."
+            />
+          ),
+          atencao: (
+            <FaixaDeAchados
+              achados={atencao}
+              carregando={plano.isLoading}
+              erro={plano.isError}
+              intro="Acima do limiar, mas sem a folga da faixa anterior. Vale acompanhar antes de virar risco alto."
+              vazio="Nada nesta faixa no momento."
+            />
+          ),
+          observacao: (
+            <FaixaDeAchados
+              achados={observacao}
+              carregando={plano.isLoading}
+              erro={plano.isError}
+              intro="Passaram o limiar por pouco. Com o motor saturado, é aqui que mora a maior parte do ruído — leia como contexto, não como fila de trabalho."
+              vazio="Nada nesta faixa no momento."
+            />
+          ),
+          apuracao: (
+            <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
+              <section className="max-w-[68ch] space-y-3">
+                <h2 className="text-xl font-medium tracking-tight">Como esta lista foi montada</h2>
+                <p className="text-muted-foreground text-[15px] leading-relaxed">
+                  Cada item sai do motor determinístico da tela de origem — sem modelo de
+                  linguagem no caminho. O número da frase é o mesmo que o card daquela tela
+                  desenha, porque o calculador chama a mesma consulta com os mesmos argumentos.
+                </p>
+                <p className="text-muted-foreground text-[15px] leading-relaxed">
+                  Ordenar telas diferentes na mesma lista só é legítimo porque o score é múltiplo
+                  do limiar da própria regra, e não a magnitude bruta. Sem essa normalização a
+                  ordem sairia do acaso da escala.
+                </p>
+                {saturacao != null && saturacao > 0.8 ? (
+                  <p className="text-[15px] leading-relaxed">
+                    <strong className="font-medium">
+                      O motor está saturado: {formatInt(publicaveis.length)} das{' '}
+                      {formatInt(avaliadas)} regras dispararam.
+                    </strong>{' '}
+                    <span className="text-muted-foreground">
+                      Um catálogo calibrado para achar quase sempre rankeia bem e filtra mal —
+                      então a <em>ordem</em> vale mais que a presença de um item na lista.
+                      Recalibrar os limiares é decisão em aberto, e enquanto isso ela fica
+                      declarada aqui em vez de passar por completude.
+                    </span>
+                  </p>
+                ) : null}
+              </section>
 
-        A gramática certa é a da aba `Análise`: leitura à esquerda em medida
-        fixa, prestação de contas à direita. É a mesma natureza de conteúdo.
-      */}
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,72ch)_minmax(16rem,26rem)] lg:gap-14">
-        <div className="space-y-8">
-          <header className="space-y-1">
-            <h2 className="text-xl font-medium tracking-tight">O que atacar primeiro</h2>
-            <p className="text-muted-foreground text-sm">
-              Ordenado por gravidade medida — cada achado vale um múltiplo do limiar da própria
-              regra, que é o que torna comparáveis regras de unidades diferentes.
-            </p>
-          </header>
+              <section className="max-w-[68ch] space-y-6 text-sm">
+                {suprimidos.length > 0 ? (
+                  <div className="space-y-2">
+                    <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                      {formatInt(suprimidos.length)} suprimido(s), com o motivo
+                    </h3>
+                    <ul className="text-muted-foreground space-y-1.5 leading-relaxed">
+                      {suprimidos.map((a) => (
+                        <li key={`${a.tela}-${a.regra}`}>
+                          <span className="text-foreground">{a.titulo}</span> —{' '}
+                          {a.motivo ?? 'sem amostra suficiente'} (
+                          {moduloDaTela(a.tela)?.title ?? a.tela})
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
 
-          {plano.isLoading ? (
-            <div className="space-y-6">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-6 w-2/3 rounded-md" />
-                  <Skeleton className="h-4 w-full rounded-md" />
-                  <Skeleton className="h-16 w-4/5 rounded-md" />
+                <div className="space-y-2">
+                  <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                    O que este plano não faz
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Ele relata; não gere. Não há dono, prazo nem status por achado, e nenhum item
+                    promete efeito atribuível — não existe experimentação em nenhuma das fontes,
+                    então &quot;fizemos isto e melhorou&quot; não seria uma afirmação que este BI
+                    consegue sustentar.
+                  </p>
                 </div>
-              ))}
+              </section>
             </div>
-          ) : plano.isError ? (
-            <p className="text-muted-foreground text-[15px]">
-              Não foi possível carregar o plano de ação.
-            </p>
-          ) : publicaveis.length === 0 ? (
-            <p className="text-[15px] leading-relaxed">
-              Nada fora do padrão nas {formatInt(avaliadas)} regras avaliadas. O plano tem
-              permissão de não ter o que dizer — e é isso que dá crédito às vezes em que ele
-              tem.
-            </p>
-          ) : (
-            <ol className="space-y-8">
-              {publicaveis.map((achado, i) => (
-                <ItemDoPlano key={`${achado.tela}-${achado.regra}`} achado={achado} ordem={i + 1} />
-              ))}
-            </ol>
-          )}
-        </div>
-
-        <aside className="space-y-6 text-sm lg:pt-1">
-          <section className="space-y-2">
-            <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              Como esta lista foi montada
-            </h3>
-            <p className="text-muted-foreground max-w-[52ch] leading-relaxed">
-              Cada item sai do motor determinístico da tela de origem — sem modelo de linguagem
-              no caminho. O número da frase é o mesmo que o card daquela tela desenha, porque o
-              calculador chama a mesma consulta com os mesmos argumentos.
-            </p>
-          </section>
-
-          {saturacao != null && saturacao > 0.8 ? (
-            <section className="space-y-2">
-              <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                O motor está saturado
-              </h3>
-              <p className="max-w-[52ch] leading-relaxed">
-                <strong className="font-medium">
-                  {formatInt(publicaveis.length)} das {formatInt(avaliadas)} regras dispararam.
-                </strong>{' '}
-                <span className="text-muted-foreground">
-                  Um catálogo calibrado para achar quase sempre rankeia bem e filtra mal — então
-                  a <em>ordem</em> desta lista vale mais que a presença de um item nela.
-                  Recalibrar os limiares é decisão em aberto, e enquanto isso ela fica declarada
-                  aqui em vez de passar por completude.
-                </span>
-              </p>
-            </section>
-          ) : null}
-
-          {suprimidos.length > 0 ? (
-            <section className="space-y-2">
-              <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                {formatInt(suprimidos.length)} suprimido(s), com o motivo
-              </h3>
-              <ul className="text-muted-foreground max-w-[52ch] space-y-1.5 leading-relaxed">
-                {suprimidos.map((a) => (
-                  <li key={`${a.tela}-${a.regra}`}>
-                    <span className="text-foreground">{a.titulo}</span> —{' '}
-                    {a.motivo ?? 'sem amostra suficiente'} ({moduloDaTela(a.tela)?.title ?? a.tela})
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          <section className="space-y-2">
-            <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              O que este plano não faz
-            </h3>
-            <p className="text-muted-foreground max-w-[52ch] leading-relaxed">
-              Ele relata; não gere. Não há dono, prazo nem status por achado, e nenhum item
-              promete efeito atribuível — não existe experimentação em nenhuma das fontes, então
-              "fizemos isto e melhorou" não seria uma afirmação que este BI consegue sustentar.
-            </p>
-          </section>
-        </aside>
-      </div>
+          ),
+        }}
+      />
     </div>
   )
 }

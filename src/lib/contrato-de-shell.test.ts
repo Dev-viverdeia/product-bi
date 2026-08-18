@@ -99,27 +99,46 @@ describe('padrão de três abas em todo módulo', () => {
     }) as Record<string, string>,
   )[0]!
 
-  /** Blocos `abas: [...]` declarados no arquivo. */
-  const blocos = semComentarios(navItems).match(/abas:\s*\[[^\]]*\]/g) ?? []
-
-  it('há módulo com aba declarada', () => {
-    expect(blocos.length).toBeGreaterThan(5)
+  /**
+   * Cada item da navegação, com a rota e as abas que ele declara.
+   *
+   * A varredura é por ITEM e não por bloco `abas:` solto, porque a régua das
+   * três abas é dos MÓDULOS. As seções de topo (`/plano`, `/explorar`)
+   * atravessam os módulos e não têm um domínio para fatiar em dado, leitura e
+   * ação — a tela inteira já é uma das três camadas. Elas se declaram em
+   * `ROTAS_TRANSVERSAIS`, e é essa lista que este teste respeita.
+   */
+  const itens = [...semComentarios(navItems).matchAll(/to: '([^']+)'/g)].map((m, i, todos) => {
+    const fim = todos[i + 1]?.index ?? semComentarios(navItems).length
+    const corpo = semComentarios(navItems).slice(m.index, fim)
+    return {
+      rota: m[1]!,
+      abas: [...corpo.matchAll(/valor:\s*'([a-z-]+)'/g)].map((a) => a[1]!),
+    }
   })
 
-  it.each(blocos.map((bloco, i) => ({ i, bloco })))('módulo %i', ({ bloco }) => {
-    const valores = [...bloco.matchAll(/valor:\s*'([a-z-]+)'/g)].map((m) => m[1])
-    expect(valores).toEqual(['graficos', 'analise', 'plano'])
+  const transversais = [...semComentarios(navItems).matchAll(/ROTAS_TRANSVERSAIS = \[([^\]]*)\]/g)]
+    .flatMap((m) => [...m[1]!.matchAll(/'([^']+)'/g)].map((r) => r[1]!))
+
+  const modulos = itens.filter((i) => i.abas.length > 0 && !transversais.includes(i.rota))
+
+  it('há módulo com aba declarada, e transversal declarada', () => {
+    expect(modulos.length).toBeGreaterThan(5)
+    expect(transversais.length).toBeGreaterThan(0)
   })
 
   /*
-    A ordem é a da leitura — dado, depois significado, depois ação — e a
-    primeira aba é a padrão, porque `useAbaAtiva` cai em `abas[0]` quando a URL
-    não traz `?aba=`. Trocar a ordem aqui troca a tela que o leitor vê primeiro.
+    ⚠️ A trava que mais importa aqui é a do valor `graficos`. Todas as regras do
+    motor gravam `insights.regra.ancora_aba = 'graficos'`, e é por esse texto que
+    o link "ver o gráfico que sustenta" navega. Renomear o valor da aba no
+    `nav-items.ts` quebraria todos eles **em silêncio** — o link trocaria de aba
+    e não rolaria para nada, sem erro, sem aviso, sem teste falhando. Até 18/ago
+    a única proteção era uma frase no CLAUDE.md, que não reprova build nenhum.
+
+    A ordem também é contrato: `useAbaAtiva` cai em `abas[0]` quando a URL não
+    traz `?aba=`, então a primeira aba é a que o leitor vê primeiro.
   */
-  it('graficos é a primeira, e portanto a padrão', () => {
-    for (const bloco of blocos) {
-      const primeiro = bloco.match(/valor:\s*'([a-z-]+)'/)?.[1]
-      expect(primeiro).toBe('graficos')
-    }
+  it.each(modulos)('$rota', ({ abas }) => {
+    expect(abas).toEqual(['graficos', 'analise', 'plano'])
   })
 })
