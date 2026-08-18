@@ -546,6 +546,83 @@ do próprio limiar da regra):
    A série descreve um evento, não um regime — e qualquer projeção feita sobre
    ela herda esse formato.
 
+### Lote de 18/ago — cinco passos, e um desenho descartado pela medição
+
+Cinco entregas encadeadas, cada uma medida antes e depois:
+
+1. **A régua de rastreio passou a viver num lugar só.** `marts.rastreio_por_tipo()`
+   virou a fonte única de ativo/atrasado/parado e `bi_saude_rastreio` passou a
+   publicá-la em vez de manter uma segunda cópia. ~3,5 s → ~0,15 s.
+2. **O espelho de CS ganhou as duas redes que a plataforma já tinha** —
+   propagação de exclusão e reconciliação de valor. O delete de movimento é
+   escopado por quadro que ainda existe: `bi_pulse.pipeline_movimentos` faz
+   INNER JOIN com uma tabela sem foreign key, e um quadro apagado faria os
+   movimentos dele sumirem da view com as linhas vivas na base.
+3. **Jornada trocou "duração mediana" por mediana de telas.** O KPI publicava
+   0,5 min porque 31,6% das sessões têm uma tela só e valem zero por construção
+   — e é o MESMO conjunto, conferido linha a linha. Aposentado em vez de
+   declarado: não há leitura honesta enquanto a plataforma não instrumentar
+   tempo. Duas RPCs órfãs caíram junto, uma delas devolvendo nome e e-mail para
+   qualquer autenticado (pendência O).
+4. **O compromisso de Soluções saiu de 1,6% para 32,1%**, e a fonte mudou de
+   vez: o início passa a sair de `marts.fact_progresso_solucao`. Decisão do
+   Mateus: publicar o reconstruído em vez de suprimir o card.
+5. **A guarda prometida pelo passo 1 foi construída — mas não como estava
+   desenhada.** Ver abaixo.
+
+**O desenho original do passo 5 era falso, e a medição pegou antes do código.**
+A guarda seria "suprimir quando `rastreio_por_tipo` disser que o tipo está
+parado". Só que "faz tempo que não registra" não separa cano entupido de
+torneira fechada. Medidos os quatro tipos parados contra uma fonte independente
+do mesmo fato:
+
+| tipo | evento parou | fonte independente | veredito |
+| --- | --- | --- | --- |
+| `solution_started` | 22/06 · 17.694 ev | `fact_progresso_solucao`: 24.643 inícios depois disso | **quebrado** |
+| `connection_accepted` | 05/05 · 144 ev | `member_connections` aceitas: 190 linhas, última em 14/08 | **quebrado** |
+| `community_post_created` | 18/06 · 137 ev | `community_posts` raiz: 142 linhas, última em **18/06** | **sem uso** |
+| `community_comment` | 23/04 · 22 ev | `community_posts` respostas: 20 linhas, última em **23/04** | **sem uso** |
+
+As duas últimas batem na data exata. A guarda original carimbaria a Comunidade
+de rastreio quebrado — publicaria diagnóstico falso, que é a mesma classe de
+defeito que o passo 4 acabou de tirar da tela.
+
+O que entrou no lugar: `etl.corroborar_rastreio()` no cron diário (04:45 BRT),
+gravando em `marts.rastreio_corroboracao`. Roda fora da RPC por duas razões
+medidas — a corroboração da Comunidade lê foreign table, e o card de saúde
+passaria a falhar exatamente quando o FDW cai, que é quando se olha para ele.
+Qualquer falha de leitura vira `sem_corroboracao`, nunca `sem_uso`: com o FDW
+fora do ar, "a fonte não tem registro" é verdade para todas as fontes.
+
+**Achado de produto que caiu daí: a Comunidade está morta, e a instrumentação
+está sadia.** Zero post desde 18/06/2026 e zero comentário desde 23/04 — 162
+posts e 20 respostas em toda a história da tabela. Fica registrado aqui e **não
+vira tela**: o volume não sustenta análise, e o módulo já não aparece no card de
+ações por não ter uma única ação na janela. É decisão de produto (manter,
+relançar ou encerrar), não pergunta de BI.
+
+**Duas correções durante a execução, as duas de desempenho, as duas medidas:**
+
+- A guarda chamava `rastreio_por_tipo()` — varria 350 mil linhas do fato para
+  ler quatro. Passou a ler `marts.rastreio_corroboracao` direto: 317 ms → 0,3 ms.
+  E o segundo canal ficou mais certo, não só mais barato: "o módulo tem consumo
+  vivo?" passou a ser respondido pela janela e pelo recorte pedidos
+  (`consumo > 0`), não pelo status global do tipo.
+- ⚠️ **`marts.evento_aposentado(tipo) -> boolean` custou 12× em predicado de
+  linha** — 31 ms viraram 371 ms no mesmo scan. A causa não é o custo da função:
+  é que **função SQL com cláusula `SET` não faz inline**, e `set search_path to
+  ''` é obrigatório pela regra da casa. As duas regras do projeto se combinam
+  num defeito que nenhuma prevê sozinha. A saída foi mudar a forma:
+  `marts.eventos_aposentados() -> text[]`, sem argumento e `immutable`, que o
+  planejador dobra em constante. **Régua compartilhada que entra em predicado de
+  linha devolve conjunto, nunca booleano por item.**
+
+**A guarda é no-op hoje, de propósito.** Ela suprime `pct_compromisso` (e a
+média da plataforma junto) quando o módulo tem consumo na janela e um
+compromisso quebrado. Hoje não dispara: o único quebrado que a função leria é o
+`solution_started`, que o passo 4 aposentou. Mesmo espírito do escopo por quadro
+do passo 2 — existe para a falha seguinte.
+
 ### Levantamento concluído em 11/ago
 
 - **`proposta-fase-2-profundidade.md`** — documento de decisão: anatomia padrão
@@ -607,6 +684,9 @@ gravidade, não de esforço.
 | M | **Os cards novos de Formações também não têm regra no motor** — mesma situação de Entrada (item K). O texto da aba ainda fala das quatro perguntas antigas | Formações | mesmo lote de reescrita do catálogo |
 | N | **Uma linha da tela de CS foi corrigida fora do combinado.** O headline de atendentes tinha o mesmo defeito do "0 enquanto carrega" e o teste novo reprovava o build; corrigi só essa linha, sem tocar em nada do que está pendente com o Mateus | CS | ciente — nenhuma decisão de CS foi antecipada |
 | L | **Tabela comparativa pede rolagem lateral em 375px.** É o comportamento correto do DS (rola dentro do próprio container, a página não rola), e o headline já carrega o número principal — mas a coluna "Convidado" só aparece rolando | Entrada | avaliar esconder uma coluna no mobile quando o padrão se repetir nas outras telas |
+| X | **`member_connections` não está espelhada, e por isso o BI não fecha o veredito de `connection_accepted`.** Medido em 18/08 direto na plataforma: 190 conexões aceitas, a última em **14/08**, contra um evento que parou em **05/05** — é rastreio quebrado, com prova. Mas a prova mora fora do BI, então o card publica `sem_corroboracao`, que é o honesto: não se publica o que não se consegue recomputar. São 1.133 linhas | Visão Geral · Networking | espelhar `member_connections` (foreign table + mart + sync). Destrava o veredito **e** o módulo de Networking, que hoje não tem nenhuma instrumentação viva de desfecho |
+| Y | **A Comunidade está morta e a instrumentação está sadia.** Zero post desde 18/06/2026, zero comentário desde 23/04 — 162 posts e 20 respostas em toda a história. Confirmado por corroboração: o evento e a fonte param na mesma data. Registrado por decisão (18/08): **não vira tela** | produto | decisão do Mateus: manter, relançar ou encerrar o módulo. O BI não tem mais o que medir aqui |
+| Z | **`bi_acoes_por_modulo` leva ~1,4 s.** Não é a guarda (0,3 ms) nem regressão do lote de 18/ago — é o `count(distinct user_id)` sobre 70 mil linhas, que derrama para disco (`external merge`). Está longe do timeout, mas é o card mais lento da Visão Geral | Visão Geral | medir se um `HashAggregate` com `work_mem` maior ou uma pré-agregação por usuário/dia resolve; não mexer sem medir |
 
 ## Pendências abertas pela auditoria de 08/ago/2026
 

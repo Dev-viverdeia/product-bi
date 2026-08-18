@@ -220,6 +220,7 @@ export type Database = {
           modulo: string
           pct_compromisso: number
           pct_compromisso_geral: number
+          suprimido_por: string[]
           total: number
         }[]
       }
@@ -1001,10 +1002,14 @@ export type Database = {
         Returns: {
           dias_parado: number
           eventos_total: number
+          fonte: string
           modulo: string
+          registros_na_fonte: number
           status: string
           tipo: string
           ultimo_registro: string
+          veredito: string
+          verificado_em: string
         }[]
       }
       bi_solucoes_candidatas_remocao: {

@@ -31,6 +31,7 @@ import { TableCell, TableHead, TableRow } from '@/components/ui/table'
 import { deltaOuNada } from '@/lib/delta'
 import { formatCompact, formatDateShort, formatInt, formatPercent } from '@/lib/format'
 import { labelTipoEvento } from '@/lib/labels-plataforma'
+import { contarQuebrados, evidenciaDoVeredito, pilulaDoRastreio } from '@/lib/rastreio'
 import { PeriodoFiltro } from '@/components/filters/periodo-filtro'
 import type { Periodo } from '@/lib/periodo'
 import { SegmentoFiltro } from '@/components/filters/segmento-filtro'
@@ -80,7 +81,15 @@ export function VisaoGeralPage() {
   // banco — somar aqui escaparia da régua de amostra.
   const parteCompromisso = porModulo.data?.[0]?.pct_compromisso_geral ?? null
 
-  const rastreiosParados = (rastreio.data ?? []).filter((r) => r.status === 'parado').length
+  // Conta o que tem PROVA de estar quebrado, não o que está calado: "parado" é
+  // sintoma e cobre desde o cano entupido até a funcionalidade que ninguém usa.
+  const rastreiosQuebrados = contarQuebrados(rastreio.data ?? [])
+
+  // Módulo cuja razão a guarda do banco se recusou a publicar. A tela declara
+  // em vez de deixar a barra sumir do gráfico sem explicação.
+  const modulosSuprimidos = (porModulo.data ?? []).filter(
+    (m) => (m.suprimido_por ?? []).length > 0,
+  )
 
   const picoNavegacao = useMemo(
     () => (heatmap.data ?? []).reduce((maior, h) => Math.max(maior, h.pageviews), 0),
@@ -316,6 +325,22 @@ export function VisaoGeralPage() {
                       }
                       className="h-[240px]"
                     />
+                    {/* Sem esta linha, o módulo suprimido pelo banco simplesmente
+                        desapareceria da barra — que é o defeito de leitura que a
+                        guarda existe para evitar, não para produzir. */}
+                    {modulosSuprimidos.length > 0 && (
+                      <p className="text-muted-foreground mt-3 text-xs">
+                        {modulosSuprimidos
+                          .map(
+                            (m) =>
+                              `${m.modulo} está fora do gráfico: ${(m.suprimido_por ?? [])
+                                .map(labelTipoEvento)
+                                .join(', ')} parou de ser emitido e o numerador dele perdeu ações`,
+                          )
+                          .join(' · ')}
+                        . A média da plataforma cai junto, pelo mesmo motivo.
+                      </p>
+                    )}
                   </ChartCard>
                 </BentoItem>
 
@@ -358,9 +383,9 @@ export function VisaoGeralPage() {
                     id="card-rastreio"
                     icon={RadarIcon}
                     title="Saúde do rastreio"
-                    headline={formatInt(rastreiosParados)}
-                    headlineLabel="rastreios parados há mais de 30 dias"
-                    description="Última data com registro por tipo de evento, contada a partir do dia do dado e não de hoje · série que atravessa a data de óbito de um evento lê queda de comportamento onde houve queda de instrumentação"
+                    headline={formatInt(rastreiosQuebrados)}
+                    headlineLabel="rastreios quebrados, com prova"
+                    description="Última data com registro por tipo de evento, contada a partir do dia do dado e não de hoje · evento calado é sintoma, não diagnóstico: o veredito compara cada um com uma fonte independente do mesmo fato e separa rastreio quebrado (a coisa acontece e o evento não sai) de funcionalidade sem uso (a instrumentação está sadia) · sem corroboração é o caso em que não há fonte espelhada para conferir, e por isso não entra na contagem · série que atravessa a data de óbito de um evento lê queda de comportamento onde houve queda de instrumentação"
                     isLoading={rastreio.isLoading}
                     isError={rastreio.isError}
                     onRetry={() => void rastreio.refetch()}
@@ -377,7 +402,7 @@ export function VisaoGeralPage() {
                           <TableHead>Módulo</TableHead>
                           <TableHead className="text-right">Último registro</TableHead>
                           <TableHead className="text-right">Dias parado</TableHead>
-                          <TableHead>Estado</TableHead>
+                          <TableHead>Diagnóstico</TableHead>
                         </TableRow>
                       }
                       renderLinha={(r) => (
@@ -391,21 +416,16 @@ export function VisaoGeralPage() {
                             {formatInt(r.dias_parado)}
                           </TableCell>
                           <TableCell>
-                            <StatusPill
-                              tom={
-                                r.status === 'parado'
-                                  ? 'critico'
-                                  : r.status === 'atrasado'
-                                    ? 'atencao'
-                                    : 'bom'
-                              }
-                            >
-                              {r.status === 'parado'
-                                ? 'parado'
-                                : r.status === 'atrasado'
-                                  ? 'atrasado'
-                                  : 'em dia'}
+                            <StatusPill tom={pilulaDoRastreio(r.status, r.veredito).tom}>
+                              {pilulaDoRastreio(r.status, r.veredito).rotulo}
                             </StatusPill>
+                            {/* A prova ao lado do veredito: sem ela o card cobra
+                                dos outros um rigor que ele mesmo não mostra. */}
+                            {evidenciaDoVeredito(r) && (
+                              <span className="text-muted-foreground mt-1 block text-xs">
+                                {evidenciaDoVeredito(r)}
+                              </span>
+                            )}
                           </TableCell>
                         </TableRow>
                       )}
