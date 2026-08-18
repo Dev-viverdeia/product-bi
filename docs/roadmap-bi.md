@@ -509,8 +509,16 @@ Quatro achados da leva, todos medidos:
    não retido, e o KPI de ativos não distinguia isso.
 2. **Comprador retém 38,9%, convidado 19,4%.** O produto retém quem paga e
    perde quem o pagante trouxe.
-3. **Soluções tem 1,6% de compromisso** contra praticamente tudo nos outros
-   módulos — atrai atenção e não converte.
+3. ~~**Soluções tem 1,6% de compromisso** contra praticamente tudo nos outros
+   módulos — atrai atenção e não converte.~~ **RETIRADO em 17/ago: o achado era
+   instrumentação, não comportamento.** `solution_started` parou de ser emitido
+   em 22/06/2026 e a janela de 30 dias tem **zero** desses eventos, então o
+   numerador perdeu os inícios inteiros. Medido no mesmo dia:
+   `marts.fact_progresso_solucao` registra **11.666 inícios reais** na janela, e
+   o compromisso reconstruído é **32,12%**, não 1,6%. A conclusão "atrai atenção
+   e não converte" não se sustenta neste número — o funil de Soluções continua
+   valendo pelo card próprio (4,9% de conclusão), que lê o mart de progresso e
+   não o evento morto. Corrigir a tela é a Fase 2 (frente A).
 4. **Mortalidade por módulo, em taxa:** de quem passou por Formações, 33,8%
    teve ali a última ação; pelo Consultor, 2,8%. O card antigo dizia "59% param
    em Formações", que era popularidade.
