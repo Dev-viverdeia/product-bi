@@ -292,7 +292,7 @@ export function VisaoGeralPage() {
                     title="O uso é raso ou profundo?"
                     headline={parteCompromisso != null ? formatPercent(parteCompromisso) : '—'}
                     headlineLabel="das ações são compromisso, não consumo"
-                    description="Consumo é olhar; compromisso é produzir, concluir ou agendar · atenção: a plataforma emite hoje um único evento de consumo (visualizar solução), então módulo em 100% quer dizer que o olhar não é rastreado ali, não que todo uso seja profundo"
+                    description="Consumo é olhar; compromisso é produzir, concluir ou agendar · início de solução é contado pelo mart de progresso, a mesma fonte da tela de Soluções, e não pelo evento da plataforma, que só existiu de abr a jun/2026 · atenção: a plataforma emite hoje um único evento de consumo (visualizar solução), então módulo em 100% quer dizer que o olhar não é rastreado ali, não que todo uso seja profundo"
                     isLoading={porModulo.isLoading}
                     isError={porModulo.isError}
                     onRetry={() => void porModulo.refetch()}
