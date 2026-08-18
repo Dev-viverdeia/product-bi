@@ -805,6 +805,47 @@ migrations e o parser errou 4 dos 9 (deu a receita para Formações e a entrada
 para Soluções). Não instalei: guarda que mede errado é pior que guarda nenhuma.
 Fica como conferência de revisão, com a consulta registrada neste documento.
 
+### Segundo corte da auditoria: a régua `e_cliente` (18/ago)
+
+O primeiro corte conferiu COERÊNCIA e achou dois defeitos. Este confere
+SEMÂNTICA, começando pela régua que já custou 30,8% de desvio em 13/08.
+
+Trinta RPCs leem fato sem `e_cliente`. A maioria é legítima, e agora cada caso
+está provado: **13 de CS** (grão empresa) · **8 leem `fact_navegacao`**, que já
+nasce filtrada · e nove que precisaram de medição uma a uma.
+
+**Um defeito real — `bi_valor_nao_consumido`:**
+
+| Créditos de mentoria individual | antes | depois |
+| --- | --- | --- |
+| disponíveis | 280 | **195** |
+| usados | 60 | **31** |
+| taxa de uso | 17,65% | **13,72%** |
+| beneficiários | 61 | 56 |
+
+**85 dos 280 créditos "parados" — 30% — eram de quem não é cliente**, e quase
+metade dos usos também (29 de 60). O card se chama "valor contratado não
+consumido" e existe para decisão comercial: inflava o problema em 43%.
+
+**Duas exceções em que aplicar a régua seria DEFEITO, não correção.** As três
+RPCs de Receita leem `marts.fact_fatura`, onde só **3** das 1.119 linhas são de
+não-cliente — mas **283 (25,3%) não têm `user_id` nenhum**. Um join com a dim
+descartaria essas 283 e derrubaria a receita publicada. `bi_erros_login` e
+`bi_erros_por_tela` são caso ainda mais claro: `fact_erro_login` e
+`fact_erro_cliente` **não têm coluna `user_id`** — a régua é impossível ali, não
+omitida.
+
+⚠️ **O achado estrutural é que nenhuma das nove exceções estava declarada** —
+oito não tinham `comment on function` nenhum. O CLAUDE.md exige "sem exceção não
+declarada" justamente porque exceção muda de indistinguível de esquecimento com
+o tempo, e foi assim que os 30,8% entraram em 13/08. As nove agora carregam o
+motivo medido no próprio banco, onde quem abre a função encontra.
+
+**Correção ao próprio registro:** publiquei o efeito como "21,4% → 15,9%" antes
+de ler a função. O denominador da taxa é `disponivel + usado`, não `disponivel`;
+a conta certa é 17,65% → 13,72%. Dividir antes de ler a fonte é exatamente o
+defeito que esta auditoria persegue.
+
 ### Levantamento concluído em 11/ago
 
 - **`proposta-fase-2-profundidade.md`** — documento de decisão: anatomia padrão
