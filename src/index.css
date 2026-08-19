@@ -361,20 +361,24 @@
   --animate-accordion-up: accordion-up 0.18s var(--via-ease-out);
 }
 
+/* A altura medida tem NOME DIFERENTE por primitiva do Radix: accordion e
+   collapsible publicam variáveis distintas. Sem o fallback, a mesma
+   animação num Collapsible aponta para var indefinida, `height` cai para
+   `auto` e o dobrar salta — sem erro, sem aviso. */
 @keyframes accordion-down {
   from {
     height: 0;
     opacity: 0;
   }
   to {
-    height: var(--radix-accordion-content-height);
+    height: var(--radix-accordion-content-height, var(--radix-collapsible-content-height));
     opacity: 1;
   }
 }
 
 @keyframes accordion-up {
   from {
-    height: var(--radix-accordion-content-height);
+    height: var(--radix-accordion-content-height, var(--radix-collapsible-content-height));
     opacity: 1;
   }
   to {
