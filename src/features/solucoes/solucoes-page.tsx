@@ -6,7 +6,6 @@ import {
   ListChecksIcon,
   RotateCcwIcon,
   RouteIcon,
-  ScissorsIcon,
   SlidersHorizontalIcon,
   TargetIcon,
   TrendingUpIcon,
@@ -146,9 +145,9 @@ export function SolucoesPage() {
           graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
-                titulo="O que o catálogo entrega, e onde o uso se concentra"
+                titulo="O que o catálogo entrega, e o que tirar dele"
                 icone={LayoutGridIcon}
-                descricao="Os dois cortes contam a mesma coisa — solução iniciada, histórico completo — e mudam só o grão: a solução ou a categoria inteira. Nada aqui responde ao período do topo. Pageviews é a exceção de fonte: vem da navegação, rastreada só desde jul/2026, então nunca fecha com as iniciadas da mesma linha."
+                descricao="Três cortes do mesmo catálogo, sobre o histórico completo: nada aqui responde ao período do topo. A lista do que tirar não para em N — o critério é o recorte. Pageviews vêm da navegação, só desde jul/2026, e ficam abaixo das iniciadas."
               >
                 <BentoItem span={6}>
                   <TabelaCard
@@ -237,12 +236,63 @@ export function SolucoesPage() {
                     />
                   </ChartCard>
                 </BentoItem>
+                <BentoItem span={12}>
+                  <TabelaCard
+                    nivel="prescritivo"
+                    icon={ArchiveXIcon}
+                    title="Candidatas a remoção ou revisão"
+                    headline={candidatas.data ? formatInt(candidatas.data.length) : '—'}
+                    headlineLabel="soluções para revisar"
+                    description="Soluções publicadas no quartil inferior de uso ou sem nenhuma conclusão · revisar antes de remover: nota alta com pouco uso pode ser problema de descoberta, não de qualidade · pageviews só desde jul/2026, então podem ficar abaixo das iniciadas (histórico completo)"
+                    isLoading={candidatas.isLoading}
+                    isRefreshing={candidatas.isFetching && !!candidatas.data}
+                    isError={candidatas.isError}
+                    onRetry={() => void candidatas.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={candidatas.data ?? []}
+                      chave={(c) => String(c.solucao)}
+                      buscarEm={(c) => [c.solucao, c.categoria]}
+                      rotuloBusca="Buscar por solução ou categoria"
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Solução</TableHead>
+                          <TableHead>Categoria</TableHead>
+                          <TableHead>Motivo</TableHead>
+                          <TableHead className="text-right">Pageviews</TableHead>
+                          <TableHead className="text-right">Iniciadas</TableHead>
+                          <TableHead className="text-right">Concluídas</TableHead>
+                          <TableHead className="text-right">Nota</TableHead>
+                          <TableHead className="text-right">Favoritos</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(c) => (
+                        <TableRow>
+                          <TableCell className="max-w-64 truncate font-medium">
+                            {c.solucao}
+                          </TableCell>
+                          <TableCell>{c.categoria ?? '—'}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{c.motivo}</Badge>
+                          </TableCell>
+                          <TableCell className="num text-right">{formatInt(c.pageviews)}</TableCell>
+                          <TableCell className="num text-right">{formatInt(c.iniciadas)}</TableCell>
+                          <TableCell className="num text-right">{formatInt(c.concluidas)}</TableCell>
+                          <TableCell className="num text-right">
+                            {c.nota != null ? formatDecimal(c.nota) : '—'}
+                          </TableCell>
+                          <TableCell className="num text-right">{formatInt(c.favoritos)}</TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
               </SecaoDeAnalise>
 
               <SecaoDeAnalise
                 titulo="Onde o caminho até concluir se estreita"
                 icone={RouteIcon}
-                descricao="Os dois medem usuários únicos e mostram percentual, mas nenhum denominador é o mesmo: um compara com quem chegou ao catálogo, na janela curta em que a navegação é rastreada; o outro compara com a aba mais concluída, sobre o histórico inteiro. Pôr os percentuais lado a lado não diz qual passo custa mais caro."
+                descricao="Os dois mostram percentual, e nenhum denominador é o mesmo: um compara com quem chegou ao catálogo, na janela rastreada; o outro, com a aba mais concluída, sobre o histórico inteiro. Pô-los lado a lado não diz qual passo custa mais caro."
               >
                 <BentoItem span={6}>
                   <TabelaCard
@@ -348,7 +398,7 @@ export function SolucoesPage() {
               <SecaoDeAnalise
                 titulo="Concluir muda o que vem depois"
                 icone={TargetIcon}
-                descricao="Duas comparações de dois grupos, ambas fora do filtro de período e ambas com margem em pontos percentuais para dizer quando a diferença ainda cabe no ruído. O que muda é quem está sendo comparado: a primeira põe pessoas diferentes lado a lado; a segunda acompanha as mesmas pessoas em tentativas diferentes."
+                descricao="Duas comparações fora do filtro de período, cada uma com margem em pontos percentuais para dizer quando a diferença ainda cabe no ruído. Muda quem se compara: a primeira, pessoas diferentes; a segunda, as mesmas em tentativas diferentes."
               >
                 <BentoItem span={6}>
                   <TabelaCard
@@ -455,64 +505,6 @@ export function SolucoesPage() {
                         ))}
                       </TableBody>
                     </Table>
-                  </TabelaCard>
-                </BentoItem>
-              </SecaoDeAnalise>
-
-              <SecaoDeAnalise
-                titulo="O que tirar do catálogo"
-                icone={ScissorsIcon}
-                descricao="Única leitura da tela que termina em decisão editorial, não em número de acompanhamento. O critério de entrada é o próprio recorte e roda sobre o histórico completo, então a lista não muda ao mexer no período do topo."
-              >
-                <BentoItem span={12}>
-                  <TabelaCard
-                    nivel="prescritivo"
-                    icon={ArchiveXIcon}
-                    title="Candidatas a remoção ou revisão"
-                    headline={candidatas.data ? formatInt(candidatas.data.length) : '—'}
-                    headlineLabel="soluções para revisar"
-                    description="Soluções publicadas no quartil inferior de uso ou sem nenhuma conclusão · revisar antes de remover: nota alta com pouco uso pode ser problema de descoberta, não de qualidade · pageviews só desde jul/2026, então podem ficar abaixo das iniciadas (histórico completo)"
-                    isLoading={candidatas.isLoading}
-                    isRefreshing={candidatas.isFetching && !!candidatas.data}
-                    isError={candidatas.isError}
-                    onRetry={() => void candidatas.refetch()}
-                  >
-                    <TabelaLonga
-                      linhas={candidatas.data ?? []}
-                      chave={(c) => String(c.solucao)}
-                      buscarEm={(c) => [c.solucao, c.categoria]}
-                      rotuloBusca="Buscar por solução ou categoria"
-                      cabecalho={
-                        <TableRow>
-                          <TableHead>Solução</TableHead>
-                          <TableHead>Categoria</TableHead>
-                          <TableHead>Motivo</TableHead>
-                          <TableHead className="text-right">Pageviews</TableHead>
-                          <TableHead className="text-right">Iniciadas</TableHead>
-                          <TableHead className="text-right">Concluídas</TableHead>
-                          <TableHead className="text-right">Nota</TableHead>
-                          <TableHead className="text-right">Favoritos</TableHead>
-                        </TableRow>
-                      }
-                      renderLinha={(c) => (
-                        <TableRow>
-                          <TableCell className="max-w-64 truncate font-medium">
-                            {c.solucao}
-                          </TableCell>
-                          <TableCell>{c.categoria ?? '—'}</TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">{c.motivo}</Badge>
-                          </TableCell>
-                          <TableCell className="num text-right">{formatInt(c.pageviews)}</TableCell>
-                          <TableCell className="num text-right">{formatInt(c.iniciadas)}</TableCell>
-                          <TableCell className="num text-right">{formatInt(c.concluidas)}</TableCell>
-                          <TableCell className="num text-right">
-                            {c.nota != null ? formatDecimal(c.nota) : '—'}
-                          </TableCell>
-                          <TableCell className="num text-right">{formatInt(c.favoritos)}</TableCell>
-                        </TableRow>
-                      )}
-                    />
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>

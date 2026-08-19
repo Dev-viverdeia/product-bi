@@ -7,7 +7,6 @@ import {
   GraduationCapIcon,
   HourglassIcon,
   LibraryIcon,
-  MessageSquareIcon,
   RouteIcon,
   StarIcon,
   TimerIcon,
@@ -164,9 +163,9 @@ export function FormacoesPage() {
           graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
-                titulo="O que os alunos estão assistindo"
+                titulo="O que os alunos assistem, e o que dizem da aula"
                 icone={LibraryIcon}
-                descricao="Os dois lados contam a mesma aula concluída e mudam só o agrupamento — por formação e por categoria de curso. A janela é que diverge: o gráfico e as colunas de período seguem o filtro do topo, enquanto histórico, certificados e conclusão da tabela correm desde o início e não se comparam com eles."
+                descricao="Os dois primeiros contam a mesma aula concluída, mudando só o agrupamento — formação e categoria; janela do topo e histórico não se comparam. O terceiro é opinião de quem quis responder, e uma aula ruim dilui na média do curso."
               >
                 <BentoItem span={6}>
                   <TabelaCard
@@ -249,12 +248,55 @@ export function FormacoesPage() {
                     />
                   </ChartCard>
                 </BentoItem>
+                <BentoItem span={12}>
+                  <TabelaCard
+                    nivel="prescritivo"
+                    icon={StarIcon}
+                    title="NPS por formação"
+                    headline={
+                      piorNps?.pct_detratores != null ? formatPercent(piorNps.pct_detratores) : '—'
+                    }
+                    headlineLabel="de detratores na pior formação"
+                    description="Escala 0–10 por aula, agregado por curso · 10+ respostas · média geral 9,5 tem viés de positividade — o sinal está nos detratores"
+                    isLoading={nps.isLoading}
+                    isRefreshing={nps.isFetching && !!nps.data}
+                    isError={nps.isError}
+                    onRetry={() => void nps.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={nps.data ?? []}
+                      chave={(n) => String(n.curso)}
+                      buscarEm={(n) => [n.curso]}
+                      rotuloBusca="Buscar por formação"
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Formação</TableHead>
+                          <TableHead className="text-right">Respostas</TableHead>
+                          <TableHead className="text-right">Média</TableHead>
+                          <TableHead className="text-right">Detratores</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(n) => (
+                        <TableRow>
+                          <TableCell className="max-w-56 truncate font-medium">{n.curso}</TableCell>
+                          <TableCell className="num text-right">{formatInt(n.respostas)}</TableCell>
+                          <TableCell className="num text-right">
+                            {n.media != null ? formatDecimal(n.media) : '—'}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {n.pct_detratores != null ? formatPercent(n.pct_detratores) : '—'}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
               </SecaoDeAnalise>
 
               <SecaoDeAnalise
                 titulo="O que decide se o aluno chega ao fim"
                 icone={CheckCheckIcon}
-                descricao="Os dois primeiros contam aula — taxa normalizada dentro do próprio curso, sobre todo o catálogo publicado, sem recorte de período. O terceiro troca de unidade e conta aluno, em coorte de 90+ dias desde a 1ª aula. Cada taxa tem denominador próprio: elas não se somam nem se comparam entre si."
+                descricao="Nenhum dos três segue o período do topo. Os dois primeiros contam aula publicada, com denominador dentro do próprio curso; o terceiro conta inscrição. As três taxas não se somam nem se comparam entre si."
               >
                 <BentoItem span={8}>
                   <ChartCard
@@ -380,7 +422,7 @@ export function FormacoesPage() {
               <SecaoDeAnalise
                 titulo="Quanto tempo leva até o certificado, e o que vem depois"
                 icone={RouteIcon}
-                descricao="Um olha para trás — quanto tempo a formação leva de quem já certificou — e o outro para a frente, comparando certificados com quem estudou e parou antes. As bases são recortadas por critérios diferentes (formação com volume mínimo de certificados de um lado, cliente com 120+ dias de casa do outro), então nenhum dos dois números explica o outro."
+                descricao="Um olha para trás — quanto tempo até o certificado — e o outro para a frente, comparando quem certificou com quem estudou e parou. Os recortes são diferentes, formação de um lado e cliente do outro: um não explica o outro."
               >
                 <BentoItem span={6}>
                   <TabelaCard
@@ -470,56 +512,6 @@ export function FormacoesPage() {
                           </TableCell>
                           <TableCell className="num text-right">
                             {j.mediana_dias != null ? formatDecimal(j.mediana_dias) : '—'}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    />
-                  </TabelaCard>
-                </BentoItem>
-              </SecaoDeAnalise>
-
-              <SecaoDeAnalise
-                titulo="O que o aluno diz sobre a aula"
-                icone={MessageSquareIcon}
-                descricao="Única leitura do módulo que não sai de comportamento: é resposta declarada, e só de quem escolheu responder — quem abandonou o curso raramente responde, então a base já entra puxada para cima. A nota nasce na aula e sobe para o curso, de modo que uma aula ruim se dilui na média da formação."
-              >
-                <BentoItem span={12}>
-                  <TabelaCard
-                    nivel="prescritivo"
-                    icon={StarIcon}
-                    title="NPS por formação"
-                    headline={
-                      piorNps?.pct_detratores != null ? formatPercent(piorNps.pct_detratores) : '—'
-                    }
-                    headlineLabel="de detratores na pior formação"
-                    description="Escala 0–10 por aula, agregado por curso · 10+ respostas · média geral 9,5 tem viés de positividade — o sinal está nos detratores"
-                    isLoading={nps.isLoading}
-                    isRefreshing={nps.isFetching && !!nps.data}
-                    isError={nps.isError}
-                    onRetry={() => void nps.refetch()}
-                  >
-                    <TabelaLonga
-                      linhas={nps.data ?? []}
-                      chave={(n) => String(n.curso)}
-                      buscarEm={(n) => [n.curso]}
-                      rotuloBusca="Buscar por formação"
-                      cabecalho={
-                        <TableRow>
-                          <TableHead>Formação</TableHead>
-                          <TableHead className="text-right">Respostas</TableHead>
-                          <TableHead className="text-right">Média</TableHead>
-                          <TableHead className="text-right">Detratores</TableHead>
-                        </TableRow>
-                      }
-                      renderLinha={(n) => (
-                        <TableRow>
-                          <TableCell className="max-w-56 truncate font-medium">{n.curso}</TableCell>
-                          <TableCell className="num text-right">{formatInt(n.respostas)}</TableCell>
-                          <TableCell className="num text-right">
-                            {n.media != null ? formatDecimal(n.media) : '—'}
-                          </TableCell>
-                          <TableCell className="num text-right">
-                            {n.pct_detratores != null ? formatPercent(n.pct_detratores) : '—'}
                           </TableCell>
                         </TableRow>
                       )}

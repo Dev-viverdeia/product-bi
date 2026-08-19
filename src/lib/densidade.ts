@@ -232,4 +232,7 @@ export const TETO_POR_TELA: Record<string, { cards: number; colunas: number }> =
 export const TELAS_NA_DENSIDADE = [
   'features/visao-geral/visao-geral-page.tsx',
   'features/organizacoes/organizacoes-page.tsx',
+  'features/jornada/jornada-page.tsx',
+  'features/formacoes/formacoes-page.tsx',
+  'features/solucoes/solucoes-page.tsx',
 ]

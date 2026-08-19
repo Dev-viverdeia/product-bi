@@ -173,6 +173,18 @@ export function JornadaPage() {
         conteudos={{
           graficos: (
             <div className="space-y-4">
+              {/*
+                DENSIDADE_DECLARADA: cardsPorSecaoNoMinimo — esta seção tem um
+                card só porque o card é META: ele mede quanto da contagem de
+                pageview sai de sessão-monstro e, com isso, qualifica de uma vez
+                os KPIs do topo, o ranking da seção seguinte e a profundidade da
+                última. Não responde à pergunta de nenhuma delas. A fusão que
+                parece tentadora é com "Quantas telas o cliente percorre", que
+                usa o MESMO eixo (faixa de telas por sessão) — e é por isso que
+                seria errada: agruparia por eixo, não por pergunta. A pergunta
+                de lá é "quantas telas o cliente percorre"; a daqui é "isto é
+                gente?".
+              */}
               <SecaoDeAnalise
                 titulo="Dá para confiar no ranking de telas"
                 icone={DatabaseIcon}
@@ -241,7 +253,7 @@ export function JornadaPage() {
               <SecaoDeAnalise
                 titulo="Que telas concentram a navegação, e para onde ela segue"
                 icone={MonitorIcon}
-                descricao="As duas leituras saem do mesmo pageview do período: o raio-x mede cada tela contra o tráfego dela própria, o fluxo mede o par origem → destino de uma tela escolhida. As duas listas chegam cortadas no limite da RPC — o que aparece é o topo do ranking, não o universo."
+                descricao="As duas leituras saem do mesmo pageview do período: o raio-x mede cada tela contra o próprio tráfego; o fluxo, o par origem → destino da tela escolhida no seletor do card."
               >
                 <BentoItem span={12}>
                   <TabelaCard
@@ -331,6 +343,12 @@ export function JornadaPage() {
                       chave={(f) => f.destino}
                       buscarEm={(f) => [f.destino]}
                       rotuloBusca="Buscar destino"
+                      // `bi_fluxo_da_tela` tem `limit 10` chumbado no SQL e a
+                      // chamada não passa teto nenhum — o corte só existia na
+                      // prosa da seção, que a régua de densidade manda encurtar.
+                      // A TabelaLonga é mais honesta que a prosa era: ela só
+                      // anuncia quando a lista de fato bate no teto.
+                      limiteDaFonte={10}
                       vazio="Nenhuma transição registrada a partir desta tela."
                       cabecalho={
                         <TableRow>
@@ -358,7 +376,7 @@ export function JornadaPage() {
               <SecaoDeAnalise
                 titulo="Por onde a sessão começa e onde ela termina"
                 icone={RouteIcon}
-                descricao="Os dois lados olham a mesma sessão pelas pontas, em unidades diferentes: a entrada conta sessões abertas, a saída conta a proporção das visitas que terminam ali. Volume e taxa não ordenam igual — a tela que lidera um lado raramente lidera o outro. Os dois vêm cortados nas dez primeiras linhas, então nenhum percentual daqui deve ser somado como se fosse o total."
+                descricao="As duas pontas da mesma sessão, em unidades diferentes: volume e taxa não ordenam igual, e quem lidera um lado raramente lidera o outro. Ambos cortados nas dez primeiras linhas — nenhum percentual daqui se soma como se fosse o total."
               >
                 <BentoItem span={6}>
                   <ChartCard
