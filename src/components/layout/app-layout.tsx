@@ -1,8 +1,9 @@
 import { Suspense } from 'react'
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 
 import { AbasCompactas, AppBarra } from '@/components/layout/app-barra'
 import { AppRail } from '@/components/layout/app-rail'
+import { FronteiraDeErro } from '@/components/layout/fronteira-de-erro'
 import { PageFallback } from '@/components/layout/page-fallback'
 
 /**
@@ -28,6 +29,8 @@ import { PageFallback } from '@/components/layout/page-fallback'
  * deixaria de tocar a borda esquerda e a marca sairia do lugar de âncora.
  */
 export function AppLayout() {
+  const { pathname } = useLocation()
+
   return (
     <div className="bg-background mx-auto min-h-svh max-w-[1720px] px-2 py-2 md:px-3 md:py-3">
       <AppBarra />
@@ -55,10 +58,24 @@ export function AppLayout() {
         <AppRail className="sticky top-3 hidden max-h-[calc(100svh-6.5rem)] min-h-[calc(100svh-6.5rem)] overflow-y-auto lg:flex" />
 
         <main className="min-w-0 flex-1">
-          {/* Módulos entram por import dinâmico — o shell não espera o chunk. */}
-          <Suspense fallback={<PageFallback />}>
-            <Outlet />
-          </Suspense>
+          {/*
+            A fronteira envolve SÓ o Outlet: erro de módulo não pode custar a
+            barra e o rail, senão a saída de uma tela quebrada vira recarregar a
+            página inteira para conseguir ir a outro lugar.
+
+            ⚠️ `key={pathname}` não é detalhe. Sem ela o estado de erro sobrevive
+            à navegação seguinte, e a próxima tela nasce quebrada sem nunca ter
+            sido renderizada — o defeito passa a parecer estar em toda parte. É
+            `pathname` e não a location inteira de propósito: trocar `?aba=` ou
+            `?periodo=` não remonta nada.
+
+            Módulos entram por import dinâmico — o shell não espera o chunk.
+          */}
+          <FronteiraDeErro key={pathname} escopo="modulo">
+            <Suspense fallback={<PageFallback />}>
+              <Outlet />
+            </Suspense>
+          </FronteiraDeErro>
         </main>
       </div>
     </div>

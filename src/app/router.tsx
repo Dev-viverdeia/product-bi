@@ -2,6 +2,7 @@ import { lazy } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router'
 
 import { AppLayout } from '@/components/layout/app-layout'
+import { FronteiraDeErro } from '@/components/layout/fronteira-de-erro'
 import { LoginPage } from '@/features/auth/login-page'
 import { ProtectedRoute } from '@/features/auth/protected-route'
 import { PublicOnlyRoute } from '@/features/auth/public-only-route'
@@ -55,34 +56,39 @@ const DesignPage = lazy(() =>
 export function AppRouter() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<PublicOnlyRoute />}>
-          <Route path="/login" element={<LoginPage />} />
-        </Route>
-
-        <Route element={<ProtectedRoute />}>
-          {/* O Suspense que segura estes chunks vive no AppLayout, em volta do
-              Outlet, para o shell não piscar a cada troca de rota. */}
-          <Route element={<AppLayout />}>
-            <Route index element={<VisaoGeralPage />} />
-            <Route path="/plano" element={<PlanoDeAcaoPage />} />
-            <Route path="/explorar" element={<ExplorarPage />} />
-            <Route path="/clientes" element={<ClientesPage />} />
-            <Route path="/entrada" element={<EntradaPage />} />
-            <Route path="/formacoes" element={<FormacoesPage />} />
-            <Route path="/solucoes" element={<SolucoesPage />} />
-            <Route path="/ia" element={<IaPage />} />
-            <Route path="/organizacoes" element={<OrganizacoesPage />} />
-            <Route path="/jornada" element={<JornadaPage />} />
-            <Route path="/receita" element={<ReceitaPage />} />
-            <Route path="/cs" element={<CsPage />} />
-            <Route path="/regras" element={<RegrasPage />} />
-            <Route path="/design" element={<DesignPage />} />
+      {/* Fronteira externa: cobre o que a do AppLayout não alcança — o login,
+          o 404 e o próprio shell (barra, rail, provedores). Aqui não há shell
+          para preservar, então a saída é recarregar. */}
+      <FronteiraDeErro escopo="app">
+        <Routes>
+          <Route element={<PublicOnlyRoute />}>
+            <Route path="/login" element={<LoginPage />} />
           </Route>
-        </Route>
 
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+          <Route element={<ProtectedRoute />}>
+            {/* O Suspense que segura estes chunks vive no AppLayout, em volta do
+                Outlet, para o shell não piscar a cada troca de rota. */}
+            <Route element={<AppLayout />}>
+              <Route index element={<VisaoGeralPage />} />
+              <Route path="/plano" element={<PlanoDeAcaoPage />} />
+              <Route path="/explorar" element={<ExplorarPage />} />
+              <Route path="/clientes" element={<ClientesPage />} />
+              <Route path="/entrada" element={<EntradaPage />} />
+              <Route path="/formacoes" element={<FormacoesPage />} />
+              <Route path="/solucoes" element={<SolucoesPage />} />
+              <Route path="/ia" element={<IaPage />} />
+              <Route path="/organizacoes" element={<OrganizacoesPage />} />
+              <Route path="/jornada" element={<JornadaPage />} />
+              <Route path="/receita" element={<ReceitaPage />} />
+              <Route path="/cs" element={<CsPage />} />
+              <Route path="/regras" element={<RegrasPage />} />
+              <Route path="/design" element={<DesignPage />} />
+            </Route>
+          </Route>
+
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </FronteiraDeErro>
     </BrowserRouter>
   )
 }

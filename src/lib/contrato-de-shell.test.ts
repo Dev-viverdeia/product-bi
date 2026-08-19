@@ -15,6 +15,15 @@ const fontes = Object.entries(
   }) as Record<string, string>,
 ).map(([caminho, fonte]) => ({ caminho: caminho.replace('../', ''), fonte }))
 
+/** O router não mora em `components/`, e é ele que monta a fronteira externa. */
+const router = Object.values(
+  import.meta.glob('../app/router.tsx', {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  }) as Record<string, string>,
+)[0]!
+
 /**
  * Remove comentário antes de casar.
  *
@@ -197,5 +206,37 @@ describe('rail de navegação', () => {
    */
   it('não esconde o separador de grupo com first: num filho fixo', () => {
     expect(semComentarios(rail!.fonte)).not.toMatch(/first:hidden/)
+  })
+
+  /**
+   * Fronteira de erro: as duas, e a de dentro com chave.
+   *
+   * Sem nenhuma, um `throw` em qualquer das quatorze rotas dá tela branca sem
+   * mensagem nem recuperação — foi o estado do produto até 19/ago, no app que o
+   * CEO está validando.
+   *
+   * ⚠️ E o `key={pathname}` é a parte que falha CALADA. Sem ela o estado de erro
+   * sobrevive à navegação seguinte: a próxima tela nasce quebrada sem nunca ter
+   * sido renderizada, e o defeito passa a parecer estar em toda parte. Uma
+   * fronteira sem chave é pior que nenhuma, porque parece que está funcionando.
+   */
+  const layout = fontes.find((f) => f.caminho.endsWith('layout/app-layout.tsx'))
+
+  it('o Outlet nasce dentro de uma fronteira de erro com key', () => {
+    const fonte = semComentarios(layout!.fonte)
+    expect(fonte, 'AppLayout precisa montar a FronteiraDeErro').toMatch(/<FronteiraDeErro[ >]/)
+    expect(fonte, 'sem key={pathname} o erro trava na navegação seguinte').toMatch(
+      /<FronteiraDeErro[^>]*key=\{pathname\}/,
+    )
+    expect(fonte, 'a fronteira do módulo declara escopo="modulo"').toMatch(
+      /<FronteiraDeErro[^>]*escopo="modulo"/,
+    )
+  })
+
+  it('as rotas inteiras ficam dentro da fronteira externa', () => {
+    const fonte = semComentarios(router)
+    expect(fonte, 'login, 404 e o próprio shell ficam fora da fronteira de módulo').toMatch(
+      /<FronteiraDeErro[^>]*escopo="app"/,
+    )
   })
 })
