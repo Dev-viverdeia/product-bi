@@ -16,38 +16,14 @@ import {
   useDataReferencia,
   type Achado,
 } from '@/features/resumo/queries'
+import { selecionar } from '@/features/resumo/selecao'
 
-/** Teto de achados na leitura. Acima disso vira lista e ninguém lê até o fim. */
-const MAXIMO_DE_ACHADOS = 3
 
 const PLANO: Record<string, string> = {
   starter: 'Starter',
   pro: 'Pro',
   enterprise: 'Enterprise',
   sem_plano: 'sem plano',
-}
-
-/**
- * Seleção: no máximo três, no máximo um por família.
- *
- * Sem o corte por família a leitura diz "retenção" três vezes com palavras
- * diferentes. A ordem já vem do banco, por múltiplo do próprio limiar de cada
- * regra — é o que torna comparáveis regras de unidades diferentes.
- */
-function selecionar(achados: Achado[]) {
-  const candidatos = achados.filter((a) => !a.suprimida)
-  const visiveis: Achado[] = []
-  for (const achado of candidatos) {
-    if (visiveis.length >= MAXIMO_DE_ACHADOS) break
-    if (visiveis.some((v) => v.familia === achado.familia)) continue
-    visiveis.push(achado)
-  }
-  return {
-    visiveis,
-    suprimidos: achados.filter((a) => a.suprimida),
-    abaixoDoCorte: candidatos.length - visiveis.length,
-    avaliadas: achados.length,
-  }
 }
 
 /**

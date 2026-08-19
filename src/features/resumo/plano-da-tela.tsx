@@ -3,6 +3,7 @@ import { AlertCircleIcon, ArrowRightIcon } from 'lucide-react'
 
 import { PARAM_ABA } from '@/components/layout/aba-do-modulo'
 import { AcordeaoDeAchados } from '@/components/ui-marca/acordeao-de-achados'
+import { selecionar } from '@/features/resumo/selecao'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatInt } from '@/lib/format'
 import type { Periodo } from '@/lib/periodo'
@@ -107,9 +108,16 @@ export function PlanoDaTela({
     )
   }
 
+  // MESMA seleção da aba `Análise`, da função compartilhada: no máximo três,
+  // um por família. Aqui isto era `filter(!suprimida)` e mais nada — em
+  // Clientes dava 3 achados lá e 6 sugestões aqui, com a mesma RPC e o mesmo
+  // cache, e esta aba propunha AÇÃO cujo FATO não aparecia na aba ao lado.
   const todos = achados.data ?? []
-  const publicaveis = todos.filter((a) => !a.suprimida)
-  const suprimidos = todos.filter((a) => a.suprimida)
+  const {
+    visiveis: publicaveis,
+    suprimidos,
+    abaixoDoCorte,
+  } = selecionar(todos)
 
   return (
     /*
@@ -178,7 +186,9 @@ export function PlanoDaTela({
           </p>
           <p className="text-muted-foreground max-w-[52ch] leading-relaxed">
             Nada aqui é recalculado: é o mesmo achado que a aba <em>Análise</em> lê, com a mesma
-            régua. Muda o que fica em primeiro plano, nunca o número.
+            régua — no máximo três, um por família
+            {abaixoDoCorte > 0 ? `, ${formatInt(abaixoDoCorte)} abaixo do corte` : ''}. Muda o
+            que fica em primeiro plano, nunca o número.
           </p>
         </section>
 
