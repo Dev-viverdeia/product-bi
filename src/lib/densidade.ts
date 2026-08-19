@@ -235,4 +235,6 @@ export const TELAS_NA_DENSIDADE = [
   'features/jornada/jornada-page.tsx',
   'features/formacoes/formacoes-page.tsx',
   'features/solucoes/solucoes-page.tsx',
+  'features/ia/ia-page.tsx',
+  'features/entrada/entrada-page.tsx',
 ]

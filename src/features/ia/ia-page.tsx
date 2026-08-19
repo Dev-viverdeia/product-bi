@@ -6,7 +6,6 @@ import {
   LayersIcon,
   MessagesSquareIcon,
   RepeatIcon,
-  RouteIcon,
   ShieldCheckIcon,
   SlidersHorizontalIcon,
   TargetIcon,
@@ -158,9 +157,9 @@ export function IaPage() {
           graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
-                titulo="Quanto do público as ferramentas alcançam"
+                titulo="Quantos usam a IA e quem volta a usar"
                 icone={TargetIcon}
-                descricao="Os dois acompanham o período escolhido acima — as demais seções do módulo são recortes históricos fixos. Contam clientes distintos, nunca mensagens, e a mesma pessoa entra nos dois: um reparte por ferramenta, o outro por quantos dias diferentes ela voltou."
+                descricao="Adoção e recorrência seguem o período acima e contam clientes distintos, nunca mensagens; a mesma pessoa entra nos dois. A porta de entrada é coorte fixa e antiga, fora do período — diferença entre modos só vale acima da margem do card."
               >
                 <BentoItem span={6}>
                   <ChartCard
@@ -230,13 +229,6 @@ export function IaPage() {
                     />
                   </ChartCard>
                 </BentoItem>
-              </SecaoDeAnalise>
-
-              <SecaoDeAnalise
-                titulo="A estreia decide se o cliente volta"
-                icone={RouteIcon}
-                descricao="O seletor de período acima não alcança esta seção: a coorte é fixa, e antiga de propósito, para que todo cliente tenha tido a mesma janela de chance de voltar. Diferença entre dois modos só é diferença quando passa da margem declarada no card."
-              >
                 <BentoItem span={12}>
                   <TabelaCard
                     nivel="comparativo"
@@ -363,67 +355,9 @@ export function IaPage() {
               </SecaoDeAnalise>
 
               <SecaoDeAnalise
-                titulo="Onde o Builder trava"
-                icone={GaugeIcon}
-                descricao="Única leitura de máquina do módulo: a unidade é a geração, não a pessoa, e a janela é fixa em 90 dias. Volume de etapa aqui não se compara com volume de uso nas outras seções, onde cada linha é um cliente ou uma conversa."
-              >
-                <BentoItem span={12}>
-                  <TabelaCard
-                    nivel="diagnostico"
-                    id="card-builder-etapas"
-                    icon={WrenchIcon}
-                    title="Builder — confiabilidade por etapa"
-                    headline={
-                      etapaMaisFragil?.pct_erro != null
-                        ? `${formatDecimal(etapaMaisFragil.pct_erro)}%`
-                        : '—'
-                    }
-                    headlineLabel={
-                      etapaMaisFragil
-                        ? `de erro na etapa mais frágil (${etapaMaisFragil.step})`
-                        : undefined
-                    }
-                    description="Gerações dos últimos 90 dias · ordenado pelas etapas mais lentas · erro alto ou tempo alto = atrito na experiência"
-                    isLoading={steps.isLoading}
-                    isRefreshing={steps.isFetching && !!steps.data}
-                    isError={steps.isError}
-                    onRetry={() => void steps.refetch()}
-                  >
-                    <TabelaLonga
-                      linhas={steps.data ?? []}
-                      chave={(s) => s.step}
-                      buscarEm={(s) => [s.step]}
-                      rotuloBusca="Buscar etapa"
-                      vazio="Nenhuma geração registrada nos últimos 90 dias."
-                      cabecalho={
-                        <TableRow>
-                          <TableHead>Etapa</TableHead>
-                          <TableHead className="text-right">Gerações</TableHead>
-                          <TableHead className="text-right">Erro</TableHead>
-                          <TableHead className="text-right">Tempo médio</TableHead>
-                        </TableRow>
-                      }
-                      renderLinha={(s) => (
-                        <TableRow>
-                          <TableCell className="font-mono text-xs">{s.step}</TableCell>
-                          <TableCell className="num text-right">{formatInt(s.geracoes)}</TableCell>
-                          <TableCell className="num text-right">
-                            {s.pct_erro != null ? `${formatDecimal(s.pct_erro)}%` : '—'}
-                          </TableCell>
-                          <TableCell className="num text-right">
-                            {s.segundos_medio != null ? `${formatDecimal(s.segundos_medio)}s` : '—'}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    />
-                  </TabelaCard>
-                </BentoItem>
-              </SecaoDeAnalise>
-
-              <SecaoDeAnalise
                 titulo="O que acontece com quem experimenta a IA"
                 icone={TrendingUpIcon}
-                descricao="Os dois olham o depois do primeiro contato por caminhos opostos: um fecha uma coorte antiga e compara dois grupos, o outro é a lista aberta de hoje, nome a nome. Nenhum responde ao período escolhido acima. E o grupo que usou IA se autosselecionou — quem procura a ferramenta já é diferente de quem não procura, e nenhum recorte desta seção corrige isso."
+                descricao="Nenhum dos dois segue o período acima: um fecha uma coorte antiga e compara dois grupos, o outro é a lista de hoje, nome a nome. E quem usou IA se autosselecionou — a diferença entre os grupos é correlação, não efeito da ferramenta."
               >
                 <BentoItem span={12}>
                   <TabelaCard
@@ -521,6 +455,74 @@ export function IaPage() {
                           </TableCell>
                           <TableCell className="num text-right font-medium">
                             {formatInt(c.dias_sem_ia)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+
+              {/*
+                DENSIDADE_DECLARADA: cardsPorSecaoNoMinimo — esta seção tem um
+                card só porque ele é a única leitura de MÁQUINA do módulo: a
+                unidade é a geração, não a pessoa nem a conversa, e a janela é
+                fixa em 90 dias. Não há segundo card de máquina na tela para
+                agrupar, e o vizinho mais parecido em forma ("Onde a conversa
+                para") mede outra coisa — juntar poria taxa de erro de geração
+                ao lado de comportamento de quem conversa, como se fossem a
+                mesma pergunta.
+              */}
+              <SecaoDeAnalise
+                titulo="Onde o Builder trava"
+                icone={GaugeIcon}
+                descricao="Única leitura de máquina do módulo: a unidade é a geração, não a pessoa, e a janela é fixa em 90 dias. Volume de etapa aqui não se compara com volume de uso nas outras seções, onde cada linha é um cliente ou uma conversa."
+              >
+                <BentoItem span={12}>
+                  <TabelaCard
+                    nivel="diagnostico"
+                    id="card-builder-etapas"
+                    icon={WrenchIcon}
+                    title="Builder — confiabilidade por etapa"
+                    headline={
+                      etapaMaisFragil?.pct_erro != null
+                        ? `${formatDecimal(etapaMaisFragil.pct_erro)}%`
+                        : '—'
+                    }
+                    headlineLabel={
+                      etapaMaisFragil
+                        ? `de erro na etapa mais frágil (${etapaMaisFragil.step})`
+                        : undefined
+                    }
+                    description="Gerações dos últimos 90 dias · ordenado pelas etapas mais lentas · erro alto ou tempo alto = atrito na experiência"
+                    isLoading={steps.isLoading}
+                    isRefreshing={steps.isFetching && !!steps.data}
+                    isError={steps.isError}
+                    onRetry={() => void steps.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={steps.data ?? []}
+                      chave={(s) => s.step}
+                      buscarEm={(s) => [s.step]}
+                      rotuloBusca="Buscar etapa"
+                      vazio="Nenhuma geração registrada nos últimos 90 dias."
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Etapa</TableHead>
+                          <TableHead className="text-right">Gerações</TableHead>
+                          <TableHead className="text-right">Erro</TableHead>
+                          <TableHead className="text-right">Tempo médio</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(s) => (
+                        <TableRow>
+                          <TableCell className="font-mono text-xs">{s.step}</TableCell>
+                          <TableCell className="num text-right">{formatInt(s.geracoes)}</TableCell>
+                          <TableCell className="num text-right">
+                            {s.pct_erro != null ? `${formatDecimal(s.pct_erro)}%` : '—'}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {s.segundos_medio != null ? `${formatDecimal(s.segundos_medio)}s` : '—'}
                           </TableCell>
                         </TableRow>
                       )}
