@@ -167,9 +167,143 @@ export function OrganizacoesPage() {
           graficos: (
             <div className="space-y-4">
               <SecaoDeAnalise
+                titulo="O que já foi contratado e ainda não virou uso"
+                icone={ClipboardListIcon}
+                descricao="As duas listas viram tarefa de CS e têm grãos diferentes: uma linha é um benefício oferecido à base inteira, a outra é uma organização nomeada. Nenhuma ordena por dinheiro — não há valor em reais nesta tela, só gente, assento e uso."
+              >
+                <BentoItem span={12}>
+                  <TabelaCard
+                    nivel="prescritivo"
+                    icon={PackageOpenIcon}
+                    title="Valor contratado e não consumido"
+                    headline={
+                      maisDesperdicado?.pct_uso != null
+                        ? formatPercent(maisDesperdicado.pct_uso)
+                        : '—'
+                    }
+                    headlineLabel={
+                      maisDesperdicado
+                        ? `de uso no mais parado (${maisDesperdicado.item})`
+                        : undefined
+                    }
+                    description="Benefícios que a empresa entrega e o cliente não usa — churn silencioso e oportunidade de ativação por CS"
+                    isLoading={valor.isLoading}
+                    isRefreshing={valor.isFetching && !!valor.data}
+                    isError={valor.isError}
+                    onRetry={() => void valor.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={valor.data ?? []}
+                      chave={(v) => v.item}
+                      buscarEm={(v) => [v.item]}
+                      rotuloBusca="Buscar benefício"
+                      vazio="Nenhum benefício disponível no período."
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Benefício</TableHead>
+                          <TableHead className="text-right">Disponível</TableHead>
+                          <TableHead className="text-right">Usado</TableHead>
+                          <TableHead className="text-right">% de uso</TableHead>
+                          <TableHead className="text-right">Beneficiários</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(v) => (
+                        <TableRow>
+                          <TableCell className="font-medium">{v.item}</TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(v.disponivel)}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(v.usado)}
+                          </TableCell>
+                          <TableCell className="num text-right font-medium">
+                            {v.pct_uso != null ? formatPercent(v.pct_uso) : '—'}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(v.beneficiarios)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
+
+                <BentoItem span={12}>
+                  <TabelaCard
+                    nivel="prescritivo"
+                    icon={AlertTriangleIcon}
+                    title="Organizações em risco — time parado"
+                    headline={
+                      orgMaisParada?.pct_time_ativo != null
+                        ? formatPercent(orgMaisParada.pct_time_ativo)
+                        : '—'
+                    }
+                    headlineLabel={
+                      orgMaisParada
+                        ? `de time ativo na pior (${orgMaisParada.organizacao})`
+                        : undefined
+                    }
+                    description="Orgs ativas com 3+ membros, ordenadas pelo menor percentual de time ativo · lista para ação de CS"
+                    isLoading={risco.isLoading}
+                    isRefreshing={risco.isFetching && !!risco.data}
+                    isError={risco.isError}
+                    onRetry={() => void risco.refetch()}
+                  >
+                    <TabelaLonga
+                      linhas={risco.data ?? []}
+                      chave={(r) => String(r.organizacao)}
+                      buscarEm={(r) => [r.organizacao]}
+                      rotuloBusca="Buscar por organização"
+                      // 25 de 1.031 organizações elegíveis. O corte só existia
+                      // na prosa da seção, e a régua de densidade manda encurtar
+                      // essa prosa — aqui ele vira mecanismo: a TabelaLonga só
+                      // anuncia quando o corte de fato morde.
+                      limiteDaFonte={25}
+                      cabecalho={
+                        <TableRow>
+                          <TableHead>Organização</TableHead>
+                          <TableHead>Plano</TableHead>
+                          <TableHead className="text-right">Membros</TableHead>
+                          <TableHead className="text-right">Ativos 30d</TableHead>
+                          <TableHead className="text-right">Time ativo</TableHead>
+                          <TableHead>Master</TableHead>
+                          <TableHead className="text-right">Assentos ociosos</TableHead>
+                        </TableRow>
+                      }
+                      renderLinha={(r) => (
+                        <TableRow>
+                          <TableCell className="max-w-64 truncate font-medium">
+                            {r.organizacao}
+                          </TableCell>
+                          <TableCell>{r.plano ?? '—'}</TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(r.membros)}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(r.ativos_30d)}
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {r.pct_time_ativo != null ? formatPercent(r.pct_time_ativo) : '—'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={r.master_ativo ? 'secondary' : 'outline'}>
+                              {r.master_ativo ? 'Ativo' : 'Parado'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="num text-right">
+                            {formatInt(r.assentos_ociosos)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </TabelaCard>
+                </BentoItem>
+              </SecaoDeAnalise>
+
+              <SecaoDeAnalise
                 titulo="Quanto de cada conta está de fato dentro do produto"
                 icone={Building2Icon}
-                descricao="Três recortes da mesma base de contas, com denominadores que não se somam: a ocupação compara membros cadastrados com o limite contratado, enquanto os outros dois comparam quem teve ação nos 30 dias até o último dia com dado contra os membros que a conta já tem. Assento preenchido não é assento que aparece."
+                descricao="Três recortes da mesma base, com denominadores que não se somam: a ocupação compara membros com o limite contratado; os outros dois, quem teve ação nos últimos 30 dias com os membros da conta. Assento preenchido não é assento que aparece."
               >
                 <BentoItem span={12}>
                   <TabelaCard
@@ -323,7 +457,7 @@ export function OrganizacoesPage() {
               <SecaoDeAnalise
                 titulo="O master puxa o time, ou é o primeiro a sumir"
                 icone={NetworkIcon}
-                descricao="Os dois cards leem a mesma dupla master–time por ângulos opostos: um compara contas em que o master está ativo com contas em que ele parou, o outro entra só nas contas já esfriadas e pergunta quem parou antes. Os dois mostram associação, não causa — master ativo pode ser sintoma de conta saudável, e não o motivo dela."
+                descricao="A mesma dupla master–time por ângulos opostos: um compara contas com o master ativo contra contas em que ele parou; o outro entra nas já esfriadas e pergunta quem parou antes. Associação, não causa: master ativo pode ser sintoma."
               >
                 <BentoItem span={6}>
                   <TabelaCard
@@ -415,135 +549,6 @@ export function OrganizacoesPage() {
                         ))}
                       </TableBody>
                     </Table>
-                  </TabelaCard>
-                </BentoItem>
-              </SecaoDeAnalise>
-
-              <SecaoDeAnalise
-                titulo="O que já foi contratado e ainda não virou uso"
-                icone={ClipboardListIcon}
-                descricao="As duas listas existem para virar tarefa de CS e mudam de grão entre si: uma linha é um benefício oferecido à base inteira, a outra é uma organização nomeada. A janela de atividade é a do módulo, declarada no topo da tela, e a lista de organizações vem cortada nas 25 mais paradas — a contagem aqui é o tamanho da lista, não o tamanho do problema. Nenhuma das duas ordena por dinheiro: não há valor em reais nesta tela, só volume de gente, de assento e de uso."
-              >
-                <BentoItem span={12}>
-                  <TabelaCard
-                    nivel="prescritivo"
-                    icon={PackageOpenIcon}
-                    title="Valor contratado e não consumido"
-                    headline={
-                      maisDesperdicado?.pct_uso != null
-                        ? formatPercent(maisDesperdicado.pct_uso)
-                        : '—'
-                    }
-                    headlineLabel={
-                      maisDesperdicado
-                        ? `de uso no mais parado (${maisDesperdicado.item})`
-                        : undefined
-                    }
-                    description="Benefícios que a empresa entrega e o cliente não usa — churn silencioso e oportunidade de ativação por CS"
-                    isLoading={valor.isLoading}
-                    isRefreshing={valor.isFetching && !!valor.data}
-                    isError={valor.isError}
-                    onRetry={() => void valor.refetch()}
-                  >
-                    <TabelaLonga
-                      linhas={valor.data ?? []}
-                      chave={(v) => v.item}
-                      buscarEm={(v) => [v.item]}
-                      rotuloBusca="Buscar benefício"
-                      vazio="Nenhum benefício disponível no período."
-                      cabecalho={
-                        <TableRow>
-                          <TableHead>Benefício</TableHead>
-                          <TableHead className="text-right">Disponível</TableHead>
-                          <TableHead className="text-right">Usado</TableHead>
-                          <TableHead className="text-right">% de uso</TableHead>
-                          <TableHead className="text-right">Beneficiários</TableHead>
-                        </TableRow>
-                      }
-                      renderLinha={(v) => (
-                        <TableRow>
-                          <TableCell className="font-medium">{v.item}</TableCell>
-                          <TableCell className="num text-right">
-                            {formatInt(v.disponivel)}
-                          </TableCell>
-                          <TableCell className="num text-right">
-                            {formatInt(v.usado)}
-                          </TableCell>
-                          <TableCell className="num text-right font-medium">
-                            {v.pct_uso != null ? formatPercent(v.pct_uso) : '—'}
-                          </TableCell>
-                          <TableCell className="num text-right">
-                            {formatInt(v.beneficiarios)}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    />
-                  </TabelaCard>
-                </BentoItem>
-
-                <BentoItem span={12}>
-                  <TabelaCard
-                    nivel="prescritivo"
-                    icon={AlertTriangleIcon}
-                    title="Organizações em risco — time parado"
-                    headline={
-                      orgMaisParada?.pct_time_ativo != null
-                        ? formatPercent(orgMaisParada.pct_time_ativo)
-                        : '—'
-                    }
-                    headlineLabel={
-                      orgMaisParada
-                        ? `de time ativo na pior (${orgMaisParada.organizacao})`
-                        : undefined
-                    }
-                    description="Orgs ativas com 3+ membros, ordenadas pelo menor percentual de time ativo · lista para ação de CS"
-                    isLoading={risco.isLoading}
-                    isRefreshing={risco.isFetching && !!risco.data}
-                    isError={risco.isError}
-                    onRetry={() => void risco.refetch()}
-                  >
-                    <TabelaLonga
-                      linhas={risco.data ?? []}
-                      chave={(r) => String(r.organizacao)}
-                      buscarEm={(r) => [r.organizacao]}
-                      rotuloBusca="Buscar por organização"
-                      cabecalho={
-                        <TableRow>
-                          <TableHead>Organização</TableHead>
-                          <TableHead>Plano</TableHead>
-                          <TableHead className="text-right">Membros</TableHead>
-                          <TableHead className="text-right">Ativos 30d</TableHead>
-                          <TableHead className="text-right">Time ativo</TableHead>
-                          <TableHead>Master</TableHead>
-                          <TableHead className="text-right">Assentos ociosos</TableHead>
-                        </TableRow>
-                      }
-                      renderLinha={(r) => (
-                        <TableRow>
-                          <TableCell className="max-w-64 truncate font-medium">
-                            {r.organizacao}
-                          </TableCell>
-                          <TableCell>{r.plano ?? '—'}</TableCell>
-                          <TableCell className="num text-right">
-                            {formatInt(r.membros)}
-                          </TableCell>
-                          <TableCell className="num text-right">
-                            {formatInt(r.ativos_30d)}
-                          </TableCell>
-                          <TableCell className="num text-right">
-                            {r.pct_time_ativo != null ? formatPercent(r.pct_time_ativo) : '—'}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={r.master_ativo ? 'secondary' : 'outline'}>
-                              {r.master_ativo ? 'Ativo' : 'Parado'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="num text-right">
-                            {formatInt(r.assentos_ociosos)}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    />
                   </TabelaCard>
                 </BentoItem>
               </SecaoDeAnalise>

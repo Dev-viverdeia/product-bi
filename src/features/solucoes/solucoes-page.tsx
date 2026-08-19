@@ -170,6 +170,11 @@ export function SolucoesPage() {
                       linhas={ranking.data ?? []}
                       chave={(r) => String(r.solucao)}
                       buscarEm={(r) => [r.solucao, r.categoria]}
+                      // A RPC corta em 200 e hoje o catálogo tem 158, então o
+                      // corte não morde — e a TabelaLonga só anuncia quando
+                      // morde. Declarar aqui é o que faz o dia em que morder
+                      // aparecer sozinho, em vez de a lista encurtar calada.
+                      limiteDaFonte={200}
                       rotuloBusca="Buscar por solução ou categoria"
                       cabecalho={
                         <TableRow>

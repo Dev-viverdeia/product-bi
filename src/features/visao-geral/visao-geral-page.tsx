@@ -374,6 +374,15 @@ export function VisaoGeralPage() {
                 </BentoItem>
               </SecaoDeAnalise>
 
+              {/*
+                DENSIDADE_DECLARADA: cardsPorSecaoNoMinimo, prescritivoNaoSoNoFim —
+                "Saúde do rastreio" é meta-card: ele não responde à mesma pergunta
+                de nenhum outro card desta tela, ele PROVA os outros seis. Agrupar
+                com qualquer um seria dizer que os dois medem o mesmo assunto, e
+                fechar a tela é o lugar certo de quem responde "dá para confiar no
+                que você acabou de ler". A régua de ordem existe para garantir que
+                a ordem foi escolhida, não para impor uma só — esta foi.
+              */}
               <SecaoDeAnalise
                 titulo="Dá para confiar no que está sendo medido"
                 icone={DatabaseIcon}

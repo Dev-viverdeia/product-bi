@@ -39,26 +39,6 @@ export function useHeatmapNavegacao(dias: Periodo, recorte: Recorte) {
   })
 }
 
-export function useEventosPorTipo(dias: Periodo, recorte: Recorte) {
-  return useQuery({
-    queryKey: ['bi', 'eventos-por-tipo', dias, recorte.papel, recorte.plano],
-    queryFn: async () =>
-      (await rpc(
-        supabase.rpc('bi_eventos_por_tipo', { p_dias: dias, ...argsSegmento(recorte) }),
-      )) ?? [],
-  })
-}
-
-export function useTopTelas(dias: Periodo, recorte: Recorte) {
-  return useQuery({
-    queryKey: ['bi', 'top-telas', dias, recorte.papel, recorte.plano],
-    queryFn: async () =>
-      (await rpc(
-        supabase.rpc('bi_top_telas', { p_dias: dias, p_limite: 10, ...argsSegmento(recorte) }),
-      )) ?? [],
-  })
-}
-
 /** Ativos decompostos em novos, reativados e retidos — de onde veio o número. */
 export function useComposicaoCrescimento(dias: Periodo, recorte: Recorte) {
   return useQuery({
