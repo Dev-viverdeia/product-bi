@@ -326,8 +326,11 @@ export type Database = {
       bi_cs_atendimento_ia_humano: {
         Args: { p_dias?: number }
         Returns: {
+          ciclos_total: number
           com_humano: number
           desfecho: string
+          pct_dos_sem_humano: number
+          sem_humano_total: number
           so_ia: number
           total: number
         }[]
@@ -645,7 +648,12 @@ export type Database = {
       bi_ia_adocao: {
         Args: { p_dias?: number }
         Returns: {
+          alcance: number
+          alcance_builder: number
+          alcance_consultor: number
+          ativos: number
           ferramenta: string
+          ordem: number
           pct_dos_ativos: number
           usuarios: number
         }[]
@@ -849,6 +857,10 @@ export type Database = {
           faixa: string
           ordem: number
           orgs: number
+          orgs_ativas: number
+          orgs_com_limite: number
+          orgs_sem_limite: number
+          pct_das_com_limite: number
         }[]
       }
       bi_orgs_por_tamanho: {

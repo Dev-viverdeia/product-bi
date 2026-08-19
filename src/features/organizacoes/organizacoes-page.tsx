@@ -97,14 +97,15 @@ export function OrganizacoesPage() {
     return itens.reduce((a, b) => ((b.pct_uso ?? 1) < (a.pct_uso ?? 1) ? b : a))
   }, [valor.data])
 
-  // Faixa com mais organizações — onde a base de fato está.
+  // Faixa com mais organizações — onde a base com limite de fato está. A fatia
+  // vem do banco (`pct_das_com_limite`), não de soma no front: contagem nunca é
+  // suprimida, e percentual derivado dela escaparia da régua de amostra.
   const faixaLotacao = useMemo(() => {
     const fs = ocupacao.data ?? []
-    if (fs.length === 0) return null
-    const maior = fs.reduce((a, b) => (b.orgs > a.orgs ? b : a))
-    const total = fs.reduce((soma, o) => soma + o.orgs, 0)
-    return total > 0 ? { faixa: maior.faixa, parte: maior.orgs / total } : null
+    return fs.length > 0 ? fs.reduce((a, b) => (b.orgs > a.orgs ? b : a)) : null
   }, [ocupacao.data])
+  // Cobertura: colunas de janela, iguais em toda linha.
+  const coberturaAssentos = ocupacao.data?.[0] ?? null
 
   // Lista de risco vem ordenada pela pior; nada de somar (pode vir cortada).
   const orgMaisParada = risco.data?.[0] ?? null
@@ -284,9 +285,19 @@ export function OrganizacoesPage() {
                     nivel="descritivo"
                     icon={ArmchairIcon}
                     title="Ocupação de assentos"
-                    headline={faixaLotacao ? formatPercent(faixaLotacao.parte) : '—'}
-                    headlineLabel={faixaLotacao ? `das orgs em ${faixaLotacao.faixa}` : undefined}
-                    description="Membros vs limite contratado · orgs lotadas são oportunidade de upsell; abaixo de 50%, risco de valor não percebido"
+                    headline={
+                      faixaLotacao?.pct_das_com_limite != null
+                        ? formatPercent(faixaLotacao.pct_das_com_limite)
+                        : '—'
+                    }
+                    headlineLabel={
+                      faixaLotacao ? `das orgs com limite em ${faixaLotacao.faixa}` : undefined
+                    }
+                    description={
+                      coberturaAssentos
+                        ? `Membros vs limite contratado · orgs lotadas são oportunidade de upsell; abaixo de 50%, risco de valor não percebido · o denominador é a base COM limite (${formatInt(coberturaAssentos.orgs_com_limite)} de ${formatInt(coberturaAssentos.orgs_ativas)} orgs ativas): as outras ${formatInt(coberturaAssentos.orgs_sem_limite)} não têm limite definido e ficam fora do eixo, porque sem limite não há ocupação a medir`
+                        : 'Membros vs limite contratado · orgs lotadas são oportunidade de upsell; abaixo de 50%, risco de valor não percebido'
+                    }
                     isLoading={ocupacao.isLoading}
                     isError={ocupacao.isError}
                     onRetry={() => void ocupacao.refetch()}

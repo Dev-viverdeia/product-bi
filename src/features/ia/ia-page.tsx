@@ -84,10 +84,10 @@ export function IaPage() {
       ? comIa.pct_retencao / semIa.pct_retencao
       : null
 
-  const ferramentaLider = useMemo(() => {
-    const fs = adocao.data ?? []
-    return fs.length > 0 ? fs.reduce((a, b) => (b.usuarios > a.usuarios ? b : a)) : null
-  }, [adocao.data])
+  // As três linhas são uma PARTIÇÃO e somam o alcance; `alcance`, `ativos` e o
+  // alcance de cada ferramenta chegam como coluna de janela, iguais em toda
+  // linha. Ler a primeira é ler todas — nada é somado nem dividido aqui.
+  const adocaoBase = adocao.data?.[0] ?? null
 
   // Recorrência é sobre hábito: interessa quem passou da faixa de um dia só.
   const voltamOutroDia = useMemo(() => {
@@ -168,9 +168,13 @@ export function IaPage() {
                     id="card-adocao-ia"
                     icon={BotIcon}
                     title="Adoção entre clientes ativos"
-                    headline={ferramentaLider ? formatInt(ferramentaLider.usuarios) : '—'}
-                    headlineLabel={ferramentaLider ? `em ${ferramentaLider.ferramenta}` : undefined}
-                    description={`Dos clientes com atividade nos últimos ${periodo} dias, quantos usam cada ferramenta`}
+                    headline={adocaoBase ? formatInt(adocaoBase.alcance) : '—'}
+                    headlineLabel={
+                      adocaoBase
+                        ? `de ${formatInt(adocaoBase.ativos)} clientes ativos usam alguma IA`
+                        : undefined
+                    }
+                    description={`Partição: as três barras não se sobrepõem e somam o alcance · quem usa as duas ferramentas aparece só em “Os dois” · o alcance de cada ferramenta isolada está no tooltip da barra dela · base = clientes com alguma ação nos últimos ${periodo} dias`}
                     isLoading={adocao.isLoading}
                     isError={adocao.isError}
                     onRetry={() => void adocao.refetch()}
@@ -182,6 +186,16 @@ export function IaPage() {
                       data={(adocao.data ?? []).map((a) => ({
                         category: a.ferramenta,
                         value: a.usuarios,
+                        // O alcance de cada ferramenta (com ou sem a outra) não é
+                        // fatia deste gráfico, e é o número que a aba Análise
+                        // afirma. Vai pelo canal de anotação, que existe para
+                        // exatamente isto — não vira quarta barra nem segundo eixo.
+                        nota:
+                          a.ordem === 1
+                            ? `Consultor ao todo: ${formatInt(a.alcance_consultor)}`
+                            : a.ordem === 3
+                              ? `Builder ao todo: ${formatInt(a.alcance_builder)}`
+                              : 'contam nos dois totais acima',
                       }))}
                       valueFormatter={formatInt}
                       className="h-[240px]"

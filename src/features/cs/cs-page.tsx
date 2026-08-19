@@ -108,12 +108,16 @@ export function CsPage() {
     return meses.length > 0 ? meses.reduce((a, b) => (b.atendimentos > a.atendimentos ? b : a)) : null
   }, [mensal.data])
 
-  const resolvidoPelaIa = useMemo(() => {
-    const linhas = iaHumano.data ?? []
-    const total = linhas.reduce((soma, l) => soma + Number(l.total), 0)
-    if (total === 0) return null
-    return linhas.reduce((soma, l) => soma + Number(l.so_ia), 0) / total
-  }, [iaHumano.data])
+  // Vocabulário da origem, não rótulo de exibição: 'resolvido' é o valor que o
+  // Pulse grava. A fatia sai do banco (`pct_dos_sem_humano`) e tem denominador
+  // nos ciclos SEM humano — que é a base sobre a qual o título pergunta, e a
+  // que fica pequena numa janela curta.
+  const semHumanoResolvido = useMemo(
+    () => (iaHumano.data ?? []).find((l) => l.desfecho === 'resolvido') ?? null,
+    [iaHumano.data],
+  )
+  // Cobertura: colunas de janela, iguais em toda linha.
+  const coberturaIaHumano = iaHumano.data?.[0] ?? null
 
   // Vocabulário da origem: RETIDO / PERDIDO / EM_ABERTO, no grão de cliente
   // deduplicado. A régua anterior (REVERTIDO/CANCELADO por empresa) era nossa e
@@ -275,9 +279,17 @@ export function CsPage() {
                   <ChartCard
                     icon={BotIcon}
                     title="A IA resolveu sozinha?"
-                    headline={resolvidoPelaIa != null ? formatPercent(resolvidoPelaIa) : '—'}
-                    headlineLabel="sem humano assumir"
-                    description="Ciclo sem atendente humano registrado — a IA respondeu e ninguém precisou entrar. Quem assumiu é medido por quem de fato respondeu, não por atribuição formal."
+                    headline={
+                      semHumanoResolvido?.pct_dos_sem_humano != null
+                        ? formatPercent(semHumanoResolvido.pct_dos_sem_humano)
+                        : '—'
+                    }
+                    headlineLabel="dos ciclos sem humano terminaram resolvidos"
+                    description={
+                      coberturaIaHumano
+                        ? `Ciclo sem atendente humano registrado — a IA respondeu e ninguém precisou entrar. As barras repartem esses ciclos por desfecho e somam ${formatInt(coberturaIaHumano.sem_humano_total)}, de ${formatInt(coberturaIaHumano.ciclos_total)} ciclos no período; o headline é a primeira barra sobre esse total. Quem assumiu é medido por quem de fato respondeu, não por atribuição formal.`
+                        : 'Ciclo sem atendente humano registrado — a IA respondeu e ninguém precisou entrar. Quem assumiu é medido por quem de fato respondeu, não por atribuição formal.'
+                    }
                     isLoading={iaHumano.isLoading}
                     isError={iaHumano.isError}
                     onRetry={() => void iaHumano.refetch()}
