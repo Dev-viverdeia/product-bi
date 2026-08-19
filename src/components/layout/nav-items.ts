@@ -32,9 +32,10 @@ export type AbaDoModulo = {
 /**
  * Blocos do rail lateral.
  *
- * O rail mostra só ícone, então o agrupamento É a única pista de arquitetura que
- * o leitor tem antes de passar o mouse. Um espaço entre blocos diz "estes quatro
- * respondem o mesmo tipo de pergunta" sem gastar uma palavra.
+ * O agrupamento é a arquitetura da navegação: um espaço entre blocos diz "estes
+ * respondem o mesmo tipo de pergunta" sem gastar uma palavra. Com o rail só de
+ * ícone ele era a ÚNICA pista antes de passar o mouse; desde que o rótulo voltou
+ * (19/ago) ele deixou de ser a única e continua sendo a que organiza a lista.
  *
  * A ordem é a da pergunta que o negócio faz, não a da entrega: quem é o cliente
  * → o que ele usa → quanto isso vale.

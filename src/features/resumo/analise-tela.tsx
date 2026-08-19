@@ -181,14 +181,30 @@ export function AnaliseDaTela({
       coluna que só precisa de texto. Aqui ela pousa direto na página e usa a
       largura inteira.
 
-      Duas colunas a partir de lg: os achados à esquerda, numa medida de leitura
+      Duas colunas a partir de xl: os achados à esquerda, numa medida de leitura
       fixa, e o aparato à direita — o que não dá para afirmar e como se apurou.
       A separação não é só de espaço: um é o conteúdo, o outro é a prestação de
       contas, e misturá-los na mesma coluna faz o leitor atravessar régua para
-      chegar ao próximo achado. Abaixo de lg empilha, e o aparato vai para o
+      chegar ao próximo achado. Abaixo de xl empilha, e o aparato vai para o
       fim, que é onde ele pertence quando não cabe ao lado.
+
+      ⚠️ **Era `lg`, e virou `xl` em 19/ago quando o rail passou a ter rótulo.**
+      O teto de `26rem` na coluna da direita existe para o apoio nunca superar a
+      leitura — e entre 1024 e 1135px de viewport ele passou a produzir
+      exatamente o contrário. A conta: o rail de 208px deixa `main` com 776px,
+      menos o `gap-14` sobram 720px; o grid distribui a folga IGUALMENTE a
+      partir das bases (0 e 16rem), a faixa da direita congela no teto de 416px
+      e a da esquerda fica com os 304px restantes. O aparato ficava 37% mais
+      largo que a leitura, que quebrava em ~40 caracteres por linha. Com o rail
+      de 68px a mesma largura dava 444 × 416, na ordem certa — quem inverteu foi
+      o rail mais largo, não este arquivo.
+
+      **O modo de falha é a razão de estar escrito aqui:** a inversão é
+      invisível nos dois checkpoints do projeto (375px empilha, 1280px dá
+      560 × 416) e só aparece numa banda de 112px no meio. Mexer na largura do
+      rail obriga a refazer esta conta.
     */
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,68ch)_minmax(16rem,26rem)] lg:gap-14">
+    <div className="grid gap-10 xl:grid-cols-[minmax(0,68ch)_minmax(16rem,26rem)] xl:gap-14">
       <div className="space-y-8">
         <header className="space-y-1">
           <h2 className="text-xl font-medium tracking-tight">O que os dados dizem</h2>
@@ -240,7 +256,7 @@ export function AnaliseDaTela({
       )}
       </div>
 
-      <aside className="space-y-8 lg:pt-14">
+      <aside className="space-y-8 xl:pt-14">
       {suprimidos.length > 0 && apuracao ? (
         <section className="space-y-2">
           <h3 className="text-base font-medium tracking-tight">O que não dá para afirmar</h3>

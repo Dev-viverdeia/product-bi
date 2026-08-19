@@ -106,10 +106,21 @@ function NavegacaoEmGaveta() {
                 onClick={() => setAberto(false)}
                 aria-current={ativo ? 'page' : undefined}
                 className={cn(
-                  'focus-visible:ring-ring flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none',
+                  'focus-visible:ring-ring flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none',
+                  /*
+                    ⚠️ O ativo era `bg-accent`, e ele não aparecia: #f0f2f5 sobre
+                    o #edeef1 da gaveta dá 1,03:1 de contraste — no escuro,
+                    rgba(255,255,255,0.06) sobre #0a1120 dá 1,15:1. O único
+                    canal real de estado era a cor do texto. Defeito de 13/ago,
+                    achado na revisão de 19/ago.
+
+                    A pílula preenchida é a mesma do rail, de propósito: esta
+                    gaveta É o rail abaixo de `lg`, e o mesmo menu não pode
+                    marcar "onde estou" de dois jeitos conforme a largura.
+                  */
                   ativo
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                    ? 'bg-primary text-primary-foreground font-medium'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground font-normal',
                 )}
               >
                 <item.icon className="size-4 shrink-0" />

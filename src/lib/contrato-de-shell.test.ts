@@ -142,3 +142,60 @@ describe('padrão de três abas em todo módulo', () => {
     expect(abas).toEqual(['graficos', 'analise', 'plano'])
   })
 })
+
+describe('rail de navegação', () => {
+  const rail = fontes.find((f) => f.caminho.endsWith('app-rail.tsx'))
+
+  it('o arquivo existe', () => {
+    expect(rail, 'app-rail.tsx não encontrado').toBeDefined()
+  })
+
+  /**
+   * ⚠️ O rótulo do rail é decisão do CEO (19/ago) e reverte o rail só de ícone
+   * que valia desde 13/ago.
+   *
+   * Esta trava existe porque a decisão anterior estava ESCRITA no CLAUDE.md como
+   * "não reintroduzir sidebar com rótulo" — ou seja, a documentação empurrava
+   * ativamente na direção contrária. Sem um teste, a próxima sessão que lesse
+   * aquela linha desfaria isto de boa-fé e ninguém notaria até o CEO abrir a
+   * tela de novo.
+   *
+   * O tooltip era o rótulo enquanto não havia rótulo; com o nome visível ele
+   * vira ruído, então a ausência dele também entra no contrato.
+   *
+   * ⚠️ **A primeira versão deste teste passava com um rail só de ícone.** Ela
+   * exigia apenas `{item.title}` no fonte, e `aria-label={item.title}` ou um
+   * `<span className="sr-only">{item.title}</span>` casam com isso — os dois são
+   * o idioma normal de nav de ícone, e nenhum desenha rótulo. Pior: a própria
+   * asserção que proíbe `Tooltip` EMPURRA para lá, porque quem reverte lê "sem
+   * tooltip" e nomeia o ícone do jeito acessível. Por isso o rótulo só
+   * acessível está barrado explicitamente, e a largura antiga junto: as duas
+   * fecham as saídas que sobravam.
+   */
+  it('desenha o nome do módulo, não só o ícone', () => {
+    const fonte = semComentarios(rail!.fonte)
+    expect(fonte, 'o rail precisa renderizar item.title').toMatch(/\{item\.title\}/)
+    expect(fonte, 'rótulo VISÍVEL, não só acessível').not.toMatch(
+      /sr-only|aria-label=\{\s*item\.title\s*\}/,
+    )
+    expect(fonte, 'w-[68px] era o rail só de ícone').not.toMatch(/w-\[68px\]/)
+    expect(fonte, 'tooltip repetindo rótulo visível é ruído').not.toMatch(/Tooltip/)
+  })
+
+  /**
+   * ⚠️ `first:` casa com `:first-child`, então num elemento que é SEMPRE o
+   * primeiro filho do próprio contêiner ele é sempre-verdadeiro.
+   *
+   * O separador de grupos nasceu assim: `<span className="h-3 first:hidden" />`
+   * como primeiro filho da div de cada grupo. Resultado: escondido em todos os
+   * grupos, sempre, de 13 a 19/ago — enquanto o código e o `nav-items.ts`
+   * afirmavam que o agrupamento era "a única pista de arquitetura que o rail
+   * dá". A pista nunca foi desenhada, e nada falhou.
+   *
+   * A variante precisa morar no elemento que SE REPETE (a div do grupo), não no
+   * que ele envolve.
+   */
+  it('não esconde o separador de grupo com first: num filho fixo', () => {
+    expect(semComentarios(rail!.fonte)).not.toMatch(/first:hidden/)
+  })
+})

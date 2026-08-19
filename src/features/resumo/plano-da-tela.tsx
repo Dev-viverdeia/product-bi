@@ -113,7 +113,7 @@ export function PlanoDaTela({
 
   return (
     /*
-      SEM card, e em duas colunas a partir de lg — a MESMA gramática da aba
+      SEM card, e em duas colunas a partir de xl — a MESMA gramática da aba
       `Análise`, que é a irmã desta. A primeira versão embrulhava tudo numa
       moldura branca própria: a aba ao lado é documento e esta era bloco, então
       trocar de aba trocava a natureza da página, e a linha de sugestão herdava
@@ -122,7 +122,7 @@ export function PlanoDaTela({
       À esquerda a sugestão, em medida de leitura. À direita a prestação de
       contas: o que foi suprimido e o que este bloco NÃO faz.
     */
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,68ch)_minmax(16rem,26rem)] lg:gap-14">
+    <div className="grid gap-10 xl:grid-cols-[minmax(0,68ch)_minmax(16rem,26rem)] xl:gap-14">
       <div className="space-y-8">
         <header className="space-y-1">
           <h2 className="text-xl font-medium tracking-tight">O que fazer a respeito</h2>
@@ -166,7 +166,7 @@ export function PlanoDaTela({
         )}
       </div>
 
-      <aside className="space-y-6 text-sm lg:pt-1">
+      <aside className="space-y-6 text-sm xl:pt-1">
         <section className="space-y-2">
           <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
             O que este bloco não faz
