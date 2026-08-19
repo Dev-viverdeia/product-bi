@@ -1,0 +1,286 @@
+# Densidade e hierarquia das telas — diagnóstico e plano
+
+**Origem:** queixa do CEO em 19/ago/2026, em duas partes.
+
+> "Está muito poluído. Em todas as telas, todos os dados exibidos são realmente o necessário?
+> Além disso, está na ordem de mais importante em cima e menos importante embaixo?"
+
+**Estado:** proposta. Nada aqui foi implementado. Adoção por fase confirmada com o Mateus.
+
+---
+
+## A resposta curta
+
+**Quase nada precisa sair da tela. O que precisa é parar de ser desenhado com o mesmo peso.**
+
+Dez auditores independentes leram uma tela cada, todos com mandato explícito de cortar e com o
+ônus da prova sobre quem corta. Somados, recomendaram cortar **6 blocos de 208** — 3 KPIs e 3
+cards. Quatro telas não acharam um único card para cortar. Seis auditores escreveram, com
+palavras próprias, alguma variação de "a camada de análise desta tela está limpa".
+
+O CEO está certo sobre o sintoma e a causa não são os cards.
+
+---
+
+## O que foi medido, e o que não foi
+
+Medido: as dez telas de produto, bloco a bloco, no fonte e no banco — 12 agentes na auditoria de
+densidade e ordem, mais conferência manual em SQL dos números citados.
+
+⚠️ **Não medido: a tela renderizada.** Nenhuma linha deste documento saiu de olhar o produto no
+navegador. O que se verifica estaticamente é contagem, duplicata de número, ordem no DOM e regra
+de composição. Equilíbrio visual, respiro e peso — que é literalmente o que "poluído" descreve —
+só se julga vendo. **Esta é a maior fraqueza do documento e ela é conhecida.**
+
+⚠️ **O rail rotulado NÃO é a causa da queixa.** Os commits `6425599` e `457b964` (19/ago) levaram
+o rail de 68px para 208px, mas **não foram empurrados** — a Vercel serve `ee9d5f9`, com o rail só
+de ícone. O CEO reclamou do que está no ar. Isso não absolve a mudança: quando ela subir, os
+gráficos perdem 140px de largura (−8,7% a 1720px), o que **piora** a densidade percebida. Decidir
+as duas coisas juntas.
+
+---
+
+## O diagnóstico
+
+### 1. O produto tem uma catraca de mão única
+
+Contagem de cards de conteúdo em cada commit de cada página, desde o primeiro:
+
+```
+visão geral    4 4 4 4 4 4 4 4 4 4 4 7 7 7 7 7 7 7 7 7
+clientes       3 4 4 4 4 9 9 9 10 10 10 10 10 10 10 10 10 10
+entrada        3 3 3 6 6 6 6 6 8 8 8 8
+organizações   1 1 1 1 4 4 4 4 7 7 7
+formações      3 3 3 6 6 6 6 6 8 8 8 8 8
+soluções       1 1 1 1 1 1 1 5 5 5 5 5 5 7 7 7 7
+IA             3 3 3 5 5 5 5 5 8 8 8 8
+jornada        3 3 3 3 5 5 5 5 5 8 8 8 8 8
+receita        2 2 2 5 5 5 5 5 5
+CS            13 13 13 13 12 12 12 12 12   ← a única queda do projeto
+```
+
+**Em 130 commits, a contagem caiu uma vez.** Nove das dez telas nunca perderam um card. Cada fase
+somou; nenhuma fase teve a pergunta "o que sai?".
+
+E a régua existente empurra no mesmo sentido: `escada.ts` exige **no mínimo** 2 comparativos, 2
+diagnósticos e 1 prescritivo, e limita descritivos a 3 — mínimos que sobem, teto que só vale para
+um dos quatro degraus, e **nenhum teto de total**. Um produto que só acumula fica poluído por
+construção, não por descuido.
+
+> Consequência para o plano: uma faxina única não resolve. Sem um passo que remove, seis meses
+> depois estamos aqui de novo.
+
+### 2. A camada de dados é 42% do produto e nunca entrou em nenhuma conta
+
+| | blocos |
+| --- | ---: |
+| KPIs (4 × 10 telas) | 40 |
+| Cards de conteúdo | 80 |
+| **Tabelas da `AbaDeDados`** | **88** |
+| **Total renderizado** | **208** |
+
+`AbaDeDados` desenha **cada fonte como um `TabelaCard` completo** — ícone, headline, descrição,
+busca, paginação — e **nenhuma página a envolve em `Collapsible`** (zero ocorrências em
+`src/features/`). São 5 a 12 tabelas sempre abertas no fim de toda aba `Gráficos`.
+
+Por tela: visão geral 6 · clientes 12 · entrada 10 · organizações 8 · formações 9 · soluções 8 ·
+IA 9 · jornada 9 · receita 5 · CS 12.
+
+**Em clientes e CS a camada de auditoria tem mais blocos que a análise inteira** (12 contra 10, e
+12 contra 12).
+
+⚠️ **E ela declara `nivel="descritivo"` fixo dentro de `aba-de-dados.tsx:63`**, enquanto
+`escada.test.ts` só varre `../features/**/*-page.tsx`. As páginas declaram 19 descritivos; o DOM
+entrega **107**. O teto da régua é 3 por tela; o renderizado é 10,7 em média. **As oito telas que
+passam na régua a violam de 2,7× a 4,7× naquilo que o navegador desenha.** A régua não está
+errada — está lendo o arquivo errado.
+
+### 3. A fileira de KPI é uma segunda consulta sobre o mesmo fato
+
+Nove das dez telas têm RPC dedicada `bi_*_kpis`, separada das RPCs dos cards. Em nove delas, ao
+menos um KPI republica número que um card abaixo também publica. Onde as duas contas divergem, a
+tela se contradiz sozinha.
+
+O motor de achados tem contrato de CI exatamente contra isso — *"o calculador só lê `public.bi_*`
+… é o que garante que o número da frase é O MESMO do card, e não uma segunda conta que pode
+divergir"*. **A fileira de KPI é o único lugar onde essa regra nunca foi aplicada.**
+
+### 4. Doze de 43 seções não agrupam nada
+
+`SecaoDeAnalise` existe para dizer "estes três respondem a mesma coisa". Doze seções têm **um card
+só** — um card com um segundo título e mais um parágrafo cinza por cima.
+
+E a prosa é grande: **43 descrições de seção, 12.430 caracteres, média 289** (~3,6 linhas a 80ch),
+máxima 460 — sempre visíveis, acima dos cards. O mesmo projeto já decidiu que régua de card sai do
+caminho da leitura (`CardCabecalho` manda a `description` para dentro do botão de informação);
+`SecaoDeAnalise` nasceu sem essa disciplina.
+
+**Causa de segunda ordem:** as seções agrupam por **assunto**, e o que de fato separa os cards é a
+**janela**. O seletor de período do topo alcança 3 de 12 hooks em clientes, 2 de 8 em soluções, 4
+de 10 em entrada. **Dezenove das 43 descrições contêm uma cláusula explicando por que aqueles
+cards não conversam entre si** ("não se somam", "o seletor acima não alcança esta seção").
+Cabeçalho que justifica por que os próprios cards não se relacionam é diagnóstico de agrupamento
+errado, e aparece em nove das dez telas.
+
+### 5. A ordem é a inversa da que o CEO pediu — e ninguém a escolheu
+
+Pico de `nivel` por seção, em ordem de documento: **em seis das oito telas com nível declarado, a
+última seção é a que contém o único card prescritivo** — o único que diz o que fazer e sobre quem.
+Em três (formações, IA, soluções) a primeira seção é puramente descritiva. Soluções é o caso
+literal: descritivo → diagnóstico → comparativo → prescritivo, a escada percorrida de baixo para
+cima.
+
+A causa é banal, e é isso que a torna corrigível: `escada.ts` declara
+`NIVEIS = ['descritivo', 'comparativo', 'diagnostico', 'prescritivo']` em ordem ascendente, e a
+`REGUA` se lê como lista de cima para baixo. Quem monta uma tela para satisfazer aquela lista monta
+na ordem da lista. **Uma regra de COMPOSIÇÃO virou, em silêncio, uma regra de SEQUÊNCIA.**
+
+Ninguém decidiu terminar toda tela com a ação. Isso caiu da ordem de um array.
+
+Exemplos do custo: quem abre `/clientes` quer saber quem ainda dá para segurar — a lista nominal é
+o 7º card, atrás de seis gráficos. Quem abre `/solucoes` quer saber o que revisar — as candidatas
+são o último card.
+
+---
+
+## O plano
+
+### Fase A — uma mudança de componente que conserta as dez telas
+
+Nenhum merge de página. Dois arquivos.
+
+1. **`AbaDeDados` nasce fechada**, num `Collapsible` único: "As linhas que esta tela leu · N
+   funções". Padrão que o projeto já adotou em `/plano` com `AcordeaoDeAchados`; `radix-ui` 1.6.7
+   já está instalado. **Devolve 88 blocos de peso visual e não apaga um dígito.**
+2. **Remover `nivel="descritivo"` de `aba-de-dados.tsx`.** A camada de auditoria não é degrau da
+   escada de análise; declarar nível ali é o que faz a régua medir 19 onde o DOM entrega 107.
+
+> Cinco das dez auditorias propuseram, isoladas, a mesma coisa por outras palavras. Nenhuma podia
+> ver que era a mesma proposta.
+
+### Fase B — as duas réguas que faltam
+
+**`src/lib/densidade.ts`**, irmã da escada, verificada pelo mesmo mecanismo (`import.meta.glob` do
+fonte). A escada responde "esta tela é rasa?"; esta responde "esta tela é lida?".
+
+```ts
+export const REGUA_DE_DENSIDADE = {
+  cardsDeConteudoNoMaximo: 9,
+  cardsPorSecaoNoMinimo: 2,
+  secoesNoMaximo: 5,
+  descritivosNoMinimo: 1,
+  prosaDeSecaoNoMaximo: 240,
+}
+```
+
+Cada número saiu de medição, não de convenção:
+
+- **9 cards** — toda tela com ≤8 recebeu do próprio auditor um veredito de que a análise está
+  limpa; as duas com ≥10 (clientes 10, CS 12) são as duas em que os auditores acharam desordem
+  estrutural. É o primeiro inteiro acima da maior tela que ninguém reprovou.
+- **2 cards por seção** — 12 das 43 seções têm um só. Dois é o menor grupo que existe.
+- **5 seções** — distribuição medida: 3, 3, 3, 4, 4, 4, 5, 5, 6, 6. As duas com 6 (clientes, CS)
+  são exatamente as duas cujos auditores propuseram fundir seções.
+- **piso de 1 descritivo** — é a trava da catraca no sentido contrário. Somadas, as dez auditorias
+  levariam o produto de 19 descritivos para ~11, e organizações a **zero**, sem nenhum teste
+  reclamar. Tela sem descritivo não tem denominador visível fora do KPI — e "denominador ausente"
+  é a queixa mais repetida das dez auditorias.
+- **240 caracteres de prosa de seção** — 3 linhas a 80ch. O CLAUDE.md já rege a descrição de *card*
+  em "uma ou duas linhas"; a seção ganha uma linha a mais e nada além. ⚠️ **34 das 43 excedem
+  hoje** (79%).
+
+**Régua de ordem**, duas asserções e uma obrigação:
+
+1. A primeira seção da aba `Gráficos` não pode ser só descritiva. *(Morde formações, IA, soluções.)*
+2. A última seção não pode ser a única que contém o prescritivo — **salvo exceção declarada no
+   fonte, com o motivo escrito**, no padrão que o banco já usa em `comment on function`.
+3. A ordem de leitura passa a ser: **o que fazer → por quê → comparado a quê → quanto → linhas
+   cruas.**
+
+A exceção é deliberada: em Visão Geral o prescritivo é "Saúde do rastreio", um meta-card que prova
+todos os outros, e ali o último lugar é o certo. **O que a régua garante não é uma ordem única — é
+que a ordem tenha sido escolhida.**
+
+**Adoção como a escada:** lista `TELAS_NA_DENSIDADE` curta e explícita, crescendo por fase, com as
+demais aparecendo no relatório com o placar atual, para a dívida ficar visível. ⚠️ Pela contagem
+conferida, **só `organizacoes` passaria hoje** nos cinco limites — visão geral, soluções e jornada
+têm seção de um card.
+
+### Fase C — o que sobra por tela
+
+Depois de A e B, sobram os 6 cortes que os auditores de fato provaram, mais as fusões de seção
+órfã. É a menor parte do trabalho, e a única que exige tocar página por página.
+
+---
+
+## Defeitos de dado achados de passagem
+
+Não são de densidade. São de correção, e valem migration própria.
+
+1. ⚠️ **"Aulas concluídas" tem dois valores.** Mesma janela de 30 dias: **22.417** na Visão Geral,
+   **22.510** em Formações — 93 aulas de diferença, mesmo rótulo, duas telas. Conferido em SQL:
+   `bi_visao_geral_kpis` conta de `marts.fact_evento`, `bi_formacoes_kpis` conta de
+   `marts.fact_progresso_aula`. As duas aplicam `e_cliente`; a divergência é de **fonte**. Como o
+   CLAUDE.md registra rastreio quebrado em `fact_evento`, o valor de Formações é o de referência.
+2. ⚠️ **Entrada se contradiz dentro da própria tela**: 4.496 × 4.477 convites, 39,17% × 38,91%,
+   89,61% × 89,49% — porque `bi_entrada_kpis` não aplica a régua `e_cliente` que `bi_funil_entrada`
+   aplica.
+3. **Visão Geral chama duas coisas diferentes de "Novo"**: o KPI usa data de cadastro (1.793); o
+   card "De onde veio o número de ativos" usa primeira ação de produto (1.312).
+
+---
+
+## Erros da própria auditoria, corrigidos aqui
+
+Registrados porque a auditoria vale pelo que se pode conferir:
+
+- A síntese contou **47 seções em 11 valores para 10 telas**. A contagem certa é **43**, conferida
+  duas vezes por medição direta. Os números derivados dela foram recalculados.
+- A síntese propôs `blocosDePrimeiraLeituraNoMaximo: 14`, que é aritmeticamente determinado pelos
+  outros limites (4 KPIs fixos + 9 cards + 1 bloco de dados). Removido — régua que repete outra
+  régua dá falsa sensação de cobertura.
+- A síntese descartou "teto de números impressos" alegando que não é contável no fonte. **As
+  colunas são contáveis**, e a crítica que apontou isso também errou os números e omitiu as duas
+  piores telas. Contagem de `<TableHead` conferida por medição direta:
+
+  | tela | colunas | cards |
+  | --- | ---: | ---: |
+  | visão geral | 5 | 7 |
+  | CS | 12 | **12** |
+  | receita | 14 | 5 |
+  | clientes · entrada · IA | 17 | 10 · 8 · 8 |
+  | jornada | 22 | 8 |
+  | formações | 23 | 8 |
+  | organizações | 29 | 7 |
+  | **soluções** | **30** | 7 |
+
+  ⚠️ **Os dois eixos apontam telas opostas, e isso muda o plano.** Pela contagem de cards, CS (12)
+  e clientes (10) são as piores e soluções (7) está limpa. Pela contagem de números impressos,
+  **soluções é a pior do produto** com 30 colunas — quatro vezes a visão geral — e CS é a terceira
+  **melhor**. Uma tela com poucos cards e tabelas largas parece limpa em toda régua que conta
+  blocos, e é exatamente o tipo de tela que o leitor descreve como poluída. A régua de densidade
+  proposta **não mede este eixo**, e por isso ela sozinha não fecha a queixa do CEO.
+
+---
+
+## O que ficou de fora, e por quê
+
+- **As abas `Análise` e `Plano`** das dez telas. A auditoria cobriu **1 das 3 abas de cada módulo**.
+  ⚠️ E há um defeito conhecido ali: `AnaliseDaTela` trava em `MAXIMO_DE_ACHADOS = 3`, um por
+  família, e `PlanoDaTela` **não trava nada** — o CLAUDE.md diz que o teto vale e o código diz que
+  não.
+- **`/plano`, `/regras` e `/design`** — três telas visíveis, uma delas no primeiro grupo do rail. O
+  CEO disse "em todas as telas".
+- **Design e usabilidade** — auditoria em sete lentes (gráficos, design system, usabilidade,
+  mobile, acessibilidade, consistência, carga) em curso. Entra como seção própria deste documento.
+- **A verificação visual.** É o que fecharia a pergunta que originou tudo isto.
+
+---
+
+## Decisões que precisam do Mateus antes de virar código
+
+1. Fase A isolada, agora, ou o pacote inteiro por fase?
+2. O piso de 1 descritivo **proíbe** o corte de "Ocupação de assentos" em Organizações, que estava
+   bem provado (1.453 de 1.923 contas sem `team_limit`, headline publicando 75,6% de dado ausente).
+   Manter o piso e recusar o corte, ou trocar o piso por "pelo menos um denominador visível"?
+3. Empurrar o rail rotulado antes ou depois desta faxina? Ele custa 140px de largura de gráfico.
