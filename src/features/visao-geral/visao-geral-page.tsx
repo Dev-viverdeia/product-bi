@@ -127,8 +127,14 @@ export function VisaoGeralPage() {
             isLoading={kpis.isLoading}
             isError={kpis.isError}
           />
+          {/* "Cadastros novos" e não "Novos clientes": este KPI conta DATA DE
+              CADASTRO, e o card "De onde veio o número de ativos", na mesma
+              tela, chama de "novo" quem teve a PRIMEIRA AÇÃO no período —
+              1.822 contra 1.336. As duas medidas são legítimas e úteis; o que
+              não podia continuar era a mesma tela usar a mesma palavra para as
+              duas, deixando o leitor concluir que uma das contas está errada. */}
           <KpiCard
-            label="Novos clientes"
+            label="Cadastros novos"
             value={kpis.data?.novos ?? null}
             format={formatInt}
             delta={
