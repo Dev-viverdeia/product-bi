@@ -78,19 +78,3 @@ export function useMastersTopConvidadores() {
       (await rpc(supabase.rpc('bi_masters_top_convidadores', { p_limite: LIMITE_LISTA }))) ?? [],
   })
 }
-
-export function useErrosLogin(dias: Periodo) {
-  return useQuery({
-    queryKey: ['entrada', 'erros-login', dias],
-    queryFn: async () =>
-      (await rpc(supabase.rpc('bi_erros_login', { p_dias: dias }))) ?? [],
-  })
-}
-
-export function useErrosPorTela(dias: Periodo) {
-  return useQuery({
-    queryKey: ['entrada', 'erros-tela', dias],
-    queryFn: async () =>
-      (await rpc(supabase.rpc('bi_erros_por_tela', { p_dias: dias, p_limite: LIMITE_LISTA }))) ?? [],
-  })
-}

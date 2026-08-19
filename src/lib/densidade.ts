@@ -206,7 +206,7 @@ export function avaliarDensidade(m: MedidaDeTela, fonte = ''): string[] {
 export const TETO_POR_TELA: Record<string, { cards: number; colunas: number }> = {
   'features/visao-geral/visao-geral-page.tsx': { cards: 7, colunas: 5 },
   'features/clientes/clientes-page.tsx': { cards: 10, colunas: 17 },
-  'features/entrada/entrada-page.tsx': { cards: 8, colunas: 17 },
+  'features/entrada/entrada-page.tsx': { cards: 6, colunas: 15 },
   'features/formacoes/formacoes-page.tsx': { cards: 8, colunas: 23 },
   'features/solucoes/solucoes-page.tsx': { cards: 7, colunas: 30 },
   'features/ia/ia-page.tsx': { cards: 8, colunas: 17 },

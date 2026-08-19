@@ -527,8 +527,8 @@ export type Database = {
         Returns: {
           conversao: number
           convites: number
-          erros_login: number
           onboarding_pct: number
+          primeira_acao: number
         }[]
       }
       bi_entrada_primeira_acao_por_origem: {

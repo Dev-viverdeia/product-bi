@@ -31,7 +31,18 @@ const paginas = Object.entries(
 const TELAS_NA_REGUA = [
   'features/visao-geral/visao-geral-page.tsx',
   'features/clientes/clientes-page.tsx',
-  'features/entrada/entrada-page.tsx',
+  // ⚠️ ENTRADA SAIU DA RÉGUA EM 19/AGO, e a dívida é para ficar visível.
+  //
+  // O único card prescritivo da tela era "Erros de JavaScript por tela" — uma
+  // lista de rotas com contagem de exceção, que saiu por decisão do Mateus
+  // (telemetria de engenharia não é análise que o CEO faça). Tirando ela, a
+  // Entrada ficou com ZERO cards que dizem o que fazer.
+  //
+  // Isso não é efeito colateral do corte: é o corte revelando o que já era
+  // verdade. A única "ação" da tela de entrada era um backlog de bug com
+  // roupa de análise. O achado `ent_master_nao_convida` (compradores que nunca
+  // convidaram) existe no motor e aparece nas abas Análise e Plano — falta o
+  // CARD que o sustente, e é ele que devolve a Entrada para a régua.
   'features/formacoes/formacoes-page.tsx',
   'features/solucoes/solucoes-page.tsx',
   'features/ia/ia-page.tsx',

@@ -1,11 +1,8 @@
 import { useMemo, useState } from 'react'
 import {
-  BugIcon,
-  DoorClosedIcon,
   FunnelIcon,
   HourglassIcon,
   ListChecksIcon,
-  LogInIcon,
   MailCheckIcon,
   RouteIcon,
   SlidersHorizontalIcon,
@@ -41,8 +38,6 @@ import {
   useAceiteConvite,
   useEfeitoOnboarding,
   useEntradaKpis,
-  useErrosLogin,
-  useErrosPorTela,
   useFunilEntrada,
   useMastersResumo,
   useMastersTopConvidadores,
@@ -61,8 +56,6 @@ export function EntradaPage() {
   const efeitoOnboarding = useEfeitoOnboarding()
   const mastersResumo = useMastersResumo()
   const mastersTop = useMastersTopConvidadores()
-  const errosLogin = useErrosLogin(periodo)
-  const errosTela = useErrosPorTela(periodo)
 
   // A última etapa do funil é a que responde o card: de tudo que entrou, quanto
   // chegou até agir. As demais linhas contam o caminho.
@@ -90,20 +83,6 @@ export function EntradaPage() {
     () => (onboarding.data ?? []).reduce((soma, o) => soma + o.clientes, 0),
     [onboarding.data],
   )
-
-  // Categoria dominante do erro de login. O denominador é o conjunto inteiro
-  // que a RPC devolve (não há corte), então a fatia é honesta.
-  const erroDominante = useMemo(() => {
-    const cats = errosLogin.data ?? []
-    if (cats.length === 0) return null
-    const maior = cats.reduce((a, b) => (b.ocorrencias > a.ocorrencias ? b : a))
-    const total = cats.reduce((soma, e) => soma + e.ocorrencias, 0)
-    return total > 0 ? { categoria: maior.categoria, parte: maior.ocorrencias / total } : null
-  }, [errosLogin.data])
-
-  // Lista de erros por tela pode vir cortada em LIMITE_LISTA, então nada de
-  // somar: a pior tela vem primeiro e não depende do corte.
-  const piorTela = errosTela.data?.[0] ?? null
 
   return (
     <div className="space-y-4">
@@ -135,9 +114,15 @@ export function EntradaPage() {
           isLoading={kpis.isLoading}
           isError={kpis.isError}
         />
+        {/* Era "Erros de login", contagem de ocorrencia por enum tecnico
+            (invalid_credentials, FALLBACK, captcha_failed). Saiu por decisao do
+            Mateus em 19/ago: nao e analise que o CEO faca. No lugar entra o
+            DESFECHO do funil desta tela — de todo convite criado, quantos
+            chegaram a fazer alguma coisa. O numero e a MESMA expressao da 4a
+            barra do funil, nao uma segunda conta. */}
         <KpiCard
-          label="Erros de login"
-          value={kpis.data?.erros_login ?? null}
+          label="Chegaram à 1ª ação"
+          value={kpis.data?.primeira_acao ?? null}
           format={formatInt}
           isLoading={kpis.isLoading}
           isError={kpis.isError}
@@ -285,77 +270,6 @@ export function EntradaPage() {
                           <TableCell className="num text-right">{formatInt(m.usados)}</TableCell>
                           <TableCell className="num text-right">
                             {m.conversao != null ? formatPercent(m.conversao) : '—'}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    />
-                  </TabelaCard>
-                </BentoItem>
-              </SecaoDeAnalise>
-
-              <SecaoDeAnalise
-                titulo="Onde o cliente esbarra antes de conseguir usar"
-                icone={DoorClosedIcon}
-                descricao="Duas telemetrias que não se somam: a tentativa de entrar que falhou e o JavaScript quebrando numa tela já aberta. As duas contam ocorrências, não pessoas — o mesmo cliente insistindo conta várias vezes, e volume alto pode ser um só."
-              >
-                <BentoItem span={6}>
-                  <ChartCard
-                    nivel="descritivo"
-                    id="card-erros-login"
-                    icon={LogInIcon}
-                    title="Erros de login por categoria"
-                    headline={erroDominante ? formatPercent(erroDominante.parte) : '—'}
-                    headlineLabel={erroDominante ? `em ${erroDominante.categoria}` : undefined}
-                    description={`auth_error_telemetry · últimos ${periodo} dias · invalid_credentials = senha errada (esperado); investigar FALLBACK`}
-                    isLoading={errosLogin.isLoading}
-                    isRefreshing={errosLogin.isFetching && !!errosLogin.data}
-                    isError={errosLogin.isError}
-                    onRetry={() => void errosLogin.refetch()}
-                    isEmpty={errosLogin.data?.length === 0}
-                  >
-                    <CategoryBarChart
-                      layout="bar"
-                      label="Ocorrências"
-                      data={(errosLogin.data ?? []).map((e) => ({
-                        category: e.categoria,
-                        value: e.ocorrencias,
-                      }))}
-                      valueFormatter={formatInt}
-                      className="h-[300px]"
-                    />
-                  </ChartCard>
-                </BentoItem>
-
-                <BentoItem span={6}>
-                  <TabelaCard
-                    nivel="prescritivo"
-                    icon={BugIcon}
-                    title="Erros de JavaScript por tela"
-                    headline={piorTela ? formatInt(piorTela.ocorrencias) : '—'}
-                    headlineLabel={piorTela ? `na pior tela (${piorTela.tela})` : undefined}
-                    description={`client_error_logs · últimos ${periodo} dias · onde o cliente sofre`}
-                    isLoading={errosTela.isLoading}
-                    isRefreshing={errosTela.isFetching && !!errosTela.data}
-                    isError={errosTela.isError}
-                    onRetry={() => void errosTela.refetch()}
-                  >
-                    <TabelaLonga
-                      linhas={errosTela.data ?? []}
-                      limiteDaFonte={LIMITE_LISTA}
-                      chave={(e) => String(e.tela)}
-                      buscarEm={(e) => [e.tela]}
-                      rotuloBusca="Buscar por tela"
-                      cabecalho={
-                        <TableRow>
-                          <TableHead>Tela</TableHead>
-                          <TableHead className="text-right">Ocorrências</TableHead>
-                        </TableRow>
-                      }
-                      renderLinha={(e) => (
-                        <TableRow>
-                          <TableCell className="font-mono text-xs">{e.tela}</TableCell>
-                          <TableCell className="num text-right">
-                            {formatInt(e.ocorrencias)}
                           </TableCell>
                         </TableRow>
                       )}
@@ -574,25 +488,6 @@ export function EntradaPage() {
                     isLoading: mastersTop.isLoading,
                     isError: mastersTop.isError,
                     onRetry: () => void mastersTop.refetch(),
-                  },
-                  {
-                    rpc: 'bi_erros_login',
-                    titulo: 'Por que a tentativa de entrar falhou',
-                    descricao: `auth_error_telemetry · últimos ${periodo} dias · conta ocorrências, não pessoas`,
-                    linhas: errosLogin.data,
-                    isLoading: errosLogin.isLoading,
-                    isError: errosLogin.isError,
-                    onRetry: () => void errosLogin.refetch(),
-                  },
-                  {
-                    rpc: 'bi_erros_por_tela',
-                    titulo: 'Em que tela o JavaScript quebra',
-                    descricao: `client_error_logs · últimos ${periodo} dias · conta ocorrências, não pessoas`,
-                    linhas: errosTela.data,
-                    limite: LIMITE_LISTA,
-                    isLoading: errosTela.isLoading,
-                    isError: errosTela.isError,
-                    onRetry: () => void errosTela.refetch(),
                   },
                 ]}
               />
