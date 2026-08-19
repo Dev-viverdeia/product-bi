@@ -271,16 +271,136 @@ Registrados porque a auditoria vale pelo que se pode conferir:
   não.
 - **`/plano`, `/regras` e `/design`** — três telas visíveis, uma delas no primeiro grupo do rail. O
   CEO disse "em todas as telas".
-- **Design e usabilidade** — auditoria em sete lentes (gráficos, design system, usabilidade,
-  mobile, acessibilidade, consistência, carga) em curso. Entra como seção própria deste documento.
 - **A verificação visual.** É o que fecharia a pergunta que originou tudo isto.
+
+---
+
+---
+
+# Parte II — Design e usabilidade
+
+Sete lentes independentes (gráficos, design system, usabilidade, 375px, acessibilidade,
+consistência, carga), mais síntese e crítica adversarial: **88 achados, 24 de gravidade alta**.
+
+**A crítica derrubou 3 achados** por contrariarem decisão já registrada no CLAUDE.md — inclusive
+um que pedia trocar o `h2` do rail (decisão de hoje) por um `<p>`. Fica registrado porque é o que
+dá crédito ao resto: a lista foi filtrada, não só coletada.
+
+## A causa comum: o kit para na moldura
+
+O kit é dono do quadro — card, cabeçalho, estados, mosaico — e **para exatamente na fronteira onde
+a página encontra o dado**. O que vive nessa fronteira não tem tipo, não tem peça e não tem teste:
+o que fazer com `null`, qual a escala da tinta, qual a altura do gráfico, qual rótulo mostrar, qual
+frase de vazio. Cada página improvisa, e improviso × 10 telas é quase toda a lista.
+
+A prova mais cara está abaixo. As outras seguem o mesmo formato: não existe peça de tinta de
+intensidade, então há **quatro implementações com cinco tetos de valor** (1,0 · 0,5 · 0,3 · 0,25 ·
+0,6) e três alfas máximos, nenhuma com legenda — a mesma tinta significa números diferentes por
+tela e por coluna. Não existe altura no `ChartCard`, então ela está no `className` de ~20 gráficos.
+
+E o inverso: **quando a peça existe mas não é obrigatória, ninguém a chama.** `labelRota`,
+`periodoDaUrl`, as props `icone`/`trend` do `KpiCard` e o `aside` do `CabecalhoDeModulo` têm **zero
+call sites** em tela de produto.
+
+## ⚠️ Defeitos de exatidão — a tela publica número errado hoje
+
+Isto não é poluição, é correção, e é mais urgente que tudo neste documento. **Os três conferidos
+por mim, em SQL, contra o código:**
+
+**1. Formações publica um precipício que não existe.** `bi_duracao_ideal()` devolve
+`taxa_media = null` para "30–60 min" (amostra abaixo do piso). A página faz `value: d.taxa_media ??
+0` (`formacoes-page.tsx:280`). O card de destaque navy desenha **77% → 74% → 69% → 63% → 0,0%**,
+com o rótulo "0,0%" escrito na coluna. A leitura óbvia é "aula longa tem conclusão zero" — e a
+descrição do mesmo card diz por escrito o contrário: *"a queda com a duração é real mas suave… o
+precipício que esta tela mostrava vinha de 76 aulas em cursos não publicados"*. **O card refuta a
+si mesmo, e o gráfico é a metade que o olho lê primeiro.**
+
+⚠️ **E o teste que existe para pegar isto não pega.** `contrato-de-tela.test.ts:49` casa
+`value=\{… ?? 0\}` — a forma de prop JSX. As cinco páginas usam `value: … ?? 0`, a forma de objeto,
+dentro do mapper. Verde por acidente, exatamente como o `contrato-do-motor` já foi. Os outros
+quatro sites (`formacoes:306`, `entrada:226`, `ia:305`, `jornada:410`) estão latentes e disparam
+sozinhos quando um recorte estreitar a amostra.
+
+**2. IA desenha partição onde há interseção.** `bi_ia_adocao(30)` devolve Consultor 1.217 · Builder
+534 · **"Usam os dois" 375** — a terceira é um `INTERSECT`, subconjunto das duas primeiras,
+desenhada como categoria irmã, mesma cor, mesma espessura. Quem soma para dimensionar o alcance
+chega a 2.126. O alcance real é 1.217 + 534 − 375 = **1.376**. Erro de 54%.
+*Conserto: virar partição no SQL — "Só Consultor" · "Só Builder" · "Os dois". Zero mudança na página.*
+
+**3. Organizações põe "não sabemos" em corpo 30px no bloco de destaque.** `bi_orgs_ocupacao()`:
+247 · 52 · 39 · 132 · **1.453 "Sem limite definido"**. O headline escolhe a maior contagem, então o
+único `tone="brand"` da tela publica **"75,6% das orgs em Sem limite definido"**. E o eixo escala
+até 1.453, espremendo as quatro faixas reais nos 17% iniciais — justamente a comparação que a
+descrição manda fazer.
+
+**4. CS: o gráfico desenha uma medida e o headline afirma outra.** O headline diz "15,6% sem humano
+assumir"; o gráfico plota `so_ia` por desfecho (resolvido 28 · em aberto 66). O número do headline
+não existe em nenhuma barra, e a leitura do gráfico é oposta à do texto.
+
+## O que explica a sensação de "poluído"
+
+Em ordem de força, e separado de propósito dos defeitos acima:
+
+1. **A `AbaDeDados` sempre aberta** — já tratada na Parte I. As duas frentes chegaram nela por
+   caminhos independentes.
+2. **A tela se remonta enquanto é lida.** Zero `placeholderData` no projeto (conferido): trocar
+   30→90 dias derruba os 12 cards de Clientes para esqueleto ao mesmo tempo, e como o esqueleto é
+   menor que o conteúdo, a página salta. **"Poluído" tem um componente que não é tinta: é uma
+   página que se remonta seis vezes em cinco segundos.**
+3. **No celular a primeira dobra inteira é cromo.** `KpiGrid` só vira 2 colunas em 640px, então os
+   4 tiles empilham em ~512px — antes deles, título, régua e controles.
+4. **33 de 43 títulos de seção terminam em reticências a 375px.** ⚠️ E isto é o projeto se
+   contradizendo: `secao-de-analise.tsx:49` usa `truncate`, enquanto `card-cabecalho.tsx:54` usa
+   `line-clamp-2` **com um comentário explicando por quê** — *"título cortado é título que mente"*.
+   A decisão certa está escrita num componente e invertida no irmão. Uma classe conserta.
+5. **O eixo come o gráfico** em Jornada: rota crua de 31 caracteres leva ~37% da largura do card.
+6. **Todo gráfico se redesenha a cada troca de aba** — o `key={ativa}` do `ModuloTabs` remonta o
+   painel, e ir da `Análise` ao gráfico que a sustenta é o movimento central do produto.
+
+## Regras da própria casa, violadas
+
+- ⚠️ **Zero `:active` em todo o produto** (conferido). O CLAUDE.md exige: *"Todo controle tem os 3
+  estados (`:hover`, `:active`, `:focus-visible`)"*.
+- **O anel de foco não alcança 3:1 em nenhuma superfície do tema claro** — `rgba(10,31,59,0.35)`
+  sobre branco dá 2,17:1, e `button.tsx` ainda o dilui com `/50`.
+- **`disabled:opacity-50` no Button**, contra *"disabled muta por cor, não por opacity"*.
+- **A régua de todo card mora num `Tooltip` do Radix, que não abre no toque.** São 79 réguas de card
+  inertes no celular. Três lentes independentes chegaram nesse tooltip por caminhos diferentes — é
+  o sinal mais forte de que o quadrante "toque" nunca foi testado. Trocar por `Popover`: um arquivo.
+
+## Uma lacuna que nenhuma lente cobriu
+
+⚠️ **Não existe `ErrorBoundary` em lugar nenhum** (conferido: zero ocorrências de
+`ErrorBoundary`/`componentDidCatch`/`errorElement`). Um `throw` em qualquer uma das dez páginas
+derruba o app inteiro para tela branca, sem recuperação e sem mensagem. O produto trata com esmero
+o erro de *card* (`isError`, `onRetry`, esqueleto, vazio) e não trata o erro de *tela*.
+
+## Uma tarde × obra grande
+
+**Uma tarde, e vale para as dez telas de uma vez** (um arquivo cada):
+`placeholderData: keepPreviousData` + `staleTime` alinhado ao cron de 30 min · `Tooltip` → `Popover`
+no `CardCabecalho` · `truncate` → `line-clamp-2` na seção · tirar o `sm:` do `grid-cols-2` do
+`KpiGrid` · `--ring` sólido · acrescentar `active:` · `scope="col"` no `TableHead` · barra `sticky`
+no mobile · `AbaDeDados` em acordeão fechado.
+
+**Obra grande:** `CategoryDatum.value: number | null` com supressão declarada no card (mais ampliar
+a regex do teste de contrato) · altura do gráfico como prop do `ChartCard` · peça única de tinta de
+intensidade com teto obrigatório e legenda · widget de abas conforme (roving tabindex) ·
+alternativa textual dos gráficos · `ErrorBoundary` de rota.
 
 ---
 
 ## Decisões que precisam do Mateus antes de virar código
 
-1. Fase A isolada, agora, ou o pacote inteiro por fase?
-2. O piso de 1 descritivo **proíbe** o corte de "Ocupação de assentos" em Organizações, que estava
+1. **Os quatro defeitos de exatidão saem na frente de tudo?** São número errado publicado hoje, não
+   densidade. O de Formações está num card de destaque e se contradiz com a própria descrição.
+2. Fase A isolada, agora, ou o pacote inteiro por fase?
+3. O piso de 1 descritivo **proíbe** o corte de "Ocupação de assentos" em Organizações, que estava
    bem provado (1.453 de 1.923 contas sem `team_limit`, headline publicando 75,6% de dado ausente).
    Manter o piso e recusar o corte, ou trocar o piso por "pelo menos um denominador visível"?
-3. Empurrar o rail rotulado antes ou depois desta faxina? Ele custa 140px de largura de gráfico.
+   ⚠️ Note que este card aparece nas duas frentes: a de densidade quer cortá-lo, a de design quer
+   consertá-lo. **Consertar resolve as duas** — tirando o balde de desconhecido do eixo, o card
+   passa a responder a pergunta que a descrição promete.
+4. Empurrar o rail rotulado antes ou depois desta faxina? Ele custa 140px de largura de gráfico.
+5. `ErrorBoundary` de rota entra nesta rodada? Hoje um `throw` em qualquer tela dá tela branca no
+   produto que o CEO está validando.
