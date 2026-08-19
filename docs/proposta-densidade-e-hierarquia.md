@@ -5,7 +5,25 @@
 > "Está muito poluído. Em todas as telas, todos os dados exibidos são realmente o necessário?
 > Além disso, está na ordem de mais importante em cima e menos importante embaixo?"
 
-**Estado:** proposta. Nada aqui foi implementado. Adoção por fase confirmada com o Mateus.
+**Estado (19/ago, 15h):** a **Parte II inteira, a Fase A e o `ErrorBoundary` estão implementados** —
+escopo confirmado com o Mateus. Cinco commits, `lint`/`test` (285)/`build` limpos.
+
+| bloco | estado |
+| --- | --- |
+| Os 4 defeitos de exatidão (+1 achado no caminho) | ✅ feito |
+| Fase A — `AbaDeDados` fechada, sem `nivel` | ✅ feito |
+| Pacote "uma tarde" (7 itens) | ✅ feito |
+| `ErrorBoundary` de rota | ✅ feito |
+| **Verificação de navegador** | ⛔ **bloqueada** — ver abaixo |
+| Fase B — `densidade.ts` e régua de ordem | ⏸ não iniciada |
+| Fase C — os 6 cortes por tela | ⏸ não iniciada |
+| Rail rotulado (208px) | ⏸ segurado, por decisão: sobe junto com a faxina |
+
+⛔ **A verificação de navegador continua sem ser feita, e ela é a régua que fecha a queixa
+original.** O `npm run dev` sobe e responde 200, mas a extensão do Chrome não está conectada nesta
+sessão e o projeto não tem Playwright nem Puppeteer. É a mesma fraqueza declarada no topo deste
+documento, agora com mais superfície para cobrir. O que precisa de olho está listado em
+"O que falta olhar", no fim.
 
 ---
 
@@ -404,3 +422,43 @@ alternativa textual dos gráficos · `ErrorBoundary` de rota.
 4. Empurrar o rail rotulado antes ou depois desta faxina? Ele custa 140px de largura de gráfico.
 5. `ErrorBoundary` de rota entra nesta rodada? Hoje um `throw` em qualquer tela dá tela branca no
    produto que o CEO está validando.
+
+---
+
+## O que falta olhar (19/ago)
+
+Checklist de verificação visual, em 1280px e 375px, nos dois temas. Cada item é uma mudança que
+passou no CI e **não** foi vista.
+
+**Exatidão**
+
+1. `/formacoes` · "Duração de aula que maximiza conclusão" — a faixa "30–60 min (2 aulas)" deve
+   aparecer no eixo **sem barra**, e a linha de supressão abaixo do gráfico deve dizer o motivo.
+   ⚠️ É o único ponto do dia em que dependo de comportamento não documentado do Recharts: barra com
+   `value: null` deveria não desenhar retângulo. Se desenhar um toco, a nota está certa e a barra
+   precisa de tratamento à parte.
+2. `/ia` · "Adoção entre clientes ativos" — três barras (Só Consultor · Os dois · Só Builder),
+   headline "1.430 de 3.687 clientes ativos usam alguma IA". Tooltip da 1ª barra traz "Consultor ao
+   todo: 1.227".
+3. `/organizacoes` · "Ocupação de assentos" — quatro faixas, sem "Sem limite definido"; headline
+   "52,6% das orgs com limite em Menos de 50%".
+4. `/cs` · "A IA resolveu sozinha?" — headline "30,9% dos ciclos sem humano terminaram resolvidos".
+5. `/design` — o card novo "Valor suprimido pela régua" exercita o estado; é a tela mais barata
+   para conferir o item 1.
+
+**Densidade e usabilidade**
+
+6. Fim da aba `Gráficos` de qualquer módulo: a camada de dados fechada, com "N funções · M linhas"
+   legível, e a animação de abrir **sem salto** (o fallback do `var()` das keyframes é a parte não
+   vista).
+7. Trocar o período de 30 → 90: os cards devem ESMAECER, não virar esqueleto, e a página não pode
+   saltar. Vale conferir também que o texto da aba `Análise` VAI a esqueleto — ali o opt-out é
+   proposital.
+8. Foco por teclado (Tab) em botão, aba e item do rail: o anel deve ser visível nas quatro
+   superfícies dos dois temas.
+9. Régua de card no toque: o botão de informação agora abre por clique (Popover). Conferir no
+   celular, que é o quadrante que nunca foi testado.
+10. 375px: KPIs em duas colunas na primeira dobra, títulos de seção em duas linhas em vez de
+    reticências, e a barra fixa ao rolar.
+11. Erro de tela: forçar um `throw` numa página e confirmar que a barra e o rail continuam de pé, e
+    que navegar para outro módulo limpa o estado.
