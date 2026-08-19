@@ -92,6 +92,32 @@ const TELAS_COM_RECORTE = [
 // na Fase 2, pegou dois percentuais que eu mesmo tinha acabado de escrever no
 // front da Visão Geral. Os dois foram para o banco.
 
+describe('headline não afirma número antes de ter o dado', () => {
+  /*
+    `headline={formatInt(x)}` imprime "0" enquanto a consulta corre e quando ela
+    falha — e o headline é o corpo 30px, o primeiro lugar onde o olho pousa.
+
+    É o mesmo defeito de `value={… ?? 0}` que a régua acima pega, entrando pela
+    porta do lado: o formatador SEMPRE devolve string, então zero derivado de
+    `[].reduce(…)` vira um número afirmado com cara de medido.
+
+    O pior dos quatro sites era "0 rastreios quebrados, com prova" na Visão
+    Geral — um "está tudo bem" dito antes de saber, no card que existe
+    justamente para provar os outros.
+
+    Passa quem guarda: `headline={q.data ? formatInt(x) : '—'}`. O travessão é
+    a mesma gramática de "não há valor" que o KpiCard e o CategoryBarChart usam.
+  */
+  it('há página para verificar', () => {
+    expect(paginas.length).toBeGreaterThan(5)
+  })
+
+  it.each(paginas)('$caminho', ({ fonte }) => {
+    const ocorrencias = achatar(fonte).match(/headline=\{format[A-Za-z]+\(/g) ?? []
+    expect(ocorrencias).toEqual([])
+  })
+})
+
 describe('percentual não é calculado no front', () => {
   const sobRegra = paginas.filter((p) => TELAS_COM_RECORTE.includes(p.caminho))
 

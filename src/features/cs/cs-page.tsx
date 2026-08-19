@@ -634,9 +634,9 @@ export function CsPage() {
                     icon={ClipboardCheckIcon}
                     title="Kickoff — clientes por etapa"
                     headline={
-                      semCarga
+                      semCarga || !kickoff.data
                         ? '—'
-                        : formatInt((kickoff.data ?? []).reduce((soma, e) => soma + Number(e.cards), 0))
+                        : formatInt(kickoff.data.reduce((soma, e) => soma + Number(e.cards), 0))
                     }
                     headlineLabel="clientes no quadro"
                     description="Quadro automatizado por motor e webhooks — cards não param na primeira etapa."
@@ -671,9 +671,9 @@ export function CsPage() {
                     icon={RotateCcwIcon}
                     title="Reversão — tentativas em curso"
                     headline={
-                      semCarga
+                      semCarga || !reversao.data
                         ? '—'
-                        : formatInt((reversao.data ?? []).reduce((soma, e) => soma + Number(e.cards), 0))
+                        : formatInt(reversao.data.reduce((soma, e) => soma + Number(e.cards), 0))
                     }
                     headlineLabel="empresas já perseguidas"
                     description="Fluxo operacional de recuperação. Estar aqui não significa recuperado — parte destes casos já foi recuperada e parte já foi perdida; quem decide isso é o acordo registrado, não a posição no quadro."

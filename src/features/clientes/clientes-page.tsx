@@ -315,7 +315,7 @@ export function ClientesPage() {
                         ? `de quem usou ${moduloMaisMortal.modulo} parou ali`
                         : undefined
                     }
-                    description="De quem passou por cada módulo, que fatia teve ali a última ação antes de sumir. A versão anterior deste card contava clientes e publicava “59% param em Formações” — o que mede popularidade do módulo, porque o mais usado tende a ser o último de qualquer jornada. Dividido pela audiência de cada um, a ordem muda: módulo com muita gente e pouca mortalidade é o que segura."
+                    description="De quem passou por cada módulo, que fatia teve ali a última ação antes de sumir · a divisão é pela audiência do próprio módulo, não pelo total de quem sumiu: sem isso a leitura mede popularidade, porque o módulo mais usado tende a ser o último de qualquer jornada"
                     isLoading={mortalidade.isLoading}
                     isRefreshing={mortalidade.isFetching && !!mortalidade.data}
                     isError={mortalidade.isError}

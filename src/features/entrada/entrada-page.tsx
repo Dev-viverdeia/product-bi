@@ -386,9 +386,9 @@ export function EntradaPage() {
                     id="card-onboarding-abandono"
                     icon={ListChecksIcon}
                     title="Onde os incompletos param"
-                    headline={formatInt(incompletos)}
+                    headline={onboarding.data ? formatInt(incompletos) : '—'}
                     headlineLabel="não concluíram o onboarding"
-                    description="Distribuição por etapa atual de quem não concluiu · o número que estava aqui era escrito à mão e estava errado (dizia 89,5% quando a régua e_cliente dá 92,5%); percentual só entra vindo do banco"
+                    description="Distribuição por etapa atual de quem não concluiu, só clientes · a etapa é a atual, não a de abandono: quem parar e voltar sai desta contagem sem virar conclusão"
                     isLoading={onboarding.isLoading}
                     isRefreshing={onboarding.isFetching && !!onboarding.data}
                     isError={onboarding.isError}
