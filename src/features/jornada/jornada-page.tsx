@@ -200,6 +200,7 @@ export function JornadaPage() {
                         : 'Sessões por número de telas, em todo o histórico disponível'
                     }
                     isLoading={infladas.isLoading}
+                    isRefreshing={infladas.isFetching && !!infladas.data}
                     isError={infladas.isError}
                     onRetry={() => void infladas.refetch()}
                     linhasEsqueleto={4}
@@ -254,6 +255,7 @@ export function JornadaPage() {
                     }
                     description="% entrada = a tela abriu a sessão (deep link ou destino habitual) · % saída = a sessão terminou nela · posição média = em que ponto da navegação ela aparece"
                     isLoading={raioX.isLoading}
+                    isRefreshing={raioX.isFetching && !!raioX.data}
                     isError={raioX.isError}
                     onRetry={() => void raioX.refetch()}
                   >
@@ -320,6 +322,7 @@ export function JornadaPage() {
                       </Select>
                     }
                     isLoading={fluxo.isLoading}
+                    isRefreshing={fluxo.isFetching && !!fluxo.data}
                     isError={fluxo.isError}
                     onRetry={() => void fluxo.refetch()}
                   >
@@ -367,6 +370,7 @@ export function JornadaPage() {
                     headlineLabel={portaLider ? `sessões abrem em ${portaLider.tela}` : undefined}
                     description="Primeira tela da sessão — por onde o cliente realmente chega"
                     isLoading={entradas.isLoading}
+                    isRefreshing={entradas.isFetching && !!entradas.data}
                     isError={entradas.isError}
                     onRetry={() => void entradas.refetch()}
                     isEmpty={entradas.data?.length === 0}
@@ -398,6 +402,7 @@ export function JornadaPage() {
                     }
                     description="Taxa de encerramento da própria tela · sessões com 2+ telas, telas com 100+ encerramentos — régua diferente da coluna % saída do raio-x, que conta todas as sessões"
                     isLoading={saidas.isLoading}
+                    isRefreshing={saidas.isFetching && !!saidas.data}
                     isError={saidas.isError}
                     onRetry={() => void saidas.refetch()}
                     isEmpty={saidas.data?.length === 0}
@@ -434,6 +439,7 @@ export function JornadaPage() {
                     headlineLabel="das sessões passam de uma tela"
                     description="Quantas telas o cliente visita por sessão — mede exploração vs visita pontual"
                     isLoading={profundidade.isLoading}
+                    isRefreshing={profundidade.isFetching && !!profundidade.data}
                     isError={profundidade.isError}
                     onRetry={() => void profundidade.refetch()}
                     isEmpty={profundidade.data?.length === 0}
@@ -472,6 +478,7 @@ export function JornadaPage() {
                         : 'Porta da frente = a sessão abriu em /, /login ou /convite'
                     }
                     isLoading={porta.isLoading}
+                    isRefreshing={porta.isFetching && !!porta.data}
                     isError={porta.isError}
                     onRetry={() => void porta.refetch()}
                     linhasEsqueleto={2}
@@ -526,6 +533,7 @@ export function JornadaPage() {
                         : 'Navegação na primeira semana registrada; atividade nos últimos 30 dias com dado'
                     }
                     isLoading={profundidadeRetencao.isLoading}
+                    isRefreshing={profundidadeRetencao.isFetching && !!profundidadeRetencao.data}
                     isError={profundidadeRetencao.isError}
                     onRetry={() => void profundidadeRetencao.refetch()}
                     linhasEsqueleto={2}

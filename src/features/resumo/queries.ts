@@ -80,6 +80,19 @@ export function useAchados(tela: string, dias?: Periodo, recorte?: Recorte) {
     // tela sem regra não consulta: a RPC nem existe, e um erro na tela diria
     // "falhou" onde a verdade é "ainda não há regra"
     enabled: temRegra(tela),
+    /*
+      ⚠️ OPT-OUT do `keepPreviousData` global, e é o hook onde ele seria mais
+      caro. Aqui o resultado não é um gráfico: é PROSA QUE AFIRMA NÚMEROS. Com
+      o dado anterior segurado, trocar o período deixaria o parágrafo da janela
+      velha publicado, com autoridade de conclusão, ao lado de KPIs já
+      atualizados — e nada na tela diria qual dos dois está certo. É a definição
+      exata de "número que não existe em lugar nenhum da tela", que o motor tem
+      contrato de CI para impedir do lado do banco.
+
+      O esqueleto aqui é o comportamento correto: melhor não afirmar nada por um
+      instante do que afirmar o que já não vale.
+    */
+    placeholderData: undefined,
     queryFn: async () => {
       const rows = await rpc(
         supabase.rpc(RPC_POR_TELA[tela as TelaComResumo], {

@@ -165,7 +165,13 @@
   --success-foreground: #ffffff;
   --border: var(--via-gray-200); /* hairline */
   --input: rgba(10, 31, 59, 0.16); /* borda de controle, navy-tint */
-  --ring: rgba(10, 31, 59, 0.35);
+  /* SÓLIDO, e o valor saiu de medição. A receita anterior era
+     rgba(10,31,59,0.35), que compõe 2,17:1 sobre o card branco e 2,11:1 sobre a
+     seção — reprovando o piso de 3:1 em TODAS as quatro superfícies do tema. E
+     o `ring-ring/50` do Button dividia de novo, para 1,42:1. Anel de foco que
+     não se vê é a mesma coisa que não ter anel de foco. #1E3A5F é o azul-escuro
+     da paleta e mede 11,50 · 9,91 · 9,22 · 9,57 nas quatro. */
+  --ring: #1e3a5f;
 
   /* Cromo da navegação — barra e rail. Par próprio, não reaproveita --card,
      porque nomeia um papel: se um dia a barra precisar divergir do card, muda

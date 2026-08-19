@@ -207,6 +207,7 @@ export function VisaoGeralPage() {
                     headlineLabel="da base pagante teve alguma ação"
                     description={`Clientes com ao menos uma ação no período, contra a base pagante inteira · últimos ${periodo} dias`}
                     isLoading={kpis.isLoading}
+                    isRefreshing={kpis.isFetching && !!kpis.data}
                     isError={kpis.isError}
                     isEmpty={kpis.data == null}
                   >
@@ -388,6 +389,7 @@ export function VisaoGeralPage() {
                     headlineLabel="rastreios quebrados, com prova"
                     description="Última data com registro por tipo de evento, contada a partir do dia do dado e não de hoje · evento calado é sintoma, não diagnóstico: o veredito compara cada um com uma fonte independente do mesmo fato e separa rastreio quebrado (a coisa acontece e o evento não sai) de funcionalidade sem uso (a instrumentação está sadia) · sem corroboração é o caso em que não há fonte espelhada para conferir, e por isso não entra na contagem · série que atravessa a data de óbito de um evento lê queda de comportamento onde houve queda de instrumentação"
                     isLoading={rastreio.isLoading}
+                    isRefreshing={rastreio.isFetching && !!rastreio.data}
                     isError={rastreio.isError}
                     onRetry={() => void rastreio.refetch()}
                     linhasEsqueleto={5}

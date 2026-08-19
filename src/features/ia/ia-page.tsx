@@ -176,6 +176,7 @@ export function IaPage() {
                     }
                     description={`Partição: as três barras não se sobrepõem e somam o alcance · quem usa as duas ferramentas aparece só em “Os dois” · o alcance de cada ferramenta isolada está no tooltip da barra dela · base = clientes com alguma ação nos últimos ${periodo} dias`}
                     isLoading={adocao.isLoading}
+                    isRefreshing={adocao.isFetching && !!adocao.data}
                     isError={adocao.isError}
                     onRetry={() => void adocao.refetch()}
                     isEmpty={adocao.data?.length === 0}
@@ -213,6 +214,7 @@ export function IaPage() {
                     headlineLabel="voltam em mais de um dia"
                     description={`Dias distintos de uso por cliente nos últimos ${periodo} dias — mede hábito, não experimentação`}
                     isLoading={recorrencia.isLoading}
+                    isRefreshing={recorrencia.isFetching && !!recorrencia.data}
                     isError={recorrencia.isError}
                     onRetry={() => void recorrencia.refetch()}
                     isEmpty={recorrencia.data?.length === 0}
@@ -257,6 +259,7 @@ export function IaPage() {
                         : 'Modo da primeira conversa de cada cliente, entre quem estreou há 30+ dias'
                     }
                     isLoading={modoEntrada.isLoading}
+                    isRefreshing={modoEntrada.isFetching && !!modoEntrada.data}
                     isError={modoEntrada.isError}
                     onRetry={() => void modoEntrada.refetch()}
                     linhasEsqueleto={2}
@@ -308,6 +311,7 @@ export function IaPage() {
                     headlineLabel="das conversas param na 1ª mensagem"
                     description="Conversas do Consultor por número de mensagens, histórico completo · conversa curta não é necessariamente falha: pode ser pergunta respondida de primeira, e resposta boa encerra o assunto — o número sozinho não separa as duas coisas"
                     isLoading={profundidade.isLoading}
+                    isRefreshing={profundidade.isFetching && !!profundidade.data}
                     isError={profundidade.isError}
                     onRetry={() => void profundidade.refetch()}
                     isEmpty={profundidade.data?.length === 0}
@@ -340,6 +344,7 @@ export function IaPage() {
                     headlineLabel={modoLider ? `em ${modoLider.modo}` : undefined}
                     description="Conversas por modo (histórico completo)"
                     isLoading={modos.isLoading}
+                    isRefreshing={modos.isFetching && !!modos.data}
                     isError={modos.isError}
                     onRetry={() => void modos.refetch()}
                     isEmpty={modos.data?.length === 0}
@@ -380,6 +385,7 @@ export function IaPage() {
                     }
                     description="Gerações dos últimos 90 dias · ordenado pelas etapas mais lentas · erro alto ou tempo alto = atrito na experiência"
                     isLoading={steps.isLoading}
+                    isRefreshing={steps.isFetching && !!steps.data}
                     isError={steps.isError}
                     onRetry={() => void steps.refetch()}
                   >
@@ -429,6 +435,7 @@ export function IaPage() {
                     headlineLabel="de lift na retenção entre 30 e 60 dias"
                     description="Clientes que entraram a partir do lançamento do Consultor (11/mai/2026) e já têm 60+ dias de casa · retenção medida entre os dias 30 e 60 · correlação, não causalidade"
                     isLoading={impacto.isLoading}
+                    isRefreshing={impacto.isFetching && !!impacto.data}
                     isError={impacto.isError}
                     onRetry={() => void impacto.refetch()}
                     linhasEsqueleto={2}
@@ -478,6 +485,7 @@ export function IaPage() {
                         : ''
                     }`}
                     isLoading={sumiram.isLoading}
+                    isRefreshing={sumiram.isFetching && !!sumiram.data}
                     isError={sumiram.isError}
                     onRetry={() => void sumiram.refetch()}
                   >

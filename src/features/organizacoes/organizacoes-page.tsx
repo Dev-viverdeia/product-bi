@@ -189,6 +189,7 @@ export function OrganizacoesPage() {
                         : 'Organizações ativas por fatia do time que apareceu nos últimos 30 dias com dado'
                     }
                     isLoading={distribuicao.isLoading}
+                    isRefreshing={distribuicao.isFetching && !!distribuicao.data}
                     isError={distribuicao.isError}
                     onRetry={() => void distribuicao.refetch()}
                     linhasEsqueleto={6}
@@ -246,6 +247,7 @@ export function OrganizacoesPage() {
                         : 'Organizações ativas com pelo menos um membro'
                     }
                     isLoading={porTamanho.isLoading}
+                    isRefreshing={porTamanho.isFetching && !!porTamanho.data}
                     isError={porTamanho.isError}
                     onRetry={() => void porTamanho.refetch()}
                     linhasEsqueleto={3}
@@ -299,6 +301,7 @@ export function OrganizacoesPage() {
                         : 'Membros vs limite contratado · orgs lotadas são oportunidade de upsell; abaixo de 50%, risco de valor não percebido'
                     }
                     isLoading={ocupacao.isLoading}
+                    isRefreshing={ocupacao.isFetching && !!ocupacao.data}
                     isError={ocupacao.isError}
                     onRetry={() => void ocupacao.refetch()}
                     isEmpty={ocupacao.data?.length === 0}
@@ -332,6 +335,7 @@ export function OrganizacoesPage() {
                     headlineLabel="mais time ativo com master ativo"
                     description="Organizações ativas com 2+ membros · master ativo = teve ação nos 30 dias até o último dia com dado"
                     isLoading={efeito.isLoading}
+                    isRefreshing={efeito.isFetching && !!efeito.data}
                     isError={efeito.isError}
                     onRetry={() => void efeito.refetch()}
                     linhasEsqueleto={2}
@@ -383,6 +387,7 @@ export function OrganizacoesPage() {
                         : 'Organizações cujo master está parado há 30+ dias, com histórico dos dois lados'
                     }
                     isLoading={sequencia.isLoading}
+                    isRefreshing={sequencia.isFetching && !!sequencia.data}
                     isError={sequencia.isError}
                     onRetry={() => void sequencia.refetch()}
                     linhasEsqueleto={3}
@@ -436,6 +441,7 @@ export function OrganizacoesPage() {
                     }
                     description="Benefícios que a empresa entrega e o cliente não usa — churn silencioso e oportunidade de ativação por CS"
                     isLoading={valor.isLoading}
+                    isRefreshing={valor.isFetching && !!valor.data}
                     isError={valor.isError}
                     onRetry={() => void valor.refetch()}
                   >
@@ -492,6 +498,7 @@ export function OrganizacoesPage() {
                     }
                     description="Orgs ativas com 3+ membros, ordenadas pelo menor percentual de time ativo · lista para ação de CS"
                     isLoading={risco.isLoading}
+                    isRefreshing={risco.isFetching && !!risco.data}
                     isError={risco.isError}
                     onRetry={() => void risco.refetch()}
                   >

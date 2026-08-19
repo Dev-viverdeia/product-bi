@@ -167,6 +167,7 @@ export function ReceitaPage() {
                     }
                     description="Faturas com pagamento aprovado · série encerra quando o rastreamento parou"
                     isLoading={mensal.isLoading}
+                    isRefreshing={mensal.isFetching && !!mensal.data}
                     isError={mensal.isError}
                     onRetry={() => void mensal.refetch()}
                     isEmpty={mensal.data?.length === 0}
@@ -191,6 +192,7 @@ export function ReceitaPage() {
                     title="Compradores por mês"
                     description="Pessoas distintas com fatura paga no mês"
                     isLoading={mensal.isLoading}
+                    isRefreshing={mensal.isFetching && !!mensal.data}
                     isError={mensal.isError}
                     onRetry={() => void mensal.refetch()}
                     isEmpty={mensal.data?.length === 0}
@@ -230,6 +232,7 @@ export function ReceitaPage() {
                     }
                     description="Falha de pagamento e reembolso comparados ao valor aprovado — dinheiro que tentou entrar e não entrou, ou entrou e voltou"
                     isLoading={cobranca.isLoading}
+                    isRefreshing={cobranca.isFetching && !!cobranca.data}
                     isError={cobranca.isError}
                     onRetry={() => void cobranca.refetch()}
                     linhasEsqueleto={4}
@@ -283,6 +286,7 @@ export function ReceitaPage() {
                     }
                     description="Clientes agrupados pelo mês em que entraram · receita por cliente considera toda a safra, inclusive quem nunca comprou"
                     isLoading={ltv.isLoading}
+                    isRefreshing={ltv.isFetching && !!ltv.data}
                     isError={ltv.isError}
                     onRetry={() => void ltv.refetch()}
                   >
@@ -336,6 +340,7 @@ export function ReceitaPage() {
                     headlineLabel={faixaTopo ? `dias ativos na faixa ${faixaTopo.faixa}` : undefined}
                     description="Clientes agrupados por receita total · dias ativos é histórico completo · amostra pequena em algumas faixas, leia com cautela"
                     isLoading={usoReceita.isLoading}
+                    isRefreshing={usoReceita.isFetching && !!usoReceita.data}
                     isError={usoReceita.isError}
                     onRetry={() => void usoReceita.refetch()}
                     linhasEsqueleto={3}

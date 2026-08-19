@@ -43,6 +43,17 @@ export function usePaginaBruta(tabela: string | null, offset: number) {
   return useQuery({
     queryKey: ['explorar', 'linhas', tabela, offset],
     enabled: tabela !== null,
+    /*
+      Segura a página anterior só quando a TABELA é a mesma — é paginação, e o
+      caso mais forte de `keepPreviousData` no repositório.
+
+      O `keepPreviousData` global não serviria aqui: a chave carrega duas
+      coisas, e ao TROCAR de tabela ele manteria as linhas da anterior por um
+      frame, com colunas diferentes. Cabeçalho novo sobre dado velho é pior que
+      esqueleto — não parece carregamento, parece resultado.
+    */
+    placeholderData: (anterior, consultaAnterior) =>
+      consultaAnterior?.queryKey[2] === tabela ? anterior : undefined,
     queryFn: async () =>
       (await rpc(
         supabase.rpc('bi_explorar', {

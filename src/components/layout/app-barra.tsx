@@ -280,7 +280,15 @@ export function AppBarra() {
   const modulo = moduloDaRota(pathname)
 
   return (
-    <header className="bg-nav-surface mb-4 flex h-[var(--barra-altura)] items-center gap-2 rounded-2xl pr-3 shadow-md">
+    /*
+      `sticky` só abaixo de `lg`, e pelo mesmo motivo que o rail é sticky no
+      desktop: trocar de módulo não pode exigir rolar de volta ao topo. No
+      celular o rail É esta barra — a navegação inteira mora no botão de gaveta
+      daqui —, então uma barra que sobe com o conteúdo tira a navegação da tela.
+      `top` acompanha a calha do AppLayout (8px, 12px a partir de `md`).
+      Acima de `lg` a barra volta ao fluxo, porque ali quem fica é o rail.
+    */
+    <header className="bg-nav-surface sticky top-2 z-30 mb-4 flex h-[var(--barra-altura)] items-center gap-2 rounded-2xl pr-3 shadow-md md:top-3 lg:static">
       <NavegacaoEmGaveta />
 
       <Link

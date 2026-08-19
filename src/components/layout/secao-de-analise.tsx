@@ -46,7 +46,11 @@ export function SecaoDeAnalise({
       <header className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-3">
         <div className="flex min-w-0 items-center gap-2.5">
           {Icone ? <Icone className="text-muted-foreground size-[18px]" strokeWidth={1.75} /> : null}
-          <h2 className="truncate text-lg font-semibold tracking-tight">{titulo}</h2>
+          {/* line-clamp-2 e não truncate, igual ao `CardCabecalho`: a decisão já
+            estava escrita no irmão — "título cortado é título que mente" — e
+            invertida aqui. Medido a 375px, 33 dos 43 títulos de seção do produto
+            terminavam em reticências. */}
+        <h2 className="line-clamp-2 text-lg font-semibold tracking-tight">{titulo}</h2>
         </div>
         {controles ? <div className="ml-auto flex items-center gap-2">{controles}</div> : null}
         {descricao ? (

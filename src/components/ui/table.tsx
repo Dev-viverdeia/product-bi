@@ -71,7 +71,12 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
 
 function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   return (
+    // `scope="col"` antes do spread para a chamada poder sobrescrever (cabeçalho
+    // de linha usa scope="row"). Sem ele, leitor de tela não associa célula a
+    // coluna e uma tabela de 30 colunas — que é o caso de Soluções — vira uma
+    // lista de números sem rótulo.
     <th
+      scope="col"
       data-slot="table-head"
       className={cn(
         "h-auto px-3 pt-2 pb-2.5 text-left align-middle text-xs font-medium whitespace-nowrap text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",

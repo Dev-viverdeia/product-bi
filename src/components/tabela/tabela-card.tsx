@@ -12,6 +12,14 @@ type TabelaCardProps = CardCabecalhoProps & {
   isLoading?: boolean
   isError?: boolean
   onRetry?: () => void
+  /**
+   * Refetch mantém o frame: a tabela anterior fica visível, esmaecida.
+   *
+   * É o par obrigatório do `placeholderData: keepPreviousData` global. Quem
+   * segura dado velho precisa DIZER que é velho — sem este canal a linha da
+   * janela anterior fica na tela com cara de linha da janela atual.
+   */
+  isRefreshing?: boolean
   /** linhas do esqueleto — aproxime do tamanho real para a tela não pular */
   linhasEsqueleto?: number
   /** alvo da âncora do bloco de resumo ("ver o card que prova") */
@@ -36,6 +44,7 @@ export function TabelaCard({
   isLoading = false,
   isError = false,
   onRetry,
+  isRefreshing = false,
   linhasEsqueleto = 6,
   id,
   nivel,
@@ -47,7 +56,12 @@ export function TabelaCard({
     <Card id={id} data-nivel={nivel} className={cn('glass-card gap-3', className)}>
       <CardCabecalho {...cabecalho} />
 
-      <CardContent className="min-w-0">
+      <CardContent
+        className={cn(
+          'min-w-0 transition-opacity',
+          isRefreshing && 'pointer-events-none opacity-60',
+        )}
+      >
         {isLoading ? (
           <div className="space-y-2" aria-hidden>
             {Array.from({ length: linhasEsqueleto }, (_, i) => (

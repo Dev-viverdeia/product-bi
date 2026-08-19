@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 import { InfoIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { Popover } from 'radix-ui'
 
 import { CardHeader, CardTitle } from '@/components/ui/card'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 export type CardCabecalhoProps = {
   title: string
@@ -77,17 +77,42 @@ export function CardCabecalho({
       <div className="max-w-full shrink-0">
         {action ??
           (description ? (
-            <Tooltip>
-              <TooltipTrigger
+            /*
+              Popover, e não Tooltip — a troca é de acessibilidade, não de
+              gosto. Tooltip do Radix abre por hover e foco, e NÃO abre no
+              toque: são 79 réguas de card inertes no celular, que é onde a
+              definição da métrica mais falta. Três lentes independentes da
+              auditoria chegaram neste tooltip por caminhos diferentes.
+
+              E o primitivo estava errado desde o começo por um segundo motivo:
+              tooltip é para rótulo curto, some ao perder o foco e não dá para
+              selecionar. Aqui o conteúdo é a régua da métrica — texto de duas
+              a quatro linhas que alguém lê com calma e às vezes copia.
+
+              Importado direto do `radix-ui` em vez de gerar `ui/popover.tsx`
+              pelo CLI: é o padrão já adotado pelo `AcordeaoDeAchados`, e
+              `src/components/ui/` é território do gerador.
+            */
+            <Popover.Root>
+              <Popover.Trigger
                 aria-label={`Como este número é calculado: ${title}`}
-                className="border-foreground/8 text-muted-foreground hover:bg-foreground/6 hover:text-foreground focus-visible:ring-ring flex size-8 items-center justify-center rounded-full border transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                className="border-foreground/8 text-muted-foreground hover:bg-foreground/6 hover:text-foreground active:bg-foreground/10 focus-visible:ring-ring data-[state=open]:bg-foreground/6 data-[state=open]:text-foreground flex size-8 items-center justify-center rounded-full border transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <InfoIcon className="size-4" />
-              </TooltipTrigger>
-              <TooltipContent side="left" className="max-w-72 text-xs leading-relaxed">
-                {description}
-              </TooltipContent>
-            </Tooltip>
+              </Popover.Trigger>
+              <Popover.Portal>
+                <Popover.Content
+                  side="left"
+                  align="start"
+                  sideOffset={6}
+                  collisionPadding={12}
+                  className="bg-popover text-popover-foreground shadow-md data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 z-50 max-w-72 rounded-md border p-3 text-xs leading-relaxed"
+                >
+                  {description}
+                  <Popover.Arrow className="fill-popover" />
+                </Popover.Content>
+              </Popover.Portal>
+            </Popover.Root>
           ) : null)}
       </div>
     </CardHeader>

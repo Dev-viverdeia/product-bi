@@ -168,6 +168,7 @@ export function EntradaPage() {
                     headlineLabel="dos convites chegam à 1ª ação"
                     description={`Safra: convites criados nos últimos ${periodo} dias, acompanhados até a 1ª ação · convites deletados fora · etapa de envio não aparece: o rastreamento de entrega da plataforma parou em abr/2026 (registrado para reporte)`}
                     isLoading={funil.isLoading}
+                    isRefreshing={funil.isFetching && !!funil.data}
                     isError={funil.isError}
                     onRetry={() => void funil.refetch()}
                     linhasEsqueleto={4}
@@ -215,6 +216,7 @@ export function EntradaPage() {
                     }
                     description="Convites criados há mais de 30 dias, não deletados · “Nunca aceito” não separa ignorado de nunca enviado: o rastreamento de envio da plataforma parou em abr/2026"
                     isLoading={aceite.isLoading}
+                    isRefreshing={aceite.isFetching && !!aceite.data}
                     isError={aceite.isError}
                     onRetry={() => void aceite.refetch()}
                     isEmpty={aceite.data?.length === 0}
@@ -256,6 +258,7 @@ export function EntradaPage() {
                     headlineLabel="dos convidados nunca fizeram nada"
                     description="Safra fechada: entrou entre 180 e 30 dias atrás, todos com a mesma janela para agir · comprador = dono da organização"
                     isLoading={origem.isLoading}
+                    isRefreshing={origem.isFetching && !!origem.data}
                     isError={origem.isError}
                     onRetry={() => void origem.refetch()}
                     linhasEsqueleto={4}
@@ -313,6 +316,7 @@ export function EntradaPage() {
                     headlineLabel="de quem parou no meio agiu no último mês"
                     description="Clientes com 120+ dias de casa · associação, não causa: quem já ia sumir também não terminou o onboarding, e a ordem entre as duas coisas não sai deste card"
                     isLoading={efeitoOnboarding.isLoading}
+                    isRefreshing={efeitoOnboarding.isFetching && !!efeitoOnboarding.data}
                     isError={efeitoOnboarding.isError}
                     onRetry={() => void efeitoOnboarding.refetch()}
                     linhasEsqueleto={2}
@@ -356,6 +360,7 @@ export function EntradaPage() {
                     headlineLabel="não concluíram o onboarding"
                     description="Distribuição por etapa atual de quem não concluiu · o número que estava aqui era escrito à mão e estava errado (dizia 89,5% quando a régua e_cliente dá 92,5%); percentual só entra vindo do banco"
                     isLoading={onboarding.isLoading}
+                    isRefreshing={onboarding.isFetching && !!onboarding.data}
                     isError={onboarding.isError}
                     onRetry={() => void onboarding.refetch()}
                     isEmpty={onboarding.data?.length === 0}
@@ -396,6 +401,7 @@ export function EntradaPage() {
                         : 'Quem traz gente para dentro — histórico completo'
                     }
                     isLoading={mastersTop.isLoading}
+                    isRefreshing={mastersTop.isFetching && !!mastersTop.data}
                     isError={mastersTop.isError}
                     onRetry={() => void mastersTop.refetch()}
                   >
@@ -448,6 +454,7 @@ export function EntradaPage() {
                     headlineLabel={erroDominante ? `em ${erroDominante.categoria}` : undefined}
                     description={`auth_error_telemetry · últimos ${periodo} dias · invalid_credentials = senha errada (esperado); investigar FALLBACK`}
                     isLoading={errosLogin.isLoading}
+                    isRefreshing={errosLogin.isFetching && !!errosLogin.data}
                     isError={errosLogin.isError}
                     onRetry={() => void errosLogin.refetch()}
                     isEmpty={errosLogin.data?.length === 0}
@@ -474,6 +481,7 @@ export function EntradaPage() {
                     headlineLabel={piorTela ? `na pior tela (${piorTela.tela})` : undefined}
                     description={`client_error_logs · últimos ${periodo} dias · onde o cliente sofre`}
                     isLoading={errosTela.isLoading}
+                    isRefreshing={errosTela.isFetching && !!errosTela.data}
                     isError={errosTela.isError}
                     onRetry={() => void errosTela.refetch()}
                   >

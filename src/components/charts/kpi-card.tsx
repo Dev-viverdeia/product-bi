@@ -243,7 +243,10 @@ export function KpiGrid({
       initial="hidden"
       animate="show"
       variants={{ show: { transition: { staggerChildren: 0.07 } } }}
-      className={cn('grid gap-4 sm:grid-cols-2 xl:grid-cols-4', className)}
+      // Duas colunas já no menor tamanho. Com o `sm:` os quatro tiles
+      // empilhavam em ~512px, e antes deles vêm título, régua e controles: a
+      // primeira dobra do celular era inteira de cromo, sem um número.
+      className={cn('grid grid-cols-2 gap-4 xl:grid-cols-4', className)}
     >
       {children}
     </motion.div>

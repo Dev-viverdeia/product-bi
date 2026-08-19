@@ -169,6 +169,7 @@ export function ExplorarPage() {
                   : ''
               } · até ${formatInt(LIMITE_POR_PAGINA)} linhas por página, teto imposto pelo banco`}
               isLoading={dados.isLoading}
+              isRefreshing={dados.isFetching && !!dados.data}
               isError={dados.isError}
               onRetry={() => void dados.refetch()}
               linhasEsqueleto={8}

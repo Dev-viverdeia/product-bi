@@ -162,6 +162,7 @@ export function SolucoesPage() {
                     }
                     description="Ordenado por vezes iniciadas (histórico) · nota em escala 0–10 · somente clientes · pageviews da página da solução, desde jul/2026"
                     isLoading={ranking.isLoading}
+                    isRefreshing={ranking.isFetching && !!ranking.data}
                     isError={ranking.isError}
                     onRetry={() => void ranking.refetch()}
                   >
@@ -214,6 +215,7 @@ export function SolucoesPage() {
                     headlineLabel={categoriaLider ? `em ${categoriaLider.categoria}` : undefined}
                     description="Soluções iniciadas por categoria (histórico completo)"
                     isLoading={categorias.isLoading}
+                    isRefreshing={categorias.isFetching && !!categorias.data}
                     isError={categorias.isError}
                     onRetry={() => void categorias.refetch()}
                     isEmpty={categorias.data?.length === 0}
@@ -257,6 +259,7 @@ export function SolucoesPage() {
                         : ` nos últimos ${periodo} dias`)
                     }
                     isLoading={conversao.isLoading}
+                    isRefreshing={conversao.isFetching && !!conversao.data}
                     isError={conversao.isError}
                     onRetry={() => void conversao.refetch()}
                     linhasEsqueleto={4}
@@ -303,6 +306,7 @@ export function SolucoesPage() {
                     }
                     description="Usuários únicos que concluíram cada aba, na ordem temporal típica de uso. As abas são independentes — dá para concluir uma sem passar pela anterior —, então não é funil: valor baixo é aba pulada, não abandono. Base de comparação é a aba mais concluída."
                     isLoading={abas.isLoading}
+                    isRefreshing={abas.isFetching && !!abas.data}
                     isError={abas.isError}
                     onRetry={() => void abas.refetch()}
                     linhasEsqueleto={6}
@@ -363,6 +367,7 @@ export function SolucoesPage() {
                         : 'Clientes com 120+ dias de casa que já iniciaram alguma solução'
                     }
                     isLoading={efeitoConclusao.isLoading}
+                    isRefreshing={efeitoConclusao.isFetching && !!efeitoConclusao.data}
                     isError={efeitoConclusao.isError}
                     onRetry={() => void efeitoConclusao.refetch()}
                     linhasEsqueleto={2}
@@ -414,6 +419,7 @@ export function SolucoesPage() {
                         : 'Clientes que tentaram 2+ soluções, com 60+ dias desde o início'
                     }
                     isLoading={ordemTentativa.isLoading}
+                    isRefreshing={ordemTentativa.isFetching && !!ordemTentativa.data}
                     isError={ordemTentativa.isError}
                     onRetry={() => void ordemTentativa.refetch()}
                     linhasEsqueleto={2}
@@ -462,6 +468,7 @@ export function SolucoesPage() {
                     headlineLabel="soluções para revisar"
                     description="Soluções publicadas no quartil inferior de uso ou sem nenhuma conclusão · revisar antes de remover: nota alta com pouco uso pode ser problema de descoberta, não de qualidade · pageviews só desde jul/2026, então podem ficar abaixo das iniciadas (histórico completo)"
                     isLoading={candidatas.isLoading}
+                    isRefreshing={candidatas.isFetching && !!candidatas.data}
                     isError={candidatas.isError}
                     onRetry={() => void candidatas.refetch()}
                   >

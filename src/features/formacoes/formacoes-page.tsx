@@ -178,6 +178,7 @@ export function FormacoesPage() {
                     headlineLabel="formações com aluno no período"
                     description="Alunos e aulas no período selecionado · histórico e conclusão desde o início · ordenado por alunos no período"
                     isLoading={uso.isLoading}
+                    isRefreshing={uso.isFetching && !!uso.data}
                     isError={uso.isError}
                     onRetry={() => void uso.refetch()}
                   >
@@ -231,6 +232,7 @@ export function FormacoesPage() {
                     headlineLabel={assuntoLider ? `em ${assuntoLider.categoria}` : undefined}
                     description={`Aulas concluídas por categoria de curso · últimos ${periodo} dias`}
                     isLoading={assuntos.isLoading}
+                    isRefreshing={assuntos.isFetching && !!assuntos.data}
                     isError={assuntos.isError}
                     onRetry={() => void assuntos.refetch()}
                     isEmpty={assuntos.data?.length === 0}
@@ -269,6 +271,7 @@ export function FormacoesPage() {
                     headlineLabel={melhorDuracao ? `na faixa ${melhorDuracao.faixa}` : undefined}
                     description="Taxa de conclusão normalizada por curso (conclusões da aula ÷ aula mais vista do mesmo curso) · só curso E aula publicados, com 50+ conclusões · faixa com menos de 10 aulas não vira média · a queda com a duração é real mas suave, e acima de 30 min não há aula publicada suficiente para afirmar — o precipício que esta tela mostrava vinha de 76 aulas longas em cursos não publicados"
                     isLoading={duracao.isLoading}
+                    isRefreshing={duracao.isFetching && !!duracao.data}
                     isError={duracao.isError}
                     onRetry={() => void duracao.refetch()}
                     isEmpty={duracao.data?.length === 0}
@@ -298,6 +301,7 @@ export function FormacoesPage() {
                     headlineLabel="chegam ao fim da grade"
                     description="Sobrevivência média por posição da aula (conclusões ÷ 1ª aula do curso) · decis da grade"
                     isLoading={dropoff.isLoading}
+                    isRefreshing={dropoff.isFetching && !!dropoff.data}
                     isError={dropoff.isError}
                     onRetry={() => void dropoff.refetch()}
                     isEmpty={dropoff.data?.length === 0}
@@ -334,6 +338,7 @@ export function FormacoesPage() {
                         : 'Inscrições com 90+ dias desde a 1ª aula daquele curso'
                     }
                     isLoading={entradaGrade.isLoading}
+                    isRefreshing={entradaGrade.isFetching && !!entradaGrade.data}
                     isError={entradaGrade.isError}
                     onRetry={() => void entradaGrade.refetch()}
                     linhasEsqueleto={2}
@@ -399,6 +404,7 @@ export function FormacoesPage() {
                         : 'Clientes com 120+ dias de casa que já estudaram'
                     }
                     isLoading={efeitoCert.isLoading}
+                    isRefreshing={efeitoCert.isFetching && !!efeitoCert.data}
                     isError={efeitoCert.isError}
                     onRetry={() => void efeitoCert.refetch()}
                     linhasEsqueleto={2}
@@ -440,6 +446,7 @@ export function FormacoesPage() {
                     headlineLabel="dias na formação mediana"
                     description="Mediana de dias entre a 1ª aula iniciada e o certificado · cursos com 20+ certificados · 0 = concluído no mesmo dia · o número acima é a formação do meio da lista, não uma média"
                     isLoading={jornada.isLoading}
+                    isRefreshing={jornada.isFetching && !!jornada.data}
                     isError={jornada.isError}
                     onRetry={() => void jornada.refetch()}
                   >
@@ -487,6 +494,7 @@ export function FormacoesPage() {
                     headlineLabel="de detratores na pior formação"
                     description="Escala 0–10 por aula, agregado por curso · 10+ respostas · média geral 9,5 tem viés de positividade — o sinal está nos detratores"
                     isLoading={nps.isLoading}
+                    isRefreshing={nps.isFetching && !!nps.data}
                     isError={nps.isError}
                     onRetry={() => void nps.refetch()}
                   >

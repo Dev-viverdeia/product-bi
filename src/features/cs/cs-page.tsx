@@ -257,6 +257,7 @@ export function CsPage() {
                     }
                     description="Um atendimento é um ciclo (ticket), não uma mensagem: 50 mensagens na mesma conversa contam como um. Contar mensagens infla o número cerca de 25 vezes."
                     isLoading={mensal.isLoading}
+                    isRefreshing={mensal.isFetching && !!mensal.data}
                     isError={mensal.isError}
                     onRetry={() => void mensal.refetch()}
                     isEmpty={mensal.data?.length === 0}
@@ -291,6 +292,7 @@ export function CsPage() {
                         : 'Ciclo sem atendente humano registrado — a IA respondeu e ninguém precisou entrar. Quem assumiu é medido por quem de fato respondeu, não por atribuição formal.'
                     }
                     isLoading={iaHumano.isLoading}
+                    isRefreshing={iaHumano.isFetching && !!iaHumano.data}
                     isError={iaHumano.isError}
                     onRetry={() => void iaHumano.refetch()}
                     isEmpty={iaHumano.data?.length === 0}
@@ -323,6 +325,7 @@ export function CsPage() {
                     headlineLabel="pessoas atenderam no período"
                     description="Quem de fato respondeu o ciclo (primeira mensagem humana de saída), que é diferente de quem está formalmente atribuído à conversa."
                     isLoading={atendentes.isLoading}
+                    isRefreshing={atendentes.isFetching && !!atendentes.data}
                     isError={atendentes.isError}
                     onRetry={() => void atendentes.refetch()}
                   >
@@ -360,6 +363,7 @@ export function CsPage() {
                     headlineLabel={canais.data?.[0] ? `no canal ${canais.data[0].canal}` : undefined}
                     description="Número da Central por onde o ciclo entrou."
                     isLoading={canais.isLoading}
+                    isRefreshing={canais.isFetching && !!canais.data}
                     isError={canais.isError}
                     onRetry={() => void canais.refetch()}
                     isEmpty={canais.data?.length === 0}
@@ -401,6 +405,7 @@ export function CsPage() {
                     headlineLabel="pessoas alcançadas no último mês"
                     description="Pessoas, não envios: a mesma pessoa recebida em lotes diferentes conta uma vez. A trava anti-duplicidade de 24h não entra na conta — somá-la inflaria o número em cerca de 14%."
                     isLoading={disparosMensal.isLoading}
+                    isRefreshing={disparosMensal.isFetching && !!disparosMensal.data}
                     isError={disparosMensal.isError}
                     onRetry={() => void disparosMensal.refetch()}
                     isEmpty={disparosMensal.data?.length === 0}
@@ -436,6 +441,7 @@ export function CsPage() {
                     }
                     description="Ignorados são a trava anti-duplicidade de 24 horas, não falha de entrega — por isso ficam numa coluna própria e fora da taxa de erro."
                     isLoading={disparosCanal.isLoading}
+                    isRefreshing={disparosCanal.isFetching && !!disparosCanal.data}
                     isError={disparosCanal.isError}
                     onRetry={() => void disparosCanal.refetch()}
                     linhasEsqueleto={2}
@@ -495,6 +501,7 @@ export function CsPage() {
                         : 'Pedido de cancelamento registrado, independentemente do desfecho. Uma empresa pode aparecer mais de uma vez, em ciclos diferentes.'
                     }
                     isLoading={cancelMensal.isLoading}
+                    isRefreshing={cancelMensal.isFetching && !!cancelMensal.data}
                     isError={cancelMensal.isError}
                     onRetry={() => void cancelMensal.refetch()}
                     isEmpty={cancelMensal.data?.length === 0}
@@ -524,6 +531,7 @@ export function CsPage() {
                     }
                     description="Vocabulário do Pulse, no grão de cliente deduplicado — o mesmo cliente com cadastro repetido conta uma vez. “Perdido ainda com acesso” não é erro de um dos lados: é a divergência entre o desfecho que o CS registrou e a base que a plataforma ainda mantém, e a tela mostra as duas em vez de escolher uma."
                     isLoading={retencao.isLoading}
+                    isRefreshing={retencao.isFetching && !!retencao.data}
                     isError={retencao.isError}
                     onRetry={() => void retencao.refetch()}
                     isEmpty={retencao.data?.length === 0}
@@ -567,6 +575,7 @@ export function CsPage() {
                     headlineLabel={cancelOrigem.data?.[0] ? `via ${cancelOrigem.data[0].origem}` : undefined}
                     description="Canal por onde a solicitação entrou no sistema."
                     isLoading={cancelOrigem.isLoading}
+                    isRefreshing={cancelOrigem.isFetching && !!cancelOrigem.data}
                     isError={cancelOrigem.isError}
                     onRetry={() => void cancelOrigem.refetch()}
                     isEmpty={cancelOrigem.data?.length === 0}
@@ -596,6 +605,7 @@ export function CsPage() {
                     }
                     description="Como o caso terminou comercialmente. NÃO é o motivo do cancelamento: motivo é texto livre e quase metade está vazia, então não existe distribuição confiável para mostrar."
                     isLoading={cancelDesfecho.isLoading}
+                    isRefreshing={cancelDesfecho.isFetching && !!cancelDesfecho.data}
                     isError={cancelDesfecho.isError}
                     onRetry={() => void cancelDesfecho.refetch()}
                     isEmpty={cancelDesfecho.data?.length === 0}
@@ -631,6 +641,7 @@ export function CsPage() {
                     headlineLabel="clientes no quadro"
                     description="Quadro automatizado por motor e webhooks — cards não param na primeira etapa."
                     isLoading={kickoff.isLoading}
+                    isRefreshing={kickoff.isFetching && !!kickoff.data}
                     isError={kickoff.isError}
                     onRetry={() => void kickoff.refetch()}
                   >
@@ -667,6 +678,7 @@ export function CsPage() {
                     headlineLabel="empresas já perseguidas"
                     description="Fluxo operacional de recuperação. Estar aqui não significa recuperado — parte destes casos já foi recuperada e parte já foi perdida; quem decide isso é o acordo registrado, não a posição no quadro."
                     isLoading={reversao.isLoading}
+                    isRefreshing={reversao.isFetching && !!reversao.data}
                     isError={reversao.isError}
                     onRetry={() => void reversao.refetch()}
                   >

@@ -220,6 +220,7 @@ export function ClientesPage() {
                     headlineLabel="aos 90 dias na safra madura mais recente"
                     description="% de clientes ativos na janela após a entrada · “—” = janela ainda não completa, por isso o número acima usa a safra mais recente com 90 dias fechados · safra com menos de 30 clientes no recorte mostra só a contagem (% suprimido pela régua de amostra) · atenção: a régua de atividade ganhou novos tipos de evento ao longo do tempo (Builder out/25, Soluções abr/26, Consultor mai/26) — parte da melhora entre cohorts distantes é instrumentação"
                     isLoading={cohort.isLoading}
+                    isRefreshing={cohort.isFetching && !!cohort.data}
                     isError={cohort.isError}
                     onRetry={() => void cohort.refetch()}
                   >
@@ -316,6 +317,7 @@ export function ClientesPage() {
                     }
                     description="De quem passou por cada módulo, que fatia teve ali a última ação antes de sumir. A versão anterior deste card contava clientes e publicava “59% param em Formações” — o que mede popularidade do módulo, porque o mais usado tende a ser o último de qualquer jornada. Dividido pela audiência de cada um, a ordem muda: módulo com muita gente e pouca mortalidade é o que segura."
                     isLoading={mortalidade.isLoading}
+                    isRefreshing={mortalidade.isFetching && !!mortalidade.data}
                     isError={mortalidade.isError}
                     onRetry={() => void mortalidade.refetch()}
                     isEmpty={mortalidade.data?.length === 0}
@@ -403,6 +405,7 @@ export function ClientesPage() {
                     headlineLabel="clientes na lista"
                     description="Inatividade: era ativo e está 14+ dias em silêncio · Plano vencendo: contrato expira em ≤30 dias sem uso recente do master"
                     isLoading={risco.isLoading}
+                    isRefreshing={risco.isFetching && !!risco.data}
                     isError={risco.isError}
                     onRetry={() => void risco.refetch()}
                   >
@@ -486,6 +489,7 @@ export function ClientesPage() {
                         : 'Quem saiu vs quem ficou: % que nunca usou cada módulo'
                     }
                     isLoading={churnModulos.isLoading}
+                    isRefreshing={churnModulos.isFetching && !!churnModulos.data}
                     isError={churnModulos.isError}
                     onRetry={() => void churnModulos.refetch()}
                   >
@@ -588,6 +592,7 @@ export function ClientesPage() {
                     }
                     description="Ação nos primeiros 7 dias × retenção aos 90 dias (clientes com 120+ dias de casa) · correlação, não causalidade — validar com experimento · só ações com tracking cobrindo todo o período aparecem · régua de amostra: 50+ fizeram, e % de “não fizeram” só com 30+"
                     isLoading={aha.isLoading}
+                    isRefreshing={aha.isFetching && !!aha.data}
                     isError={aha.isError}
                     onRetry={() => void aha.refetch()}
                   >
