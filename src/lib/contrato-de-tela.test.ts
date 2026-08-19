@@ -68,7 +68,7 @@ describe('valor nunca cai para zero', () => {
 })
 
 /*
-  Telas em que a régua de "percentual sai do banco" já vale.
+  Telas em que a régua de "percentual sai do banco" já vale — **hoje, as dez**.
 
   Percentual derivado de contagem no cliente escapa da supressão, porque
   contagem nunca é suprimida — num recorte estreito a tela imprime fatia sobre
@@ -76,16 +76,38 @@ describe('valor nunca cai para zero', () => {
   publicou 37,2% onde a resposta é 57,8%: o corte por prefixo de rótulo comeu
   um balde inteiro.
 
-  O risco só existe onde há recorte que estreita a base, e hoje o
-  `SegmentoFiltro` está em duas telas. As outras sete somam sobre a base
-  inteira, então a fatia é honesta enquanto o filtro não chegar nelas — e
-  entram nesta lista na fase que trouxer o recorte, junto com a migração dos
-  cálculos para o banco. Lista curta de propósito: cada nome que entra aqui é
-  uma tela que já passou pela migração.
+  ⚠️ A LISTA ERA DE DUAS, E O MOTIVO REGISTRADO ENVELHECEU. Ela dizia: "o risco
+  só existe onde há recorte que estreita a base, e o SegmentoFiltro está em duas
+  telas; as outras sete somam sobre a base inteira, então a fatia é honesta
+  enquanto o filtro não chegar nelas". Meia verdade, e a metade que faltava
+  custou caro: sem recorte a soma de fato estava certa, mas
+
+  1. o denominador não aparecia em barra nenhuma — Soluções publicava "37,7%"
+     sobre 49.777 inícios que o gráfico não desenha, no único bloco de destaque
+     da tela;
+  2. e o corte da faixa era feito por PREFIXO DE RÓTULO. IA achava a faixa de um
+     dia com `startsWith('1')`; Jornada, a de uma tela — e "16+ telas" também
+     começa com 1. Só acertava porque o `.find` pega a primeira e a RPC ordena
+     por `ordem`, duas coisas que ninguém prometeu manter.
+
+  Em 19/ago as oito restantes migraram o cálculo para o banco: `bi_assuntos`,
+  `bi_consultor_recorrencia`, `bi_consultor_modos`, `bi_profundidade_sessao`,
+  `bi_solucoes_por_categoria`, `bi_onboarding_abandono` e `bi_cs_funil` passaram
+  a devolver a própria fatia e o próprio total, com a supressão por amostra
+  valendo para elas. A lista deixou de ser "quem tem recorte" e passou a ser
+  "todas" — que é o estado em que ela para de crescer.
 */
-const TELAS_COM_RECORTE = [
-  'features/clientes/clientes-page.tsx',
+const TELAS_SEM_PERCENTUAL_NO_FRONT = [
   'features/visao-geral/visao-geral-page.tsx',
+  'features/clientes/clientes-page.tsx',
+  'features/entrada/entrada-page.tsx',
+  'features/formacoes/formacoes-page.tsx',
+  'features/solucoes/solucoes-page.tsx',
+  'features/ia/ia-page.tsx',
+  'features/organizacoes/organizacoes-page.tsx',
+  'features/jornada/jornada-page.tsx',
+  'features/receita/receita-page.tsx',
+  'features/cs/cs-page.tsx',
 ]
 
 // Esta régua já se pagou duas vezes: pegou o defeito de 20 pontos da Fase 0 e,
@@ -119,10 +141,10 @@ describe('headline não afirma número antes de ter o dado', () => {
 })
 
 describe('percentual não é calculado no front', () => {
-  const sobRegra = paginas.filter((p) => TELAS_COM_RECORTE.includes(p.caminho))
+  const sobRegra = paginas.filter((p) => TELAS_SEM_PERCENTUAL_NO_FRONT.includes(p.caminho))
 
   it('a lista de telas sob a régua bate com o disco', () => {
-    expect(sobRegra.map((p) => p.caminho).sort()).toEqual([...TELAS_COM_RECORTE].sort())
+    expect(sobRegra.map((p) => p.caminho).sort()).toEqual([...TELAS_SEM_PERCENTUAL_NO_FRONT].sort())
   })
 
   it.each(sobRegra)('$caminho', ({ fonte }) => {

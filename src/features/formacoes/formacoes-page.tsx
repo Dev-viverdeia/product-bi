@@ -84,14 +84,13 @@ export function FormacoesPage() {
     [efeitoCert.data],
   )
 
-  // Nenhuma destas RPCs corta a lista, então somar e comparar aqui é honesto.
-  const assuntoLider = useMemo(() => {
-    const cats = assuntos.data ?? []
-    if (cats.length === 0) return null
-    const maior = cats.reduce((a, b) => (b.aulas_concluidas > a.aulas_concluidas ? b : a))
-    const total = cats.reduce((soma, a) => soma + a.aulas_concluidas, 0)
-    return total > 0 ? { categoria: maior.categoria, parte: maior.aulas_concluidas / total } : null
-  }, [assuntos.data])
+  // A RPC vem ordenada por aulas desc, então a primeira linha É a líder, e a
+  // fatia dela chega pronta do banco. Somar aqui estava CERTO hoje — a função
+  // não corta a lista —, mas percentual derivado no cliente escapa da
+  // supressão por amostra e publica fatia sobre um total que nenhuma barra
+  // desenha. Se alguém puser um LIMIT na RPC amanhã, a conta continua rodando
+  // e passa a mentir sem erro nenhum.
+  const assuntoLider = assuntos.data?.[0] ?? null
 
   const melhorDuracao = useMemo(() => {
     const faixas = (duracao.data ?? []).filter((d) => d.taxa_media != null)
@@ -227,7 +226,7 @@ export function FormacoesPage() {
                     nivel="descritivo"
                     icon={BookOpenIcon}
                     title="Assuntos mais assistidos"
-                    headline={assuntoLider ? formatPercent(assuntoLider.parte) : '—'}
+                    headline={assuntoLider?.pct_das_aulas != null ? formatPercent(assuntoLider.pct_das_aulas) : '—'}
                     headlineLabel={assuntoLider ? `em ${assuntoLider.categoria}` : undefined}
                     description={`Aulas concluídas por categoria de curso · últimos ${periodo} dias`}
                     isLoading={assuntos.isLoading}

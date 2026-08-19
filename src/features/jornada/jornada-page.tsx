@@ -117,13 +117,12 @@ export function JornadaPage() {
   const saidaLider = saidasPorTaxa[0] ?? null
 
   // Exploração: sessões que passaram de uma tela só.
-  const exploram = useMemo(() => {
-    const faixas = profundidade.data ?? []
-    const total = faixas.reduce((soma, p) => soma + p.sessoes, 0)
-    if (total === 0) return null
-    const umaTela = faixas.find((p) => p.faixa.startsWith('1'))?.sessoes ?? 0
-    return (total - umaTela) / total
-  }, [profundidade.data])
+  //
+  // ⚠️ Era calculado aqui, e o pior não era a divisão: a faixa de uma tela era
+  // achada por `faixa.startsWith('1')`, que casa "1 tela" E "16+ telas". Só
+  // acertava porque o `.find` pega a primeira e a RPC ordena por `ordem` —
+  // duas coisas que ninguém prometeu manter. Agora o corte sai do número.
+  const exploram = profundidade.data?.[0]?.pct_mais_de_uma_tela ?? null
 
   return (
     <div className="space-y-4">

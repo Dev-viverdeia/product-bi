@@ -79,10 +79,8 @@ export function EntradaPage() {
     [aceite.data],
   )
 
-  const incompletos = useMemo(
-    () => (onboarding.data ?? []).reduce((soma, o) => soma + o.clientes, 0),
-    [onboarding.data],
-  )
+  // Coluna de janela, igual em toda linha: o total deixa de ser somado aqui.
+  const incompletos = onboarding.data?.[0]?.incompletos_total ?? null
 
   return (
     <div className="space-y-4">
@@ -386,7 +384,7 @@ export function EntradaPage() {
                     id="card-onboarding-abandono"
                     icon={ListChecksIcon}
                     title="Onde os incompletos param"
-                    headline={onboarding.data ? formatInt(incompletos) : '—'}
+                    headline={incompletos != null ? formatInt(incompletos) : '—'}
                     headlineLabel="não concluíram o onboarding"
                     description="Distribuição por etapa atual de quem não concluiu, só clientes · a etapa é a atual, não a de abandono: quem parar e voltar sai desta contagem sem virar conclusão"
                     isLoading={onboarding.isLoading}

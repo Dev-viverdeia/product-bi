@@ -627,18 +627,18 @@ export function CsPage() {
               <SecaoDeAnalise
                 titulo="Onde cada caso está parado nos quadros do CS"
                 icone={WorkflowIcon}
-                descricao="Foto da posição atual dos cards, não fluxo do período: o seletor de dias não alcança nenhum dos dois quadros, e um card parado há meses pesa igual a um que entrou ontem. Os dois também não se somam — são fluxos separados e o grão difere, com o Kickoff contando clientes e a Reversão contando empresas."
+                descricao="Foto da posição atual dos CARDS, não fluxo do período: o seletor de dias não alcança nenhum dos dois quadros, e um card parado há meses pesa igual a um que entrou ontem. Os dois não se somam — são fluxos separados. E card não é empresa: há empresa com mais de um card, então o headline conta empresas distintas e a tabela conta cards."
               >
                 <BentoItem span={6}>
                   <TabelaCard
                     icon={ClipboardCheckIcon}
-                    title="Kickoff — clientes por etapa"
+                    title="Kickoff — cards por etapa"
                     headline={
-                      semCarga || !kickoff.data
+                      semCarga || !kickoff.data?.[0]
                         ? '—'
-                        : formatInt(kickoff.data.reduce((soma, e) => soma + Number(e.cards), 0))
+                        : formatInt(kickoff.data[0].empresas_total)
                     }
-                    headlineLabel="clientes no quadro"
+                    headlineLabel="empresas no quadro"
                     description="Quadro automatizado por motor e webhooks — cards não param na primeira etapa."
                     isLoading={kickoff.isLoading}
                     isRefreshing={kickoff.isFetching && !!kickoff.data}
@@ -653,7 +653,7 @@ export function CsPage() {
                       cabecalho={
                         <TableRow>
                           <TableHead>Etapa</TableHead>
-                          <TableHead className="text-right">Clientes</TableHead>
+                          <TableHead className="text-right">Cards</TableHead>
                         </TableRow>
                       }
                       renderLinha={(e) => (
@@ -667,15 +667,18 @@ export function CsPage() {
                 </BentoItem>
 
                 <BentoItem span={6}>
+                  {/* "em tentativa AGORA" e não "já perseguidas": a tabela é foto
+                      do quadro, e card removido some da origem — acumulado
+                      histórico é coisa que ela não guarda. */}
                   <TabelaCard
                     icon={RotateCcwIcon}
                     title="Reversão — tentativas em curso"
                     headline={
-                      semCarga || !reversao.data
+                      semCarga || !reversao.data?.[0]
                         ? '—'
-                        : formatInt(reversao.data.reduce((soma, e) => soma + Number(e.cards), 0))
+                        : formatInt(reversao.data[0].empresas_total)
                     }
-                    headlineLabel="empresas já perseguidas"
+                    headlineLabel="empresas em tentativa agora"
                     description="Fluxo operacional de recuperação. Estar aqui não significa recuperado — parte destes casos já foi recuperada e parte já foi perdida; quem decide isso é o acordo registrado, não a posição no quadro."
                     isLoading={reversao.isLoading}
                     isRefreshing={reversao.isFetching && !!reversao.data}

@@ -247,7 +247,9 @@ export type Database = {
         Returns: {
           alunos: number
           aulas_concluidas: number
+          aulas_total: number
           categoria: string
+          pct_das_aulas: number
         }[]
       }
       bi_atividade_diaria: {
@@ -311,7 +313,9 @@ export type Database = {
         Args: never
         Returns: {
           modo: string
+          pct_das_threads: number
           threads: number
+          threads_total: number
           usuarios: number
         }[]
       }
@@ -320,7 +324,10 @@ export type Database = {
         Returns: {
           faixa: string
           ordem: number
+          pct_dos_usuarios: number
+          pct_mais_de_um_dia: number
           usuarios: number
+          usuarios_total: number
         }[]
       }
       bi_cs_atendimento_ia_humano: {
@@ -437,6 +444,8 @@ export type Database = {
         Args: { p_quadro: string }
         Returns: {
           cards: number
+          cards_total: number
+          empresas_total: number
           etapa: string
           etapa_ordem: number
         }[]
@@ -817,6 +826,7 @@ export type Database = {
         Args: never
         Returns: {
           clientes: number
+          incompletos_total: number
           step_atual: number
         }[]
       }
@@ -939,7 +949,10 @@ export type Database = {
         Returns: {
           faixa: string
           ordem: number
+          pct_das_sessoes: number
+          pct_mais_de_uma_tela: number
           sessoes: number
+          sessoes_total: number
         }[]
       }
       bi_raio_x_telas: {

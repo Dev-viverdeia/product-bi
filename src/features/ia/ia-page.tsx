@@ -89,21 +89,15 @@ export function IaPage() {
   const adocaoBase = adocao.data?.[0] ?? null
 
   // Recorrência é sobre hábito: interessa quem passou da faixa de um dia só.
-  const voltamOutroDia = useMemo(() => {
-    const faixas = recorrencia.data ?? []
-    const total = faixas.reduce((soma, r) => soma + r.usuarios, 0)
-    if (total === 0) return null
-    const umDia = faixas.find((r) => r.faixa.startsWith('1'))?.usuarios ?? 0
-    return (total - umDia) / total
-  }, [recorrencia.data])
+  //
+  // ⚠️ Isto era calculado aqui, e o pior não era a divisão: a faixa de um dia
+  // era achada por `faixa.startsWith('1')` — que casa "1 dia" e casaria
+  // "16+ dias" se a ordem mudasse, e some em silêncio se alguém reescrever a
+  // legenda. Agora o corte sai do número da ordem, dentro da RPC.
+  const voltamOutroDia = recorrencia.data?.[0]?.pct_mais_de_um_dia ?? null
 
-  const modoLider = useMemo(() => {
-    const ms = modos.data ?? []
-    if (ms.length === 0) return null
-    const maior = ms.reduce((a, b) => (b.threads > a.threads ? b : a))
-    const total = ms.reduce((soma, m) => soma + m.threads, 0)
-    return total > 0 ? { modo: maior.modo, parte: maior.threads / total } : null
-  }, [modos.data])
+  // Ordenada por threads desc: a primeira linha é a líder, e a fatia vem do banco.
+  const modoLider = modos.data?.[0] ?? null
 
   // O card das etapas do Builder é sobre atrito: a etapa que mais falha.
   const etapaMaisFragil = useMemo(() => {
@@ -332,7 +326,7 @@ export function IaPage() {
                     nivel="descritivo"
                     icon={SlidersHorizontalIcon}
                     title="Modos do Consultor"
-                    headline={modoLider ? formatPercent(modoLider.parte) : '—'}
+                    headline={modoLider?.pct_das_threads != null ? formatPercent(modoLider.pct_das_threads) : '—'}
                     headlineLabel={modoLider ? `em ${modoLider.modo}` : undefined}
                     description="Conversas por modo (histórico completo)"
                     isLoading={modos.isLoading}
