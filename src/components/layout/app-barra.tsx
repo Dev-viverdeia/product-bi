@@ -6,7 +6,14 @@ import { toast } from 'sonner'
 import { AbaCanal } from '@/components/layout/aba-canal'
 import { useAbaAtiva } from '@/components/layout/aba-do-modulo'
 import { AlertaPipeline } from '@/components/layout/alerta-pipeline'
-import { moduloDaRota, navFerramentas, navItems } from '@/components/layout/nav-items'
+import {
+  GRUPOS_DE_NAV,
+  ROTULO_DE_FERRAMENTAS,
+  ROTULOS_DE_GRUPO,
+  moduloDaRota,
+  navFerramentas,
+  navItems,
+} from '@/components/layout/nav-items'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
 import { MarcaVia } from '@/components/ui-marca/marca-via'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -94,40 +101,60 @@ function NavegacaoEmGaveta() {
         <SheetHeader className="border-b">
           <SheetTitle>Navegação</SheetTitle>
         </SheetHeader>
-        <nav className="flex flex-col gap-0.5 p-2">
-          {[...navItems, ...navFerramentas]
-            .filter((item) => !item.oculto)
-            .map((item) => {
-            const ativo = item.matchPrefix ? pathname.startsWith(item.to) : pathname === item.to
-            return (
-              <Link
-                key={item.to}
-                to={comSegmento(item.to, params)}
-                onClick={() => setAberto(false)}
-                aria-current={ativo ? 'page' : undefined}
-                className={cn(
-                  'focus-visible:ring-ring flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none',
-                  /*
-                    ⚠️ O ativo era `bg-accent`, e ele não aparecia: #f0f2f5 sobre
-                    o #edeef1 da gaveta dá 1,03:1 de contraste — no escuro,
-                    rgba(255,255,255,0.06) sobre #0a1120 dá 1,15:1. O único
-                    canal real de estado era a cor do texto. Defeito de 13/ago,
-                    achado na revisão de 19/ago.
-
-                    A pílula preenchida é a mesma do rail, de propósito: esta
-                    gaveta É o rail abaixo de `lg`, e o mesmo menu não pode
-                    marcar "onde estou" de dois jeitos conforme a largura.
-                  */
-                  ativo
-                    ? 'bg-primary text-primary-foreground font-medium'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground font-normal',
-                )}
-              >
-                <item.icon className="size-4 shrink-0" />
-                {item.title}
-              </Link>
-            )
-          })}
+        {/* Os mesmos blocos do rail, com os mesmos nomes: esta gaveta É o rail
+            abaixo de `lg`, e um menu que agrupa numa largura e vira lista
+            corrida na outra obriga a reaprender a navegação ao girar o
+            aparelho. A gaveta rola nativamente, então aqui os nomes não custam
+            altura como custam no rail. */}
+        <nav className="flex flex-col gap-4 overflow-y-auto p-2 pb-6">
+          {[
+            ...GRUPOS_DE_NAV.map((grupo) => ({
+              rotulo: ROTULOS_DE_GRUPO[grupo],
+              itens: navItems.filter((i) => i.grupo === grupo && !i.oculto),
+            })),
+            { rotulo: ROTULO_DE_FERRAMENTAS, itens: navFerramentas.filter((i) => !i.oculto) },
+          ]
+            .filter((bloco) => bloco.itens.length > 0)
+            .map((bloco) => (
+              <div key={bloco.rotulo}>
+                <h2 className="text-muted-foreground px-3 pb-1.5 text-[11px] font-medium tracking-wide uppercase">
+                  {bloco.rotulo}
+                </h2>
+                <ul className="flex flex-col gap-0.5">
+                  {bloco.itens.map((item) => {
+                    const ativo = item.matchPrefix
+                      ? pathname.startsWith(item.to)
+                      : pathname === item.to
+                    return (
+                      <li key={item.to}>
+                        <Link
+                          to={comSegmento(item.to, params)}
+                          onClick={() => setAberto(false)}
+                          aria-current={ativo ? 'page' : undefined}
+                          className={cn(
+                            'focus-visible:ring-ring flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none',
+                            /*
+                              ⚠️ O ativo era `bg-accent`, e ele não aparecia:
+                              #f0f2f5 sobre o #edeef1 da gaveta dá 1,03:1 de
+                              contraste — no escuro, rgba(255,255,255,0.06)
+                              sobre #0a1120 dá 1,15:1. O único canal real de
+                              estado era a cor do texto. Defeito de 13/ago,
+                              achado na revisão de 19/ago.
+                            */
+                            ativo
+                              ? 'bg-primary text-primary-foreground font-medium'
+                              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground font-normal',
+                          )}
+                        >
+                          <item.icon className="size-4 shrink-0" strokeWidth={1.75} />
+                          {item.title}
+                        </Link>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            ))}
         </nav>
       </SheetContent>
     </Sheet>

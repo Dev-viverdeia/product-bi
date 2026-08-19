@@ -41,8 +41,18 @@ export function AppLayout() {
             topo; a altura mínima é a da área visível, para o rail parecer uma
             coluna e não um bloco solto numa página curta.
             6,5rem = a calha de cima (12) + a barra (64) + a margem dela (16) +
-            a calha de baixo (12). Muda junto com `--barra-altura`. */}
-        <AppRail className="sticky top-3 hidden min-h-[calc(100svh-6.5rem)] lg:flex" />
+            a calha de baixo (12). Muda junto com `--barra-altura`.
+
+            ⚠️ `max-h` e `overflow-y-auto` entraram em 19/ago, com os nomes de
+            grupo. Elemento `sticky` mais alto que a área visível tem o pé
+            INALCANÇÁVEL — ele nunca sai do lugar, então rolar a página não
+            revela o resto. Medido: o rail passou a 758px de conteúdo contra os
+            664px de uma tela de 768px de altura (1366x768 é laptop comum), e
+            "Design system" ficaria fora para sempre. Com o teto igual ao piso,
+            o rail tem exatamente a altura da área visível e rola por dentro
+            quando não cabe — em telas altas nada muda, porque não sobra o que
+            rolar. Módulo novo passa a caber por construção. */}
+        <AppRail className="sticky top-3 hidden max-h-[calc(100svh-6.5rem)] min-h-[calc(100svh-6.5rem)] overflow-y-auto lg:flex" />
 
         <main className="min-w-0 flex-1">
           {/* Módulos entram por import dinâmico — o shell não espera o chunk. */}

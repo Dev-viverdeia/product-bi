@@ -1,9 +1,40 @@
 import { NavLink, useMatch, useSearchParams } from 'react-router'
 
-import { GRUPOS_DE_NAV, navFerramentas, navItems } from '@/components/layout/nav-items'
+import {
+  GRUPOS_DE_NAV,
+  ROTULO_DE_FERRAMENTAS,
+  ROTULOS_DE_GRUPO,
+  navFerramentas,
+  navItems,
+} from '@/components/layout/nav-items'
 import type { NavItem } from '@/components/layout/nav-items'
 import { comSegmento } from '@/lib/segmento'
 import { cn } from '@/lib/utils'
+
+/**
+ * O nome do bloco.
+ *
+ * É `h2` de propósito, e não um `span` estilizado: quem usa leitor de tela
+ * navega por cabeçalho, e isso dá aos quatro grupos a mesma estrutura que quem
+ * enxerga recebe do espaço em branco. Enquanto o rail era só de ícone, esse
+ * canal não existia em lado nenhum.
+ *
+ * Caixa alta é o que separa o rótulo do bloco do rótulo do item sem gastar cor
+ * nem peso — os dois usam `text-muted-foreground`, e o que os distingue é
+ * tamanho e caixa. ⚠️ O `tracking-wide` não é enfeite: o base do projeto aplica
+ * `letter-spacing: -0.011em` no corpo, e caixa alta a 11px com tracking
+ * negativo fecha as letras umas nas outras.
+ *
+ * (A regra "sem uppercase" do DS é da PÍLULA/chip, que é um controle. Aqui o
+ * elemento é um cabeçalho de seção, e ele precisa não competir com os itens.)
+ */
+function RotuloDeGrupo({ children }: { children: string }) {
+  return (
+    <h2 className="text-muted-foreground px-3 pb-1.5 text-[11px] font-medium tracking-wide uppercase">
+      {children}
+    </h2>
+  )
+}
 
 function ItemDoRail({ item }: { item: NavItem }) {
   const [params] = useSearchParams()
@@ -86,20 +117,32 @@ export function AppRail({ className }: { className?: string }) {
         return (
           /* Separador entre blocos: espaço, não linha. Uma régua a cada bloco
              competiria com a pílula do item ativo e o rail viraria formulário. */
-          <div key={grupo} className="mt-3 flex flex-col gap-1 first:mt-0">
-            {doGrupo.map((item) => (
-              <ItemDoRail key={item.to} item={item} />
-            ))}
+          <div key={grupo} className="mt-4 first:mt-0">
+            <RotuloDeGrupo>{ROTULOS_DE_GRUPO[grupo]}</RotuloDeGrupo>
+            {/* `ul` para o leitor de tela anunciar quantos itens o bloco tem —
+                o preflight do Tailwind já tira marcador e recuo. */}
+            <ul className="flex flex-col gap-1">
+              {doGrupo.map((item) => (
+                <li key={item.to}>
+                  <ItemDoRail item={item} />
+                </li>
+              ))}
+            </ul>
           </div>
         )
       })}
 
       {/* As ferramentas caem no rodapé: são do app, não do produto, e
           misturá-las aos módulos daria a elas o mesmo peso das análises. */}
-      <div className="mt-auto flex flex-col gap-1 pt-6">
-        {navFerramentas.map((item) => (
-          <ItemDoRail key={item.to} item={item} />
-        ))}
+      <div className="mt-auto pt-6">
+        <RotuloDeGrupo>{ROTULO_DE_FERRAMENTAS}</RotuloDeGrupo>
+        <ul className="flex flex-col gap-1">
+          {navFerramentas.map((item) => (
+            <li key={item.to}>
+              <ItemDoRail item={item} />
+            </li>
+          ))}
+        </ul>
       </div>
     </nav>
   )

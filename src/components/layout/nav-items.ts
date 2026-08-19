@@ -44,6 +44,30 @@ export const GRUPOS_DE_NAV = ['panorama', 'quem', 'uso', 'negocio'] as const
 
 export type GrupoDeNav = (typeof GRUPOS_DE_NAV)[number]
 
+/**
+ * O nome de cada bloco, como ele aparece no rail.
+ *
+ * Os três do meio são a **pergunta que o negócio faz**, escrita por extenso —
+ * "quem é o cliente → o que ele usa → quanto isso vale". Essa ordem já era a
+ * razão do agrupamento e vivia só em comentário; com o rail rotulado ela passa
+ * a estar na tela, que é onde quem navega pode usá-la.
+ *
+ * ⚠️ **São rótulos de UI, não os slugs.** `GRUPOS_DE_NAV` guarda identificador
+ * de código (`quem`, `uso`, `negocio`) e nenhum deles é texto que se mostre a
+ * alguém. O `Record<GrupoDeNav, string>` é o que garante que um grupo novo não
+ * entre sem nome: falta de chave aqui é erro de compilação, não bloco anônimo
+ * na tela.
+ */
+export const ROTULOS_DE_GRUPO: Record<GrupoDeNav, string> = {
+  panorama: 'Panorama',
+  quem: 'Quem é o cliente',
+  uso: 'O que ele usa',
+  negocio: 'Quanto isso vale',
+}
+
+/** O bloco do rodapé não é um grupo de módulo, mas precisa do mesmo nome. */
+export const ROTULO_DE_FERRAMENTAS = 'Ferramentas'
+
 export type NavItem = {
   /** nome completo — cabeçalho da página e navegação mobile */
   title: string
