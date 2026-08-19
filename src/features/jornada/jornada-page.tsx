@@ -407,7 +407,9 @@ export function JornadaPage() {
                       label="Encerram a sessão"
                       data={saidasPorTaxa.map((s) => ({
                         category: s.tela,
-                        value: s.pct_da_tela ?? 0,
+                        // `bi_pontos_saida` tem `having count(*) >= 100`: o
+                        // denominador nunca é zero, então a taxa nunca falta.
+                        value: s.pct_da_tela,
                         nota: `${formatInt(s.saidas)} sessões terminadas`,
                       }))}
                       valueFormatter={formatPercent}

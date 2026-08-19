@@ -30,7 +30,7 @@ function achatar(fonte: string) {
   return fonte.replace(/\s+/g, ' ')
 }
 
-describe('valor de KPI nunca cai para zero', () => {
+describe('valor nunca cai para zero', () => {
   /*
     `value={dados?.campo ?? 0}` publica "0" quando a consulta não trouxe o
     campo — e zero é indistinguível de "não carregou" e de "suprimido pela
@@ -40,13 +40,29 @@ describe('valor de KPI nunca cai para zero', () => {
 
     Zero de verdade continua passando: quando a linha existe e o campo vale 0,
     `?? null` devolve 0.
+
+    ⚠️ AS DUAS FORMAS, e a segunda é a que passou despercebida. A régua nasceu
+    casando só `value={… ?? 0}`, a forma de PROP JSX — e a coerção que estava no
+    produto era `value: … ?? 0`, a forma de CHAVE DE OBJETO, dentro do `.map`
+    que monta o `data` do gráfico. Cinco páginas escreviam assim, o teste ficou
+    verde por acidente, e Formações publicou uma coluna de "0,0%" num card de
+    destaque cuja própria descrição negava o precipício. É o mesmo modo de
+    falha que o `contrato-do-motor` já teve: régua que casa uma grafia e não a
+    classe de defeito.
+
+    Aqui o par não é retórico — a barra suprimida é `value: null` +
+    `motivoSemValor` no `CategoryDatum`, exatamente como no `KpiCard`.
   */
   it('há página para verificar', () => {
     expect(paginas.length).toBeGreaterThan(5)
   })
 
   it.each(paginas)('$caminho', ({ fonte }) => {
-    const ocorrencias = achatar(fonte).match(/value=\{[^}]*\?\?\s*0\s*[})]/g) ?? []
+    const chato = achatar(fonte)
+    const ocorrencias = [
+      ...(chato.match(/value=\{[^}]*\?\?\s*0\s*[})]/g) ?? []),
+      ...(chato.match(/value:\s*[^,}]*\?\?\s*0\s*[,}]/g) ?? []),
+    ]
     expect(ocorrencias).toEqual([])
   })
 })

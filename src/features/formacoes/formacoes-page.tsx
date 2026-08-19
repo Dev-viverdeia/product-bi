@@ -277,7 +277,10 @@ export function FormacoesPage() {
                       label="Taxa de conclusão"
                       data={(duracao.data ?? []).map((d) => ({
                         category: `${d.faixa} (${formatInt(d.aulas)} aulas)`,
-                        value: d.taxa_media ?? 0,
+                        value: d.taxa_media,
+                        motivoSemValor: `amostra de ${formatInt(d.aulas)} ${
+                          d.aulas === 1 ? 'aula' : 'aulas'
+                        }, mínimo de 10`,
                       }))}
                       valueFormatter={formatPercent}
                       className="h-[300px]"
@@ -303,7 +306,9 @@ export function FormacoesPage() {
                       label="Sobrevivência"
                       data={(dropoff.data ?? []).map((d) => ({
                         category: `${d.decil * 10}%`,
-                        value: d.taxa_media ?? 0,
+                        // `bi_dropoff_posicao` não tem cláusula de supressão: a
+                        // média do decil só não existe se o decil não existe.
+                        value: d.taxa_media,
                       }))}
                       valueFormatter={formatPercent}
                       className="h-[280px]"

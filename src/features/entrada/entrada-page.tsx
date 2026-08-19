@@ -36,6 +36,7 @@ import {
 import { formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import { fundoIntensidade } from '@/lib/intensidade'
 import { LIMITE_LISTA } from '@/lib/rpc'
+import { notaAmostra } from '@/lib/segmento'
 import { AnaliseDaTela } from '@/features/resumo/analise-tela'
 import { PlanoDaTela } from '@/features/resumo/plano-da-tela'
 import {
@@ -223,7 +224,8 @@ export function EntradaPage() {
                       label="Convites"
                       data={(aceite.data ?? []).map((a) => ({
                         category: a.faixa,
-                        value: a.pct ?? 0,
+                        value: a.pct,
+                        motivoSemValor: notaAmostra(a.total),
                         nota: `${formatInt(a.convites)} convites`,
                         // A barra de "nunca aceito" é o problema, não o resultado:
                         // recua para o cinza para que as faixas de aceite, que são

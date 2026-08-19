@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/table'
 import { formatDateShort, formatDecimal, formatInt, formatPercent } from '@/lib/format'
 import { LIMITE_LISTA } from '@/lib/rpc'
+import { notaAmostra } from '@/lib/segmento'
 import { AnaliseDaTela } from '@/features/resumo/analise-tela'
 import { PlanoDaTela } from '@/features/resumo/plano-da-tela'
 import {
@@ -302,7 +303,8 @@ export function IaPage() {
                       label="Conversas"
                       data={(profundidade.data ?? []).map((p) => ({
                         category: p.faixa,
-                        value: p.pct ?? 0,
+                        value: p.pct,
+                        motivoSemValor: notaAmostra(p.total),
                         nota: `${formatInt(p.conversas)} conversas`,
                         // As duas faixas de saída precoce são o assunto do card; o
                         // resto é o comportamento normal contra o qual se lê.

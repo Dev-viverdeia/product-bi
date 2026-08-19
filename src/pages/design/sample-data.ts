@@ -28,21 +28,44 @@ export const usuariosMensal: TimeSeriesPoint[] = [
   { x: '2026-08-01', novos: 618, recorrentes: 3_210 },
 ]
 
-export const sessoesPorCanal: CategoryDatum[] = [
+// `satisfies` e não anotação: com `: CategoryDatum[]` o `value` de cada linha
+// alarga para `number | null` — o tipo do kit, que aceita supressão — e os
+// headlines do showcase, que somam e comparam, deixam de compilar. `satisfies`
+// confere a conformidade e preserva o literal.
+export const sessoesPorCanal = [
   { category: 'Orgânico', value: 12_400 },
   { category: 'Direto', value: 8_900 },
   { category: 'Social', value: 6_200 },
   { category: 'E-mail', value: 4_100 },
   { category: 'Pago', value: 2_800 },
-]
+] satisfies CategoryDatum[]
 
-export const receitaPorProduto: CategoryDatum[] = [
+export const receitaPorProduto = [
   { category: 'Formação Viver de IA', value: 148_000 },
   { category: 'Comunidade', value: 96_500 },
   { category: 'Mentoria em grupo', value: 61_200 },
   { category: 'Eventos', value: 32_400 },
   { category: 'Consultoria', value: 19_000 },
-]
+] satisfies CategoryDatum[]
+
+/**
+ * O estado de valor suprimido do `CategoryBarChart`: a faixa existe, tem
+ * amostra, e mesmo assim não tem taxa — porque a régua da própria função a
+ * suprimiu. Está aqui porque é o defeito real que Formações publicou: com
+ * `?? 0` na página, esta última faixa virava uma coluna de "0,0%" e o card
+ * afirmava um precipício que o dado nega.
+ */
+export const conclusaoPorDuracao = [
+  { category: 'Até 5 min (124 aulas)', value: 0.7694 },
+  { category: '5–10 min (135 aulas)', value: 0.7433 },
+  { category: '10–20 min (89 aulas)', value: 0.6895 },
+  { category: '20–30 min (15 aulas)', value: 0.6287 },
+  {
+    category: '30–60 min (2 aulas)',
+    value: null,
+    motivoSemValor: 'amostra de 2 aulas, mínimo de 10',
+  },
+] satisfies CategoryDatum[]
 
 export const assinaturasPorPlano: DonutDatum[] = [
   { name: 'Anual', value: 1_420 },

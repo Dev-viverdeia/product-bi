@@ -1,3 +1,4 @@
+import { InfoIcon } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, ReferenceLine, XAxis, YAxis } from 'recharts'
 
 import { ChartReveal } from '@/components/charts/chart-reveal'
@@ -12,7 +13,24 @@ import { cn } from '@/lib/utils'
 
 export type CategoryDatum = {
   category: string
-  value: number
+  /**
+   * `null` = a régua do dado suprimiu o valor. A barra não é desenhada e a
+   * categoria continua no eixo, com o motivo declarado abaixo do gráfico.
+   *
+   * É a mesma doutrina do `KpiCard`: **zero é uma medida, ausência não é.**
+   * Coagir com `?? 0` na página desenha um precipício que o banco não afirma —
+   * e o rótulo na ponta escreve "0" ao lado de uma categoria cujo único
+   * problema era ter amostra pequena demais para ter valor. A `AbaDeDados` já
+   * mostra a mesma célula como travessão; era só o gráfico que mentia.
+   */
+  value: number | null
+  /**
+   * Por que não há valor, quando `value` é `null` (ex.: `notaAmostra(n)`).
+   *
+   * Sem ele o gráfico teria um buraco sem explicação, que lê como falha de
+   * carregamento. Com ele, o buraco é a régua se declarando.
+   */
+  motivoSemValor?: string
   /** recua a barra para o cinza de de-ênfase — use para destacar UMA */
   mute?: boolean
   /**
@@ -70,6 +88,7 @@ export function CategoryBarChart({
   className,
 }: CategoryBarChartProps) {
   const temMute = data.some((d) => d.mute)
+  const suprimidos = data.filter((d) => d.value == null)
   const config = {
     value: { label, color: 'var(--color-data-1)' },
   } satisfies ChartConfig
@@ -77,6 +96,7 @@ export function CategoryBarChart({
   const isColumn = layout === 'column'
 
   return (
+    <div className="flex flex-col">
     <ChartReveal direction={isColumn ? 'up' : 'left'}>
       <ChartContainer
         config={config}
@@ -135,7 +155,8 @@ export function CategoryBarChart({
           content={
             <ChartTooltipContent
               formatter={(value, _name, item) => {
-                const nota = (item.payload as CategoryDatum | undefined)?.nota
+                const datum = item.payload as CategoryDatum | undefined
+                const nota = datum?.nota
                 return (
                   <>
                     <div
@@ -146,9 +167,14 @@ export function CategoryBarChart({
                       <div className="flex items-center justify-between gap-4 leading-none">
                         <span className="text-muted-foreground">{label}</span>
                         <span className="text-foreground font-mono font-medium tabular-nums">
-                          {valueFormatter(Number(value))}
+                          {value == null ? '—' : valueFormatter(Number(value))}
                         </span>
                       </div>
+                      {value == null && datum?.motivoSemValor ? (
+                        <span className="text-muted-foreground text-xs leading-none">
+                          {datum.motivoSemValor}
+                        </span>
+                      ) : null}
                       {nota ? (
                         <span className="text-muted-foreground text-xs leading-none">
                           {nota}
@@ -202,7 +228,12 @@ export function CategoryBarChart({
               dataKey="value"
               position={isColumn ? 'top' : 'right'}
               offset={8}
-              formatter={(label: unknown) => valueFormatter(Number(label))}
+              formatter={(label: unknown) =>
+                // `Number(null)` é 0: sem esta guarda, a categoria suprimida
+                // imprime "0" (ou "0,0%") na ponta de uma barra que não existe,
+                // indistinguível de zero medido.
+                label == null ? '' : valueFormatter(Number(label))
+              }
               fill="var(--color-muted-foreground)"
               fontSize={11}
             />
@@ -211,5 +242,27 @@ export function CategoryBarChart({
         </BarChart>
       </ChartContainer>
     </ChartReveal>
+
+    {/* A supressão é declarada em texto, e não só pela barra ausente: buraco
+        sem explicação lê como falha de carregamento. O canal é HTML e não
+        geometria do Recharts de propósito — barra nula não tem retângulo onde
+        pendurar rótulo nem área onde disparar tooltip. */}
+    {suprimidos.length > 0 ? (
+      <p className="text-muted-foreground mt-3 flex items-start gap-1.5 text-xs leading-relaxed">
+        <InfoIcon className="mt-0.5 size-3.5 shrink-0" />
+        <span>
+          Sem {label.toLowerCase()} em{' '}
+          {suprimidos.map((d, i) => (
+            <span key={d.category}>
+              {i > 0 ? ' · ' : ''}
+              <span className="text-foreground">{d.category}</span>
+              {d.motivoSemValor ? ` (${d.motivoSemValor})` : ''}
+            </span>
+          ))}
+          . A barra fica de fora — ausência de valor não é zero.
+        </span>
+      </p>
+    ) : null}
+    </div>
   )
 }

@@ -7,6 +7,7 @@ import {
   RadioIcon,
   ClockIcon,
   TableIcon,
+  TimerIcon,
   UsersIcon,
 } from 'lucide-react'
 
@@ -40,6 +41,7 @@ import { notaAmostra } from '@/lib/segmento'
 import { cn } from '@/lib/utils'
 import {
   assinaturasPorPlano,
+  conclusaoPorDuracao,
   kpis,
   receitaMensal,
   receitaPorProduto,
@@ -330,6 +332,20 @@ export function DesignPage() {
             data={assinaturasPorPlano}
             totalLabel="assinaturas"
             valueFormatter={formatInt}
+          />
+        </ChartCard>
+
+        <ChartCard
+          icon={TimerIcon}
+          title="Valor suprimido pela régua"
+          headline={formatPercent(0.7694)}
+          headlineLabel="na melhor faixa"
+          description="A última faixa tem amostra abaixo do mínimo e o banco devolve null · a barra fica de fora e o motivo é declarado abaixo do gráfico · sem isso a página faria `?? 0` e desenharia um precipício de 0,0% que o dado nega"
+        >
+          <CategoryBarChart
+            data={conclusaoPorDuracao}
+            label="Taxa de conclusão"
+            valueFormatter={formatPercent}
           />
         </ChartCard>
 
