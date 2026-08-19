@@ -62,6 +62,13 @@ export function ReceitaPage() {
   }, [mensal.data])
 
   // O card de cobrança é sobre dinheiro que não entrou: lidera pelo pior evento.
+  //
+  // O filtro de nulo é o que faz isso funcionar, e ele passou a ter dente: a
+  // linha "Pagamento aprovado" É o denominador, e a RPC devolvia 1,0000 nela.
+  // Como este reduce pega o MAIOR pct, o headline publicava "100,0% do valor
+  // pago em Pagamento aprovado" — tautologia em corpo 30px. Hoje a RPC
+  // suprime a fatia da linha de referência, então ela sai daqui por régua e
+  // não por nome, que é o que sobrevive a alguém renomear o evento.
   const piorEventoCobranca = useMemo(() => {
     const evs = (cobranca.data ?? []).filter((c) => c.pct_do_pago != null)
     if (evs.length === 0) return null

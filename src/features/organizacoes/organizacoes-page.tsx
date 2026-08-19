@@ -121,8 +121,14 @@ export function OrganizacoesPage() {
           não pode custar os números de referência da tela. */}
       <div id="card-kpis">
         <KpiGrid>
+          {/* "com time" e não só "ativas": este KPI conta `ativa and membros > 0`,
+              e o card "Onde estão as contas" logo abaixo usa TODAS as ativas —
+              1.925 contra 1.957, o mesmo nome para duas populações na mesma
+              tela. A diferença são as 32 contas sem ninguém dentro, que o card
+              mostra na primeira faixa. As médias desta fileira dependem do
+              recorte com time: conta vazia não tem fração de time ativo. */}
           <KpiCard
-            label="Organizações ativas"
+            label="Organizações ativas com time"
             value={kpis.data?.orgs_ativas ?? null}
             format={formatInt}
             isLoading={kpis.isLoading}
@@ -319,7 +325,7 @@ export function OrganizacoesPage() {
                     }
                     description={
                       faixaComMaisGente
-                        ? `Organizações ativas por fatia do time que apareceu nos 30 dias até o último dia com dado · as duas colunas de percentual apontam para faixas diferentes: a maior parte das CONTAS está zerada, e a maior parte das PESSOAS está em "${faixaComMaisGente.faixa}" · qual delas olhar depende de a decisão ser sobre cobrança ou sobre uso`
+                        ? `TODAS as organizações ativas — ${formatInt(faixaComMaisGente.total_orgs)}, incluindo as sem membro nenhum, que a fileira de KPIs não conta · fatia do time que apareceu nos 30 dias até o último dia com dado · as duas colunas de percentual apontam para faixas diferentes: a maior parte das CONTAS está zerada, e a maior parte das PESSOAS está em "${faixaComMaisGente.faixa}"`
                         : 'Organizações ativas por fatia do time que apareceu nos últimos 30 dias com dado'
                     }
                     isLoading={distribuicao.isLoading}

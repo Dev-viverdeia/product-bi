@@ -1126,6 +1126,8 @@ export type Database = {
           categoria: string
           concluidas: number
           iniciadas: number
+          iniciadas_total: number
+          pct_das_iniciadas: number
           solucoes: number
           taxa_conclusao: number
         }[]

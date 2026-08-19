@@ -79,13 +79,12 @@ export function SolucoesPage() {
 
   const solucaoLider = ranking.data?.[0] ?? null
 
-  const categoriaLider = useMemo(() => {
-    const cats = categorias.data ?? []
-    if (cats.length === 0) return null
-    const maior = cats.reduce((a, b) => (b.iniciadas > a.iniciadas ? b : a))
-    const total = cats.reduce((soma, c) => soma + c.iniciadas, 0)
-    return total > 0 ? { categoria: maior.categoria, parte: maior.iniciadas / total } : null
-  }, [categorias.data])
+  // A RPC vem ordenada por iniciadas desc, então a primeira linha É a líder —
+  // e a fatia dela sai do banco, não de um `reduce` aqui. O bloco de destaque
+  // publicava 37,7% somado no front sobre 49.777, um denominador que nenhuma
+  // barra do gráfico desenha; agora ele chega junto, e a supressão por amostra
+  // vale para ele como vale para o resto.
+  const categoriaLider = categorias.data?.[0] ?? null
 
   // Última etapa do funil da tela: do catálogo até concluir.
   const conclusaoDoCatalogo = conversao.data?.at(-1)?.pct ?? null
@@ -215,9 +214,17 @@ export function SolucoesPage() {
                     nivel="descritivo"
                     icon={LayersIcon}
                     title="Uso por categoria"
-                    headline={categoriaLider ? formatPercent(categoriaLider.parte) : '—'}
+                    headline={
+                      categoriaLider?.pct_das_iniciadas != null
+                        ? formatPercent(categoriaLider.pct_das_iniciadas)
+                        : '—'
+                    }
                     headlineLabel={categoriaLider ? `em ${categoriaLider.categoria}` : undefined}
-                    description="Soluções iniciadas por categoria (histórico completo)"
+                    description={
+                      categoriaLider
+                        ? `Soluções iniciadas por categoria, histórico completo · a fatia é sobre ${formatInt(categoriaLider.iniciadas_total)} inícios no total, que é a soma das barras`
+                        : 'Soluções iniciadas por categoria (histórico completo)'
+                    }
                     isLoading={categorias.isLoading}
                     isRefreshing={categorias.isFetching && !!categorias.data}
                     isError={categorias.isError}
