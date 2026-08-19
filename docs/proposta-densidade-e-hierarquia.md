@@ -11,13 +11,27 @@ escopo confirmado com o Mateus. Cinco commits, `lint`/`test` (285)/`build` limpo
 | bloco | estado |
 | --- | --- |
 | Os 4 defeitos de exatidão (+1 achado no caminho) | ✅ feito |
+| Os 3 "defeitos de dado achados de passagem" | ✅ feito |
 | Fase A — `AbaDeDados` fechada, sem `nivel` | ✅ feito |
 | Pacote "uma tarde" (7 itens) | ✅ feito |
 | `ErrorBoundary` de rota | ✅ feito |
+| Fase B — `densidade.ts`, régua de ordem e catraca | ✅ feito |
+| Fase C — 7 das 10 telas na régua | 🟡 parcial |
 | **Verificação de navegador** | ⛔ **bloqueada** — ver abaixo |
-| Fase B — `densidade.ts` e régua de ordem | ⏸ não iniciada |
-| Fase C — os 6 cortes por tela | ⏸ não iniciada |
 | Rail rotulado (208px) | ⏸ segurado, por decisão: sobe junto com a faxina |
+
+**Placar da Fase C:** prosa de seção de **12.430 para 9.773 caracteres** (média 289 → 257),
+seções de **43 para 38**, e sete telas cumprindo os cinco limites e as duas regras de ordem —
+seis por medição e duas por exceção declarada com motivo escrito. **Nenhum card foi cortado e
+nenhum número mudou nesta fase**: o que caiu foi peso de leitura.
+
+**As três que faltam precisam de DECISÃO, não de edição:**
+
+- `clientes` — 10 cards (teto 9) e 6 seções (teto 5). Entrar exige CORTAR um card, e a auditoria
+  original provou 6 cortes no produto inteiro sem deixar a lista de quais. É decisão de produto.
+- `cs` — 12 cards, 6 seções e **zero `nivel=` declarado**: está fora da escada, então nem a régua
+  de ordem nem o piso de descritivo podem ser avaliados nela.
+- `receita` — mesmo caso de CS quanto ao `nivel`, mais três seções de um card.
 
 ⛔ **A verificação de navegador continua sem ser feita, e ela é a régua que fecha a queixa
 original.** O `npm run dev` sobe e responde 200, mas a extensão do Chrome não está conectada nesta
