@@ -9,6 +9,7 @@ import type { Periodo } from '@/lib/periodo'
 import { formatDateShort, formatInt } from '@/lib/format'
 import { AMOSTRA_MINIMA, rotuloPapel, type Recorte } from '@/lib/segmento'
 import { lerSeveridade } from '@/lib/severidade'
+import { DocumentoDeAchados } from '@/features/resumo/documento'
 import { preencherGabarito } from '@/features/resumo/gabarito'
 import {
   temRegra,
@@ -150,44 +151,66 @@ export function AnaliseDaTela({
   }
 
   return (
-    /*
-      SEM card. A leitura escrita é o DOCUMENTO da tela, não um bloco dentro
-      dela — envolvê-la numa moldura branca a rebaixa ao mesmo nível de um
-      gráfico e ainda cobra dois paddings (o do card e o do conteúdo) de uma
-      coluna que só precisa de texto. Aqui ela pousa direto na página e usa a
-      largura inteira.
+    <DocumentoDeAchados
+      titulo="O que os dados dizem"
+      escopo={escopo}
+      placar={
+        apuracao
+          ? {
+              avaliadas,
+              emTela: visiveis.length,
+              semLastro: suprimidos.length,
+              abaixoDoCorte,
+            }
+          : undefined
+      }
+      aparato={
+        apuracao ? (
+          <>
+            {suprimidos.length > 0 ? (
+              <section className="space-y-2">
+                <h3 className="text-base font-medium tracking-tight">
+                  O que não dá para afirmar
+                </h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {suprimidos.length === 1
+                    ? 'Uma pergunta foi avaliada e não produziu resposta sustentada.'
+                    : `${formatInt(suprimidos.length)} perguntas foram avaliadas e não produziram resposta sustentada.`}{' '}
+                  Ficam aqui em vez de sumir: onde o dado não sustenta, a tela declara.
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {suprimidos.map((s) => (
+                    <li key={s.regra} className="text-sm leading-relaxed">
+                      <span className="font-medium">{s.titulo}</span>
+                      <span className="text-muted-foreground"> — {s.motivo}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
 
-      Duas colunas a partir de xl: os achados à esquerda, numa medida de leitura
-      fixa, e o aparato à direita — o que não dá para afirmar e como se apurou.
-      A separação não é só de espaço: um é o conteúdo, o outro é a prestação de
-      contas, e misturá-los na mesma coluna faz o leitor atravessar régua para
-      chegar ao próximo achado. Abaixo de xl empilha, e o aparato vai para o
-      fim, que é onde ele pertence quando não cabe ao lado.
-
-      ⚠️ **Era `lg`, e virou `xl` em 19/ago quando o rail passou a ter rótulo.**
-      O teto de `26rem` na coluna da direita existe para o apoio nunca superar a
-      leitura — e entre 1024 e 1135px de viewport ele passou a produzir
-      exatamente o contrário. A conta: o rail de 208px deixa `main` com 776px,
-      menos o `gap-14` sobram 720px; o grid distribui a folga IGUALMENTE a
-      partir das bases (0 e 16rem), a faixa da direita congela no teto de 416px
-      e a da esquerda fica com os 304px restantes. O aparato ficava 37% mais
-      largo que a leitura, que quebrava em ~40 caracteres por linha. Com o rail
-      de 68px a mesma largura dava 444 × 416, na ordem certa — quem inverteu foi
-      o rail mais largo, não este arquivo.
-
-      **O modo de falha é a razão de estar escrito aqui:** a inversão é
-      invisível nos dois checkpoints do projeto (375px empilha, 1280px dá
-      560 × 416) e só aparece numa banda de 112px no meio. Mexer na largura do
-      rail obriga a refazer esta conta.
-    */
-    <div className="grid gap-10 xl:grid-cols-[minmax(0,68ch)_minmax(16rem,26rem)] xl:gap-14">
-      <div className="space-y-8">
-        <header className="space-y-1">
-          <h2 className="text-xl font-medium tracking-tight">O que os dados dizem</h2>
-          <p className="text-muted-foreground text-sm">{escopo}</p>
-        </header>
-
-        {achados.isLoading ? (
+            <section className="space-y-2">
+              <h3 className="text-base font-medium tracking-tight">Como isto foi apurado</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Nenhuma frase acima foi escrita na hora. Cada uma vem de um gabarito
+                versionado no banco, preenchido com os mesmos números que os gráficos da
+                aba ao lado desenham — não há uma segunda conta em lugar nenhum.
+              </p>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Percentual só aparece com pelo menos {formatInt(AMOSTRA_MINIMA)} clientes no
+                denominador, e diferença entre dois grupos só vira achado quando passa de
+                dois erros padrão da própria estimativa.{' '}
+                <Link to="/regras" className="underline underline-offset-4">
+                  Ver o catálogo completo
+                </Link>
+                .
+              </p>
+            </section>
+          </>
+        ) : undefined
+      }
+    >
+      {achados.isLoading ? (
         <div className="space-y-4">
           <Skeleton className="h-5 w-72 rounded-md" />
           <Skeleton className="h-4 w-full rounded-md" />
@@ -209,8 +232,8 @@ export function AnaliseDaTela({
               ? 'A regra desta tela foi avaliada'
               : `As ${formatInt(avaliadas)} regras desta tela foram avaliadas`}{' '}
             e nenhuma cruzou o limiar. Isto não é um atestado de que está tudo bem: a
-            leitura cobre as perguntas que alguém previu, e só essas. Elas estão
-            listadas em{' '}
+            leitura cobre as perguntas que alguém previu, e só essas. Elas estão listadas
+            em{' '}
             <Link to="/regras" className="underline underline-offset-4">
               regras do resumo
             </Link>
@@ -230,54 +253,6 @@ export function AnaliseDaTela({
           }))}
         />
       )}
-      </div>
-
-      <aside className="space-y-8 xl:pt-14">
-      {suprimidos.length > 0 && apuracao ? (
-        <section className="space-y-2">
-          <h3 className="text-base font-medium tracking-tight">O que não dá para afirmar</h3>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            {suprimidos.length === 1
-              ? 'Uma pergunta foi avaliada e não produziu resposta sustentada.'
-              : `${formatInt(suprimidos.length)} perguntas foram avaliadas e não produziram resposta sustentada.`}{' '}
-            Ficam aqui em vez de sumir: onde o dado não sustenta, a tela declara.
-          </p>
-          <ul className="mt-3 space-y-2">
-            {suprimidos.map((s) => (
-              <li key={s.regra} className="text-sm leading-relaxed">
-                <span className="font-medium">{s.titulo}</span>
-                <span className="text-muted-foreground"> — {s.motivo}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {apuracao ? (
-        <section className="space-y-2">
-          <h3 className="text-base font-medium tracking-tight">Como isto foi apurado</h3>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            Nenhuma frase acima foi escrita na hora. Cada uma vem de um gabarito
-            versionado no banco, preenchido com os mesmos números que os gráficos da aba
-            ao lado desenham — não há uma segunda conta em lugar nenhum. Percentual só
-            aparece com pelo menos {formatInt(AMOSTRA_MINIMA)} clientes no denominador, e
-            diferença entre dois grupos só vira achado quando passa de dois erros padrão
-            da própria estimativa.
-          </p>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            Nesta carga, {formatInt(avaliadas)}{' '}
-            {avaliadas === 1 ? 'regra foi avaliada' : 'regras foram avaliadas'}:{' '}
-            {formatInt(visiveis.length)} em tela, {formatInt(suprimidos.length)} sem
-            lastro
-            {abaixoDoCorte > 0 ? `, ${formatInt(abaixoDoCorte)} abaixo do corte` : ''}.{' '}
-            <Link to="/regras" className="underline underline-offset-4">
-              Ver o catálogo completo
-            </Link>
-            .
-          </p>
-        </section>
-      ) : null}
-      </aside>
-    </div>
+    </DocumentoDeAchados>
   )
 }

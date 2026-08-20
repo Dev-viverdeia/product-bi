@@ -3,6 +3,7 @@ import { AlertCircleIcon, ArrowRightIcon } from 'lucide-react'
 
 import { PARAM_ABA } from '@/components/layout/aba-do-modulo'
 import { AcordeaoDeAchados } from '@/components/ui-marca/acordeao-de-achados'
+import { DocumentoDeAchados } from '@/features/resumo/documento'
 import { selecionar } from '@/features/resumo/selecao'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatInt } from '@/lib/format'
@@ -119,95 +120,93 @@ export function PlanoDaTela({
     abaixoDoCorte,
   } = selecionar(todos)
 
+  const apuracao = !achados.isLoading && !achados.isError
+
   return (
-    /*
-      SEM card, e em duas colunas a partir de xl — a MESMA gramática da aba
-      `Análise`, que é a irmã desta. A primeira versão embrulhava tudo numa
-      moldura branca própria: a aba ao lado é documento e esta era bloco, então
-      trocar de aba trocava a natureza da página, e a linha de sugestão herdava
-      dois paddings para exibir texto.
-
-      À esquerda a sugestão, em medida de leitura. À direita a prestação de
-      contas: o que foi suprimido e o que este bloco NÃO faz.
-    */
-    <div className="grid gap-10 xl:grid-cols-[minmax(0,68ch)_minmax(16rem,26rem)] xl:gap-14">
-      <div className="space-y-8">
-        <header className="space-y-1">
-          <h2 className="text-xl font-medium tracking-tight">O que fazer a respeito</h2>
-          <p className="text-muted-foreground text-sm">
-            {achados.isLoading
-              ? 'Calculando…'
-              : `${formatInt(publicaveis.length)} sugest${
-                  publicaveis.length === 1 ? 'ão' : 'ões'
-                } para esta tela, em ordem de gravidade medida`}
-          </p>
-        </header>
-
-        {achados.isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-5 w-72 rounded-md" />
-            <Skeleton className="h-4 w-full rounded-md" />
-            <Skeleton className="h-16 w-full rounded-md" />
-          </div>
-        ) : achados.isError ? (
-          <p className="text-muted-foreground flex items-center gap-2 text-[15px]">
-            <AlertCircleIcon className="size-4 shrink-0" aria-hidden />
-            Não foi possível carregar as sugestões.
-          </p>
-        ) : publicaveis.length === 0 ? (
-          <p className="text-[15px] leading-relaxed">
-            Nada fora do padrão nas {formatInt(todos.length)} regras avaliadas desta tela. O bloco
-            tem permissão de não ter o que sugerir — e é isso que dá crédito às vezes em que ele
-            tem.
-          </p>
-        ) : (
-          <AcordeaoDeAchados
-            achados={publicaveis.map((achado) => ({
-              id: achado.regra,
-              titulo: achado.titulo,
-              severidade: lerSeveridade(achado.severidade),
-              // fechado, a linha visível é a AÇÃO — é o que se procura aqui
-              resumo: preencherGabarito(achado.gabarito_acao, achado.parametros),
-              detalhe: <JustificativaDoAchado achado={achado} />,
-            }))}
-          />
-        )}
-      </div>
-
-      <aside className="space-y-6 text-sm xl:pt-1">
-        <section className="space-y-2">
-          <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-            O que este bloco não faz
-          </h3>
-          <p className="text-muted-foreground max-w-[52ch] leading-relaxed">
-            O BI reporta; ele não gere. Não há dono, prazo nem status, e nenhum item promete
-            efeito atribuível — não existe experimentação em nenhuma das três fontes, então
-            "fizemos isto e melhorou" não é afirmação que este BI consegue sustentar.
-          </p>
-          <p className="text-muted-foreground max-w-[52ch] leading-relaxed">
-            Nada aqui é recalculado: é o mesmo achado que a aba <em>Análise</em> lê, com a mesma
-            régua — no máximo três, um por família
-            {abaixoDoCorte > 0 ? `, ${formatInt(abaixoDoCorte)} abaixo do corte` : ''}. Muda o
-            que fica em primeiro plano, nunca o número.
-          </p>
-        </section>
-
-        {suprimidos.length > 0 ? (
+    <DocumentoDeAchados
+      titulo="O que fazer a respeito"
+      escopo={
+        achados.isLoading
+          ? 'Calculando…'
+          : `${formatInt(publicaveis.length)} sugest${
+              publicaveis.length === 1 ? 'ão' : 'ões'
+            } para esta tela, em ordem de gravidade medida`
+      }
+      placar={
+        apuracao
+          ? {
+              avaliadas: todos.length,
+              emTela: publicaveis.length,
+              semLastro: suprimidos.length,
+              abaixoDoCorte,
+            }
+          : undefined
+      }
+      aparato={
+        <>
           <section className="space-y-2">
-            <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              Suprimidas, com o motivo
-            </h3>
-            <ul className="text-muted-foreground max-w-[52ch] space-y-1.5 leading-relaxed">
-              {suprimidos.map((a) => (
-                <li key={a.regra}>
-                  <span className="text-foreground">{a.titulo}</span> —{' '}
-                  {a.motivo ?? 'sem amostra suficiente'}
-                </li>
-              ))}
-            </ul>
+            <h3 className="text-base font-medium tracking-tight">O que este bloco não faz</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              O BI reporta; ele não gere. Não há dono, prazo nem status, e nenhum item
+              promete efeito atribuível — não existe experimentação em nenhuma das três
+              fontes, então "fizemos isto e melhorou" não é afirmação que este BI consegue
+              sustentar.
+            </p>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Nada aqui é recalculado: é o mesmo achado que a aba <em>Análise</em> lê, com a
+              mesma régua — no máximo três, um por família. Muda o que fica em primeiro
+              plano, nunca o número.
+            </p>
           </section>
-        ) : null}
-      </aside>
-    </div>
+
+          {suprimidos.length > 0 ? (
+            <section className="space-y-2">
+              <h3 className="text-base font-medium tracking-tight">Suprimidas, com o motivo</h3>
+              <ul className="space-y-2">
+                {suprimidos.map((a) => (
+                  <li key={a.regra} className="text-sm leading-relaxed">
+                    <span className="font-medium">{a.titulo}</span>
+                    <span className="text-muted-foreground">
+                      {' '}
+                      — {a.motivo ?? 'sem amostra suficiente'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+        </>
+      }
+    >
+      {achados.isLoading ? (
+        <div className="space-y-4">
+          <Skeleton className="h-5 w-72 rounded-md" />
+          <Skeleton className="h-4 w-full rounded-md" />
+          <Skeleton className="h-16 w-full rounded-md" />
+        </div>
+      ) : achados.isError ? (
+        <p className="text-muted-foreground flex items-center gap-2 text-[15px]">
+          <AlertCircleIcon className="size-4 shrink-0" aria-hidden />
+          Não foi possível carregar as sugestões.
+        </p>
+      ) : publicaveis.length === 0 ? (
+        <p className="text-[15px] leading-relaxed">
+          Nada fora do padrão nas {formatInt(todos.length)} regras avaliadas desta tela. O
+          bloco tem permissão de não ter o que sugerir — e é isso que dá crédito às vezes em
+          que ele tem.
+        </p>
+      ) : (
+        <AcordeaoDeAchados
+          achados={publicaveis.map((achado) => ({
+            id: achado.regra,
+            titulo: achado.titulo,
+            severidade: lerSeveridade(achado.severidade),
+            // fechado, a linha visível é a AÇÃO — é o que se procura aqui
+            resumo: preencherGabarito(achado.gabarito_acao, achado.parametros),
+            detalhe: <JustificativaDoAchado achado={achado} />,
+          }))}
+        />
+      )}
+    </DocumentoDeAchados>
   )
 }

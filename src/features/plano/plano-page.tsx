@@ -8,6 +8,7 @@ import { ModuloTabs } from '@/components/layout/modulo-tabs'
 import { moduloDaTela } from '@/components/layout/nav-items'
 import { KpiCard, KpiGrid } from '@/components/charts'
 import { AcordeaoDeAchados } from '@/components/ui-marca/acordeao-de-achados'
+import { DocumentoDeAchados } from '@/features/resumo/documento'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatInt } from '@/lib/format'
 import { lerSeveridade } from '@/lib/severidade'
@@ -220,18 +221,64 @@ export function PlanoDeAcaoPage() {
             />
           ),
           apuracao: (
-            <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
-              <section className="max-w-[68ch] space-y-3">
-                <h2 className="text-xl font-medium tracking-tight">Como esta lista foi montada</h2>
+            <DocumentoDeAchados
+              titulo="Como esta lista foi montada"
+              placar={
+                !plano.isLoading && !plano.isError
+                  ? {
+                      avaliadas,
+                      emTela: publicaveis.length,
+                      semLastro: suprimidos.length,
+                      abaixoDoCorte: 0,
+                    }
+                  : undefined
+              }
+              aparato={
+                <>
+                  {suprimidos.length > 0 ? (
+                    <section className="space-y-2">
+                      <h3 className="text-base font-medium tracking-tight">
+                        {formatInt(suprimidos.length)} suprimido(s), com o motivo
+                      </h3>
+                      <ul className="space-y-2">
+                        {suprimidos.map((a) => (
+                          <li key={`${a.tela}-${a.regra}`} className="text-sm leading-relaxed">
+                            <span className="font-medium">{a.titulo}</span>
+                            <span className="text-muted-foreground">
+                              {' '}
+                              — {a.motivo ?? 'sem amostra suficiente'} (
+                              {moduloDaTela(a.tela)?.title ?? a.tela})
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
+
+                  <section className="space-y-2">
+                    <h3 className="text-base font-medium tracking-tight">
+                      O que este plano não faz
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      Ele relata; não gere. Não há dono, prazo nem status por achado, e nenhum
+                      item promete efeito atribuível — não existe experimentação em nenhuma
+                      das fontes, então &quot;fizemos isto e melhorou&quot; não seria uma
+                      afirmação que este BI consegue sustentar.
+                    </p>
+                  </section>
+                </>
+              }
+            >
+              <div className="space-y-3">
                 <p className="text-muted-foreground text-[15px] leading-relaxed">
                   Cada item sai do motor determinístico da tela de origem — sem modelo de
                   linguagem no caminho. O número da frase é o mesmo que o card daquela tela
                   desenha, porque o calculador chama a mesma consulta com os mesmos argumentos.
                 </p>
                 <p className="text-muted-foreground text-[15px] leading-relaxed">
-                  Ordenar telas diferentes na mesma lista só é legítimo porque o score é múltiplo
-                  do limiar da própria regra, e não a magnitude bruta. Sem essa normalização a
-                  ordem sairia do acaso da escala.
+                  Ordenar telas diferentes na mesma lista só é legítimo porque o score é
+                  múltiplo do limiar da própria regra, e não a magnitude bruta. Sem essa
+                  normalização a ordem sairia do acaso da escala.
                 </p>
                 {saturacao != null && saturacao > 0.8 ? (
                   <p className="text-[15px] leading-relaxed">
@@ -247,39 +294,8 @@ export function PlanoDeAcaoPage() {
                     </span>
                   </p>
                 ) : null}
-              </section>
-
-              <section className="max-w-[68ch] space-y-6 text-sm">
-                {suprimidos.length > 0 ? (
-                  <div className="space-y-2">
-                    <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                      {formatInt(suprimidos.length)} suprimido(s), com o motivo
-                    </h3>
-                    <ul className="text-muted-foreground space-y-1.5 leading-relaxed">
-                      {suprimidos.map((a) => (
-                        <li key={`${a.tela}-${a.regra}`}>
-                          <span className="text-foreground">{a.titulo}</span> —{' '}
-                          {a.motivo ?? 'sem amostra suficiente'} (
-                          {moduloDaTela(a.tela)?.title ?? a.tela})
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-
-                <div className="space-y-2">
-                  <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                    O que este plano não faz
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Ele relata; não gere. Não há dono, prazo nem status por achado, e nenhum item
-                    promete efeito atribuível — não existe experimentação em nenhuma das fontes,
-                    então &quot;fizemos isto e melhorou&quot; não seria uma afirmação que este BI
-                    consegue sustentar.
-                  </p>
-                </div>
-              </section>
-            </div>
+              </div>
+            </DocumentoDeAchados>
           ),
         }}
       />
