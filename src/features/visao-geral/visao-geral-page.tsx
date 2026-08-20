@@ -176,7 +176,7 @@ export function VisaoGeralPage() {
               <SecaoDeAnalise
                 titulo="Quantos clientes aparecem, e de onde eles vêm"
                 icone={LineChartIcon}
-                descricao="Os três cortes contam a mesma coisa — cliente com ao menos uma ação de produto — e mudam só o denominador: o dia, a base pagante inteira, ou a origem de cada ativo."
+                descricao="Os três cortes contam a mesma coisa — cliente com ao menos uma ação de produto — e mudam só o denominador: o dia, a base de clientes inteira, ou a origem de cada ativo."
               >
                 <BentoItem span={12}>
                   <ChartCard
@@ -207,11 +207,12 @@ export function VisaoGeralPage() {
                 <BentoItem span={6}>
                   <ChartCard
                     nivel="comparativo"
+                    id="card-penetracao"
                     icon={UsersIcon}
                     title="Quem apareceu, e quem não"
                     headline={penetracao != null ? formatPercent(penetracao) : '—'}
-                    headlineLabel="da base pagante teve alguma ação"
-                    description={`Clientes com ao menos uma ação no período, contra a base pagante inteira · últimos ${periodo} dias`}
+                    headlineLabel="dos clientes teve alguma ação"
+                    description={`Clientes com ao menos uma ação no período, contra a base inteira · últimos ${periodo} dias · a base é a régua e_cliente, que exclui admin, interno e teste — ela não separa quem comprou de quem foi convidado, e a maior parte dela entrou por convite`}
                     isLoading={kpis.isLoading}
                     isRefreshing={kpis.isFetching && !!kpis.data}
                     isError={kpis.isError}
