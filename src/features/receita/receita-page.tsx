@@ -52,7 +52,13 @@ export function ReceitaPage() {
   const ltv = useLtvCohort()
   const usoReceita = useUsoVsReceita()
 
+  // Duas datas, e elas NÃO são a mesma: o último pagamento aprovado entrou
+  // dezesseis dias antes do último registro de qualquer tipo. A fonte seguiu
+  // mandando fatura criada e falhada, sem nenhuma aprovada — e enquanto as
+  // duas eram uma só, a tela dizia "último webhook de pagamento" sobre uma
+  // fatura apenas emitida, fazendo a fonte parecer mais fresca do que está.
   const dadosAte = kpis.data?.dados_ate
+  const fonteAte = kpis.data?.fonte_ate
 
   // Melhor mês da série — o teto que a receita já alcançou.
   const melhorMes = useMemo(() => {
@@ -99,9 +105,17 @@ export function ReceitaPage() {
           <CardTitle className="text-base">Leia antes de usar estes números</CardTitle>
           <CardDescription className="space-y-1.5">
             <span className="block">
-              <strong>A fonte parou.</strong> O último webhook de pagamento recebido pela plataforma
-              é de {dadosAte ? formatDateShort(dadosAte) : 'abr/2026'} — esta tela mostra o
-              histórico até essa data e <strong>não reflete a receita de hoje</strong>.
+              <strong>A fonte parou.</strong> O último pagamento aprovado é de{' '}
+              {dadosAte ? formatDateShort(dadosAte) : 'abr/2026'} — esta tela mostra o histórico
+              até essa data e <strong>não reflete a receita de hoje</strong>.
+              {fonteAte && dadosAte && fonteAte !== dadosAte ? (
+                <>
+                  {' '}
+                  A fonte ainda registrou fatura criada e falhada até{' '}
+                  {formatDateShort(fonteAte)}, sem nenhuma aprovada no intervalo: o que parou
+                  primeiro foi a cobrança dar certo, não o webhook chegar.
+                </>
+              ) : null}
             </span>
             <span className="block">
               <strong>A view de receita da plataforma está incorreta.</strong> A
@@ -396,7 +410,7 @@ export function ReceitaPage() {
                     rpc: 'bi_receita_kpis',
                     titulo: 'Os quatro números do topo: receita, faturas, compradores e ticket',
                     descricao:
-                      'uma linha só · dados_ate é a data do último webhook de pagamento recebido, e é onde toda série desta tela termina',
+                      'uma linha só · dados_ate é a data do último pagamento APROVADO, e é onde toda série desta tela termina; fonte_ate é a do último registro de qualquer tipo, dezesseis dias depois — a fonte seguiu criando e falhando fatura sem aprovar nenhuma',
                     linhas: kpis.data ? [kpis.data] : [],
                     isLoading: kpis.isLoading,
                     isError: kpis.isError,

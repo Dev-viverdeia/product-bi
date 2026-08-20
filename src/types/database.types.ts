@@ -972,6 +972,7 @@ export type Database = {
           compradores: number
           dados_ate: string
           faturas: number
+          fonte_ate: string
           receita_brl: number
           reembolsado_brl: number
           ticket_mediano: number
