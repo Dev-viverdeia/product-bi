@@ -77,11 +77,41 @@ const sqlSemComentario = sqlCompleto.replace(/--[^\n]*/g, '')
  *
  * `''` é o escape de aspas do SQL e não aparece nos gabaritos atuais; se um dia
  * aparecer, o casamento quebra em vez de passar despercebido.
+ *
+ * Pega os gabaritos que entram por `insert`, onde os valores são posicionais e
+ * não há nome de coluna para ancorar o casamento.
  */
-function gabaritos(): string[] {
+function porMarcador(): string[] {
   return (sqlSemComentario.match(/'[^']*\{[a-z_]+(?::[a-z]+)?\}[^']*'/g) ?? []).map((s) =>
     s.slice(1, -1),
   )
+}
+
+/**
+ * Gabaritos atribuídos por nome de coluna — `gabarito_acao = '…'`.
+ *
+ * ⚠️ **Esta metade existe porque a de cima tem um cego, e ele deixou passar um
+ * dígito em 20/ago.** `porMarcador` casa literal que CARREGA MARCADOR; frase
+ * sem nenhum marcador é invisível para ela. E é justo onde o número escrito na
+ * mão tem mais chance de estar: quem não usou marcador é porque escreveu o
+ * valor. O caso real foi uma leitura nova que citava o card "Usar IA na 1ª
+ * semana muda a retenção?" pelo título — o `1` entrou, o teste passou verde, e
+ * quem viu foi uma conferência à parte contra o banco.
+ *
+ * O cego era grande na prática: **correção de texto vira `update`, não
+ * `insert`**, então toda frase corrigida sem marcador escapava da régua — que é
+ * a metade do catálogo que mais muda.
+ */
+function porColuna(): string[] {
+  const achados: string[] = []
+  const atribuicao = /\b(?:gabarito|gabarito_leitura|gabarito_acao)\s*=\s*'((?:[^']|'')*)'/g
+  let m: RegExpExecArray | null
+  while ((m = atribuicao.exec(sqlSemComentario)) !== null) achados.push(m[1].replaceAll("''", "'"))
+  return achados
+}
+
+function gabaritos(): string[] {
+  return [...new Set([...porMarcador(), ...porColuna()])]
 }
 
 describe('motor de achados só lê as funções que a tela lê', () => {
